@@ -1,5 +1,21 @@
 # TilawaAi — Handoff (2026-07-16, session 5) — START HERE
 
+## CURRENT STATE (top of session 5, 2026-07-16)
+- **Repo is now git-initialized + committed** (`daaf6a9`, branch `master`, initial commit, 1098 files). No
+  remote yet — CI (`.github/workflows/ci.yml`) is inert until a GitHub remote is added. `git` identity in use:
+  Shadi Albatal (global config — change if you want a different author on this project).
+- **`pulls/` and `tool/_cache/` are git-ignored** (pulls = sensitive recitation logs; cache = regenerable).
+  `/build/`, `.dart_tool/`, keystores/`key.properties` already ignored. `audio/` + `capture/` ARE committed
+  (non-sensitive reference media).
+- **Health: 128 tests green, `flutter analyze lib` clean.** The full A-to-Z review (`docs/REVIEW.md`) roadmap
+  is DONE except the 2 items that need a phone: (1) ONNX-on-background-isolate, (2) the RecitationSession
+  3-state merge — step-by-step device-verified plans for both are the next section.
+- **User still owes (external/legal, not code):** create the real release keystore (`android/key.properties`
+  from the `.example`); paste the exact ASR-model + KFGQPC-font license text into `lib/util/licenses.dart` /
+  `THIRD_PARTY_NOTICES.md`; add a project `LICENSE`; write a privacy policy before any Supabase upload.
+- **Analytics = local + opt-in only (Phase A).** Supabase upload (Phase B) is NOT wired; `SupabaseAnalyticsSink`
+  exists but is never instantiated. Plan + schema in `docs/ANALYTICS_PLAN.md`.
+
 ## DEVICE-VERIFIED PLANS for the 2 deferred items (do these WITH a phone in the loop)
 Both were deferred because they touch the live on-device ASR and CANNOT be checked by `flutter test`
 (the states hold platform channels; sherpa native code doesn't run host-side). The rule for both: **one
@@ -47,6 +63,17 @@ Shazam-style multi-du'a id). Extract the COMMON core, keep each state's unique p
 - **Rule:** one extraction at a time, device-smoke after each, never all three at once. If a step forces the
   three to be "the same" when they aren't, STOP — that's the wrong shape. Each step is independently
   revertible.
+
+## HADITH SEARCH — feasibility research (2026-07-16) → GO (host-proven; real-voice device test is the only open risk)
+Voice-driven Hadith search ("Shazam for hadith": speak a matn snippet → retrieve the hadith). Fully de-risked host-side.
+- **Reference phonemes are TEXT-derived, not audio.** `tool/build_dua_phonemes.py`'s path (quran-transcript Hafs G2P + greedy longest-match over the 250-unit `assets/asr/phoneme/tokens.txt`) works on arbitrary diacritized Arabic — the 5 bundled "duas" ARE hadith texts. No audio corpus needed.
+- **G2P generalizes to hadith vocab: 0.00% OOV over 135K words** (2000 Bukhari hadith), 0 crashes, 0 under-diacritized skips. No normalizer/diacritization work needed first. ~44 min offline to phonemize all 15k.
+- **Retrieval proof (all 7008 Bukhari, 11% simulated PER, SW local-align + n-gram index):** top-1 **100% at 10-word snippets** (95.7% @6, 99.4% @15). Index (3-gram, K=50): **100% recall + 25× speedup** (154→6 ms/query at 7k). Design: **≥8-10-word min snippet, 3/4-gram phoneme index (K=50), SW rerank** reusing `PhonemeLocalizer`.
+- **Isnad is NOT a problem** — SW *local* alignment skips the narrator-chain boilerplate on its own; matn-only splitting added +1.2pt @6 words, 0 elsewhere. Index whole-text; the isnad/matn splitter (fires ~50%) is optional.
+- **Data source:** `mhashim6/Open-Hadith-Data` (GitHub) — per-book CSV, WITH-tashkeel + WITHOUT, aligned hadith numbers, **ODbL 1.0 / DbCL 1.0** license (attribution + share-alike; cleanest to ship). Bukhari ~7008, Muslim ~5362.
+- **ONLY open risk = real on-device acoustic accuracy** (proof used simulated PER, not recorded voice). Next real step needs a phone.
+- **Build sequence:** (1) commit `tool/build_hadith_phonemes.py` (fault-tolerant batch) → `assets/asr/hadith_phonemes/` + index; (2) Dart `HadithFinderState` (n-gram prefilter K=50 → SW rerank, reuse `PhonemeLocalizer`); (3) Hadith tab + record UI + candidate-list + reader; (4) device-test real voice.
+- Prototype scripts/results were in session scratchpad (throwaway): `build_corpus.py`, `retrieval_experiment.py`, `REPORT.txt` — reproducible from the params above.
 
 ## Session 5 pm addendum — FULL A-TO-Z REVIEW → `docs/REVIEW.md`
 Ran an independent 16-lens multi-agent audit (architecture, engineering, concurrency, ASR, ML/tajwīd, security,
