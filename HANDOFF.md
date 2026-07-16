@@ -1,9 +1,10 @@
 # TilawaAi — Handoff (2026-07-16, session 5) — START HERE
 
 ## CURRENT STATE (top of session 5, 2026-07-16)
-- **Repo is now git-initialized + committed** (`daaf6a9`, branch `master`, initial commit, 1098 files). No
-  remote yet — CI (`.github/workflows/ci.yml`) is inert until a GitHub remote is added. `git` identity in use:
-  Shadi Albatal (global config — change if you want a different author on this project).
+- **Repo is now git-initialized + committed** (`743dbed`, branch `master`, initial commit, 1098 files). No
+  remote yet — CI (`.github/workflows/ci.yml`) is inert until a GitHub remote is added. Commit author is set
+  LOCALLY (this repo only) to `shadialbatal1993@hotmail.com`; the global git config (a work email) was left
+  untouched. History was rewritten once to scrub a work email that git had auto-stamped — 0 traces remain.
 - **`pulls/` and `tool/_cache/` are git-ignored** (pulls = sensitive recitation logs; cache = regenerable).
   `/build/`, `.dart_tool/`, keystores/`key.properties` already ignored. `audio/` + `capture/` ARE committed
   (non-sensitive reference media).
@@ -74,6 +75,25 @@ Voice-driven Hadith search ("Shazam for hadith": speak a matn snippet → retrie
 - **ONLY open risk = real on-device acoustic accuracy** (proof used simulated PER, not recorded voice). Next real step needs a phone.
 - **Build sequence:** (1) commit `tool/build_hadith_phonemes.py` (fault-tolerant batch) → `assets/asr/hadith_phonemes/` + index; (2) Dart `HadithFinderState` (n-gram prefilter K=50 → SW rerank, reuse `PhonemeLocalizer`); (3) Hadith tab + record UI + candidate-list + reader; (4) device-test real voice.
 - Prototype scripts/results were in session scratchpad (throwaway): `build_corpus.py`, `retrieval_experiment.py`, `REPORT.txt` — reproducible from the params above.
+
+## UNIFIED SEARCH + FOLLOW-ALONG ARCHITECTURE — roadmap (2026-07-16)
+All 6 features (Quran/Dua/Hadith × find + follow) are ONE operation with 3 knobs: **speak → phonemes → localize against a candidate set → act on the match.** Knobs: (1) candidate set (this page / all Quran / this dua / all duas / all hadith); (2) contract — *follow-cursor* (in a known text, marker tracks you, backward-tracking) vs *find* (identify which text, forward-only); (3) UI action (move cursor / turn page / navigate+open / show candidate list).
+
+**Principle: unite the ENGINE, not the BUTTON.**
+- UNITE → one background ASR worker + one localizer/n-gram-index retrieval core. (This is Plan B's real target — the shared core is the *retrieval engine*, not just "common plumbing.")
+- DON'T UNITE → the two contracts. Follow-along and Find are different jobs; keep them as two thin modes over one engine (this is Plan B's own "if a step forces them to be the same when they aren't, STOP").
+- BUTTON → per-domain search first; the global "speak anywhere" cascade is a cheap v2, not a prerequisite.
+
+**Cascade (the "Quran-in-page then broaden" idea): belongs to Find mode, gated by intent.** While READING, bias hard to the current text (a shared word must not yank you into a hadith — passive follow-along is NOT a cross-corpus search). On EXPLICIT search, cascade current-context → domain → cross-domain, heavily context-weighted, disambiguation list on ties.
+
+**3 layers:** (L1) Engine: worker → phonemes → localizer + n-gram index, one code path. (L2) Modes: FollowAlong(candidates=current text, cursor+backward) / Find(candidates=corpus/cascade, forward-only, ranked). (L3) Domains: Quran/Dua/Hadith each supply {corpus phonemes+index, reader UI}, plug into modes.
+
+**Sequencing = GREENFIELD-FIRST (lowers risk vs extracting the core out of 3 live states):** build the shared retrieval core fresh in Hadith (nothing to break; Hadith is mostly Find anyway — no tajwīd recitation), prove it on device, THEN migrate the 3 live states onto the proven core.
+- **Phase 0 (host, IN PROGRESS):** `tool/build_hadith_phonemes.py` + domain-agnostic Dart retrieval core (`PhonemeFinder`: n-gram prefilter K=50 → SW rerank reusing `PhonemeLocalizer`) + host test. This IS L1's Find path.
+- **Phase 1:** Hadith tab — Find + candidate list + reader. Device-test real voice → closes the last Hadith risk + validates the core live.
+- **Phase 2:** Plan B — migrate ReadingState/DuaReadingState/DuaFinderState onto the now-proven core. Device-test each.
+- **Phase 3:** Plan A — offload the one core to the worker isolate. Fallback flag.
+- **Phase 4 (v2):** global cascade mic. Cheap once L1/L2 exist.
 
 ## Session 5 pm addendum — FULL A-TO-Z REVIEW → `docs/REVIEW.md`
 Ran an independent 16-lens multi-agent audit (architecture, engineering, concurrency, ASR, ML/tajwīd, security,
