@@ -1,0 +1,15 @@
+CORPUS VALIDATION vs canonical ordered_quran_phonemes.json
+============================================================
+ayat compared            : 6236
+  fully identical        : 6236
+  segmentation mismatch  : 0 (word count per ayah differs)
+canonical ayat missing from ours : 0
+our ayat missing from canonical  : 0
+
+word-level (over segmentation-matched ayat), 67264 words:
+  exact phoneme match    : 67264
+  match only after collapse: 0
+  real mismatch          : 0
+
+EXAMPLES
+----------------------------------------

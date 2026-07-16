@@ -1,0 +1,121 @@
+CORPUS->MUSHAF ALIGNMENT VALIDATION
+=======================================================
+ayat total                 : 6236
+coverage complete & exact  : 6236
+monotonic (in order)       : 6236
+identity on C==M ayat      : 2120/2120
+per-group sim < 0.5        : 77/67264 (baseline 77; OK)
+T(text2phoneme) == M(mushaf): 268
+ordered vs text2phoneme phoneme-string mismatches: 6236
+
+INCOMPLETE coverage (0):
+
+EXTRA/wrong locations (0):
+
+NON-MONOTONIC (0):
+
+IDENTITY VIOLATIONS on C==M (0):
+
+LOW per-group sim < 0.5 (77) [expect legit phonetic + 13 cosmetic]:
+  2:1 c0 sim=0.4 phon='لف' mushaf='الم' -> ['2:1:1']
+  2:259 c17 sim=0.33 phon='مت' mushaf='مايه' -> ['2:259:19']
+  2:259 c30 sim=0.33 phon='مت' mushaf='مايه' -> ['2:259:35']
+  2:269 c10 sim=0.33 phon='ل' mushaf='اولوا' -> ['2:269:15']
+  3:1 c0 sim=0.4 phon='لف' mushaf='الم' -> ['3:1:1']
+  3:7 c40 sim=0.33 phon='ل' mushaf='اولوا' -> ['3:7:45']
+  3:26 c4 sim=0.4 phon='ت' mushaf='توتي' -> ['3:26:5']
+  3:110 c2 sim=0.33 phon='متن' mushaf='امه' -> ['3:110:3']
+  3:158 c3 sim=0.4 phon='ل' mushaf='لالي' -> ['3:158:5']
+  4:5 c1 sim=0.33 phon='ت' mushaf='توتوا' -> ['4:5:2']
+  4:8 c3 sim=0.33 phon='ل' mushaf='اولوا' -> ['4:8:4']
+  4:12 c34 sim=0.44 phon='كلالتن' mushaf='كله' -> ['4:12:54']
+  4:83 c13 sim=0.4 phon='ل' mushaf='اولي' -> ['4:83:15']
+  4:95 c6 sim=0.4 phon='ل' mushaf='اولي' -> ['4:95:7']
+  4:128 c1 sim=0.44 phon='مرتن' mushaf='امراه' -> ['4:128:2']
+  6:108 c12 sim=0.33 phon='متن' mushaf='امه' -> ['6:108:16']
+  7:1 c0 sim=0.33 phon='لف' mushaf='المص' -> ['7:1:1']
+  7:34 c1 sim=0.33 phon='متن' mushaf='امه' -> ['7:34:2']
+  9:12 c7 sim=0.33 phon='مت' mushaf='ايمه' -> ['9:12:11']
+  9:86 c10 sim=0.33 phon='ل' mushaf='اولوا' -> ['9:86:11']
+  10:1 c0 sim=0.4 phon='لف' mushaf='الر' -> ['10:1:1']
+  10:49 c10 sim=0.33 phon='متن' mushaf='امه' -> ['10:49:13']
+  11:1 c0 sim=0.4 phon='لف' mushaf='الر' -> ['11:1:1']
+  12:1 c0 sim=0.4 phon='لف' mushaf='الر' -> ['12:1:1']
+  12:45 c6 sim=0.33 phon='متن' mushaf='امه' -> ['12:45:7']
+  13:1 c0 sim=0.33 phon='لف' mushaf='المر' -> ['13:1:1']
+  13:19 c11 sim=0.33 phon='ل' mushaf='اولوا' -> ['13:19:14']
+  14:1 c0 sim=0.4 phon='لف' mushaf='الر' -> ['14:1:1']
+  14:52 c8 sim=0.33 phon='ل' mushaf='اولوا' -> ['14:52:12']
+  15:1 c0 sim=0.4 phon='لف' mushaf='الر' -> ['15:1:1']
+  15:5 c3 sim=0.33 phon='متن' mushaf='امه' -> ['15:5:4']
+  16:92 c11 sim=0.33 phon='متن' mushaf='امه' -> ['16:92:16']
+  16:92 c15 sim=0.33 phon='متن' mushaf='امه' -> ['16:92:20']
+  18:20 c9 sim=0.4 phon='ذن' mushaf='اذا' -> ['18:20:12']
+  18:57 c23 sim=0.4 phon='ذن' mushaf='اذا' -> ['18:57:29']
+  19:1 c0 sim=0.25 phon='كاف' mushaf='كهيعص' -> ['19:1:1']
+  19:1 c1 sim=0.29 phon='ها' mushaf='كهيعص' -> ['19:1:1']
+  19:1 c2 sim=0.29 phon='يا' mushaf='كهيعص' -> ['19:1:1']
+  23:43 c3 sim=0.33 phon='متن' mushaf='امه' -> ['23:43:4']
+  24:2 c5 sim=0.33 phon='مت' mushaf='مايه' -> ['24:2:7']
+
+T != M (5968):
+  1:1: T(text2phoneme)=6 M(mushaf)=4 C(corpus)=4
+  1:2: T(text2phoneme)=8 M(mushaf)=4 C(corpus)=4
+  1:3: T(text2phoneme)=5 M(mushaf)=2 C(corpus)=2
+  1:4: T(text2phoneme)=12 M(mushaf)=3 C(corpus)=3
+  1:5: T(text2phoneme)=22 M(mushaf)=4 C(corpus)=4
+  1:6: T(text2phoneme)=12 M(mushaf)=3 C(corpus)=3
+  1:7: T(text2phoneme)=2 M(mushaf)=9 C(corpus)=9
+  2:1: T(text2phoneme)=4 M(mushaf)=1 C(corpus)=2
+  2:2: T(text2phoneme)=4 M(mushaf)=7 C(corpus)=6
+  2:3: T(text2phoneme)=40 M(mushaf)=8 C(corpus)=8
+  2:4: T(text2phoneme)=3 M(mushaf)=12 C(corpus)=11
+  2:5: T(text2phoneme)=19 M(mushaf)=8 C(corpus)=6
+  2:6: T(text2phoneme)=4 M(mushaf)=11 C(corpus)=11
+  2:7: T(text2phoneme)=20 M(mushaf)=12 C(corpus)=11
+  2:8: T(text2phoneme)=7 M(mushaf)=11 C(corpus)=9
+  2:9: T(text2phoneme)=27 M(mushaf)=10 C(corpus)=10
+  2:10: T(text2phoneme)=2 M(mushaf)=12 C(corpus)=8
+  2:11: T(text2phoneme)=9 M(mushaf)=11 C(corpus)=11
+  2:12: T(text2phoneme)=13 M(mushaf)=7 C(corpus)=6
+  2:13: T(text2phoneme)=9 M(mushaf)=19 C(corpus)=18
+  2:14: T(text2phoneme)=5 M(mushaf)=16 C(corpus)=16
+  2:15: T(text2phoneme)=4 M(mushaf)=7 C(corpus)=7
+  2:16: T(text2phoneme)=12 M(mushaf)=11 C(corpus)=10
+  2:17: T(text2phoneme)=5 M(mushaf)=17 C(corpus)=15
+  2:18: T(text2phoneme)=8 M(mushaf)=6 C(corpus)=4
+  2:19: T(text2phoneme)=8 M(mushaf)=19 C(corpus)=13
+  2:20: T(text2phoneme)=4 M(mushaf)=25 C(corpus)=23
+  2:21: T(text2phoneme)=2 M(mushaf)=11 C(corpus)=10
+  2:22: T(text2phoneme)=20 M(mushaf)=23 C(corpus)=18
+  2:23: T(text2phoneme)=3 M(mushaf)=20 C(corpus)=13
+  2:24: T(text2phoneme)=5 M(mushaf)=13 C(corpus)=11
+  2:25: T(text2phoneme)=19 M(mushaf)=34 C(corpus)=25
+  2:26: T(text2phoneme)=8 M(mushaf)=39 C(corpus)=32
+  2:27: T(text2phoneme)=8 M(mushaf)=20 C(corpus)=18
+  2:28: T(text2phoneme)=9 M(mushaf)=13 C(corpus)=12
+  2:29: T(text2phoneme)=4 M(mushaf)=19 C(corpus)=16
+  2:30: T(text2phoneme)=7 M(mushaf)=28 C(corpus)=25
+  2:31: T(text2phoneme)=20 M(mushaf)=15 C(corpus)=14
+  2:33: T(text2phoneme)=4 M(mushaf)=22 C(corpus)=19
+  2:35: T(text2phoneme)=10 M(mushaf)=18 C(corpus)=18
+  2:36: T(text2phoneme)=7 M(mushaf)=19 C(corpus)=17
+  2:37: T(text2phoneme)=16 M(mushaf)=11 C(corpus)=9
+  2:38: T(text2phoneme)=8 M(mushaf)=17 C(corpus)=13
+  2:39: T(text2phoneme)=27 M(mushaf)=10 C(corpus)=10
+  2:40: T(text2phoneme)=5 M(mushaf)=13 C(corpus)=13
+  2:41: T(text2phoneme)=15 M(mushaf)=18 C(corpus)=14
+  2:43: T(text2phoneme)=3 M(mushaf)=7 C(corpus)=7
+  2:44: T(text2phoneme)=14 M(mushaf)=10 C(corpus)=10
+  2:45: T(text2phoneme)=3 M(mushaf)=8 C(corpus)=8
+  2:46: T(text2phoneme)=3 M(mushaf)=8 C(corpus)=7
+  2:47: T(text2phoneme)=15 M(mushaf)=11 C(corpus)=11
+  2:48: T(text2phoneme)=12 M(mushaf)=19 C(corpus)=13
+  2:49: T(text2phoneme)=4 M(mushaf)=18 C(corpus)=14
+  2:50: T(text2phoneme)=8 M(mushaf)=10 C(corpus)=10
+  2:51: T(text2phoneme)=21 M(mushaf)=12 C(corpus)=10
+  2:52: T(text2phoneme)=7 M(mushaf)=8 C(corpus)=6
+  2:53: T(text2phoneme)=21 M(mushaf)=7 C(corpus)=7
+  2:54: T(text2phoneme)=5 M(mushaf)=26 C(corpus)=24
+  2:55: T(text2phoneme)=10 M(mushaf)=14 C(corpus)=12
+  2:56: T(text2phoneme)=11 M(mushaf)=7 C(corpus)=5

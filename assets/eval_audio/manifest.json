@@ -1,0 +1,50 @@
+[
+ {
+  "file": "alfatiha.wav",
+  "surah": 1,
+  "label": "Al-Fatiha",
+  "kind": "correct"
+ },
+ {
+  "file": "alikhlas.wav",
+  "surah": 112,
+  "label": "Al-Ikhlas",
+  "kind": "correct"
+ },
+ {
+  "file": "alnas.wav",
+  "surah": 114,
+  "label": "An-Nas",
+  "kind": "correct"
+ },
+ {
+  "file": "alfalaq.wav",
+  "surah": 113,
+  "label": "Al-Falaq",
+  "kind": "correct"
+ },
+ {
+  "file": "alkursi.wav",
+  "surah": 2,
+  "label": "Ayat al-Kursi (2:255)",
+  "kind": "correct"
+ },
+ {
+  "file": "albaqarah.wav",
+  "surah": 2,
+  "label": "Al-Baqarah start",
+  "kind": "correct"
+ },
+ {
+  "file": "alkursi_wrong.wav",
+  "surah": 2,
+  "label": "Ayat al-Kursi (wrong)",
+  "kind": "wrong"
+ },
+ {
+  "file": "ikhlas_wrong.wav",
+  "surah": 112,
+  "label": "Al-Ikhlas (wrong)",
+  "kind": "wrong"
+ }
+]

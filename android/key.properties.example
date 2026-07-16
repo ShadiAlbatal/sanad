@@ -1,0 +1,15 @@
+# Copy this file to android/key.properties (git-ignored) and fill in your
+# UPLOAD keystore details. Then `flutter build appbundle --release` is signed
+# with your key instead of the debug key. NEVER commit key.properties or the .jks.
+#
+# Create a keystore (once), keep it + these passwords backed up SECURELY —
+# losing them means you can never update the app on Play again:
+#   keytool -genkey -v -keystore ~/tilawa-upload.jks -keyalg RSA -keysize 2048 \
+#           -validity 10000 -alias upload
+#
+# Prefer Play App Signing: upload with this key; Google holds the app-signing key.
+
+storeFile=/absolute/path/to/tilawa-upload.jks
+storePassword=CHANGE_ME
+keyAlias=upload
+keyPassword=CHANGE_ME
