@@ -39,6 +39,8 @@ class _QuranListScreenState extends State<QuranListScreen> {
   Timer? _debounce;
   String _query = '';
   List<QuranTextHit> _results = const [];
+  // Last voice candidates, kept after the mic stops (see hadith_search_screen).
+  List<QuranCandidate> _voiceCache = const [];
 
   @override
   void initState() {
@@ -126,6 +128,7 @@ class _QuranListScreenState extends State<QuranListScreen> {
       await finder.stop();
       return;
     }
+    setState(() => _voiceCache = const []); // fresh recitation → drop the last matches
     await finder.start();
     if (finder.error != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(finder.error!)));
@@ -151,20 +154,20 @@ class _QuranListScreenState extends State<QuranListScreen> {
   @override
   Widget build(BuildContext context) {
     final finder = context.watch<QuranFinderState>();
-    final candidates = finder.candidates;
-    final showCandidates = finder.listening && candidates.isNotEmpty;
-    final searching = !showCandidates && _query.isNotEmpty;
+    if (finder.listening && finder.candidates.isNotEmpty) _voiceCache = finder.candidates;
+    final showCandidates = _query.isEmpty && _voiceCache.isNotEmpty;
+    final searching = _query.isNotEmpty;
     final chapters = _chapters;
 
     final int count;
     final IndexedWidgetBuilder builder;
     if (showCandidates) {
-      count = candidates.length;
+      count = _voiceCache.length;
       builder = (_, i) => _VerseCard(
-            label: _verseLabel(candidates[i].surah, candidates[i].ayah),
-            text: candidates[i].text,
-            matched: finder.matchedWords(candidates[i].id),
-            onTap: () => _open(candidates[i].page),
+            label: _verseLabel(_voiceCache[i].surah, _voiceCache[i].ayah),
+            text: _voiceCache[i].text,
+            matched: finder.matchedWords(_voiceCache[i].id),
+            onTap: () => _open(_voiceCache[i].page),
           );
     } else if (searching) {
       count = _results.length;
@@ -193,7 +196,6 @@ class _QuranListScreenState extends State<QuranListScreen> {
       starting: finder.starting,
       level: finder.level,
       heard: finder.heard,
-      idlePrompt: 'Recite a verse to find it',
       hearingLabel: _finderLabel(finder),
       onMicTap: () => _toggleMic(finder),
       micIdleLabel: 'Recite to find a verse',

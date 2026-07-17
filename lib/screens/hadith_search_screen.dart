@@ -33,6 +33,10 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
   Timer? _debounce;
   String _query = '';
   List<TextSearchHit> _results = const [];
+  // The last voice candidates, kept after the mic stops so tapping one and coming
+  // back (or just stopping to read the list) doesn't wipe the matches. Refreshed
+  // while reciting, cleared only when a NEW recitation starts.
+  List<HadithCandidate> _voiceCache = const [];
 
   @override
   void initState() {
@@ -120,6 +124,7 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
       await finder.stop();
       return;
     }
+    setState(() => _voiceCache = const []); // fresh recitation → drop the last matches
     await finder.start();
     if (finder.error != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(finder.error!)));
@@ -141,21 +146,23 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
     //     word map) — the same highlight the typed path gives;
     //  2. a typed query → ranked BM25 results with the matched words highlighted;
     //  3. idle → browse the whole corpus. Never a dead end.
-    final candidates = finder.candidates;
-    final showCandidates = finder.listening && candidates.isNotEmpty;
-    final searching = !showCandidates && _query.isNotEmpty;
+    // Keep the freshest voice matches in the cache; they persist after the mic
+    // stops (tap-to-read / back) and only clear on a new recitation or a typed query.
+    if (finder.listening && finder.candidates.isNotEmpty) _voiceCache = finder.candidates;
+    final showCandidates = _query.isEmpty && _voiceCache.isNotEmpty;
+    final searching = _query.isNotEmpty;
     final browse = _search?.allHadith;
 
     final int count;
     final IndexedWidgetBuilder builder;
     if (showCandidates) {
-      count = candidates.length;
+      count = _voiceCache.length;
       builder = (_, i) => _HadithCard(
-            label: candidates[i].label,
-            text: candidates[i].text,
-            matched: finder.matchedWords(candidates[i].id),
+            label: _voiceCache[i].label,
+            text: _voiceCache[i].text,
+            matched: finder.matchedWords(_voiceCache[i].id),
             onTap: () =>
-                _open(candidates[i].collection, candidates[i].number, candidates[i].text),
+                _open(_voiceCache[i].collection, _voiceCache[i].number, _voiceCache[i].text),
           );
     } else if (searching) {
       count = _results.length;
@@ -189,7 +196,6 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
       starting: finder.starting,
       level: finder.level,
       heard: finder.heard,
-      idlePrompt: 'Recite a hadith to find it',
       hearingLabel: _finderLabel(finder),
       onMicTap: () => _toggleMic(finder),
       micIdleLabel: 'Recite to find a hadith',

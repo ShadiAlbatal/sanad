@@ -35,6 +35,8 @@ class _DuaListScreenState extends State<DuaListScreen> {
   Timer? _debounce;
   String _query = '';
   List<TextSearchHit> _results = const [];
+  // Last voice candidates, kept after the mic stops (see hadith_search_screen).
+  List<DuaCandidate> _voiceCache = const [];
 
   @override
   void initState() {
@@ -126,6 +128,7 @@ class _DuaListScreenState extends State<DuaListScreen> {
       await finder.stop();
       return;
     }
+    setState(() => _voiceCache = const []); // fresh recitation → drop the last matches
     await finder.start();
     if (finder.error != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(finder.error!)));
@@ -142,25 +145,25 @@ class _DuaListScreenState extends State<DuaListScreen> {
   @override
   Widget build(BuildContext context) {
     final finder = context.watch<DuaFinderState>();
-    final candidates = finder.candidates;
-    final showCandidates = finder.listening && candidates.isNotEmpty;
-    final searching = !showCandidates && _query.isNotEmpty;
+    if (finder.listening && finder.candidates.isNotEmpty) _voiceCache = finder.candidates;
+    final showCandidates = _query.isEmpty && _voiceCache.isNotEmpty;
+    final searching = _query.isNotEmpty;
     final metas = _search?.allDuas;
 
     // Three renderings through one card + scaffold, in priority order (mirrors the
     // Hadith/Quran tabs):
-    //  1. reciting → the finder's live ranked candidates, each row bolding the words
-    //     the recitation matched (finder.matchedWords, via the corpus word map);
+    //  1. voice matches (live or last-recited) — each row bolds the words the
+    //     recitation matched (finder.matchedWords, via the corpus word map);
     //  2. a typed query → ranked BM25 results with the matched words highlighted;
     //  3. idle → browse the whole corpus. Never a dead end.
     final int count;
     final IndexedWidgetBuilder builder;
     if (showCandidates) {
-      count = candidates.length;
+      count = _voiceCache.length;
       builder = (_, i) => _DuaCard(
-            dua: _duaFromMeta(candidates[i].meta),
-            matched: finder.matchedWords(candidates[i].id),
-            onTap: () => _open(_duaFromMeta(candidates[i].meta)),
+            dua: _duaFromMeta(_voiceCache[i].meta),
+            matched: finder.matchedWords(_voiceCache[i].id),
+            onTap: () => _open(_duaFromMeta(_voiceCache[i].meta)),
           );
     } else if (searching) {
       count = _results.length;
@@ -189,7 +192,6 @@ class _DuaListScreenState extends State<DuaListScreen> {
       starting: finder.starting,
       level: finder.level,
       heard: finder.heard,
-      idlePrompt: 'Recite to open a du\'ā',
       hearingLabel: _finderLabel(finder),
       onMicTap: () => _toggleMic(finder),
       micIdleLabel: 'Recite to find a du\'ā',

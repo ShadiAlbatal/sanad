@@ -152,7 +152,6 @@ class _HarnessState extends State<_Harness> {
       starting: false,
       level: 0,
       heard: '',
-      idlePrompt: 'idle',
       hearingLabel: 'h',
       onMicTap: () {},
       searchController: _controller,

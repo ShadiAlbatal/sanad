@@ -6,9 +6,9 @@ import 'package:sanad/widgets/mic_toggle_button.dart';
 import 'package:sanad/widgets/search_list_scaffold.dart';
 
 /// Pins the shared shell every content tab renders through: a lazy content list +
-/// a footer that ALWAYS carries the mic control and the search bar, and swaps the
-/// idle prompt for the hearing indicator + heard-ticker once listening. This is
-/// what makes the Dua and Hadith tabs identical.
+/// a footer that ALWAYS carries the mic control and the search bar, and shows the
+/// hearing indicator + heard-ticker above them once listening. This is what makes
+/// the Dua, Quran, and Hadith tabs identical.
 void main() {
   Widget wrap({
     required bool listening,
@@ -29,7 +29,6 @@ void main() {
         starting: false,
         level: 0.5,
         heard: 'ابجد',
-        idlePrompt: 'Recite to find',
         hearingLabel: 'Hearing: X?',
         onMicTap: onMicTap ?? () {},
         onSearchChanged: onSearchChanged,
@@ -45,18 +44,18 @@ void main() {
     expect(find.text('Search'), findsOneWidget); // hint
   });
 
-  testWidgets('idle: shows the prompt, no hearing indicator or ticker', (tester) async {
+  testWidgets('idle: no hearing indicator or ticker, just search + mic', (tester) async {
     await tester.pumpWidget(wrap(listening: false, loading: false));
-    expect(find.text('Recite to find'), findsOneWidget);
     expect(find.byType(HearingIndicator), findsNothing);
     expect(find.byType(HeardTicker), findsNothing);
+    expect(find.byType(MicToggleButton), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget);
   });
 
-  testWidgets('listening: swaps in the hearing indicator + heard ticker', (tester) async {
+  testWidgets('listening: adds the hearing indicator + heard ticker', (tester) async {
     await tester.pumpWidget(wrap(listening: true, loading: false));
     expect(find.byType(HearingIndicator), findsOneWidget);
     expect(find.byType(HeardTicker), findsOneWidget);
-    expect(find.text('Recite to find'), findsNothing);
     expect(find.byType(MicToggleButton), findsOneWidget); // mic still there
     expect(find.byType(TextField), findsOneWidget); // search still there
   });

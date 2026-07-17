@@ -35,7 +35,6 @@ class SearchListScaffold extends StatelessWidget {
   final bool starting;
   final double level;
   final String heard; // decoded-phoneme ticker text; '' when idle
-  final String idlePrompt; // centered status text when not listening
   final String hearingLabel; // status text while listening ("Hearing: X?")
   final VoidCallback onMicTap;
   final String micIdleLabel; // mic-button semantics
@@ -59,7 +58,6 @@ class SearchListScaffold extends StatelessWidget {
     required this.starting,
     required this.level,
     required this.heard,
-    required this.idlePrompt,
     required this.hearingLabel,
     required this.onMicTap,
     this.micIdleLabel = 'Recite to find',
@@ -113,7 +111,6 @@ class SearchListScaffold extends StatelessWidget {
         starting: starting,
         level: level,
         heard: heard,
-        idlePrompt: idlePrompt,
         hearingLabel: hearingLabel,
         onMicTap: onMicTap,
         micIdleLabel: micIdleLabel,
@@ -134,7 +131,6 @@ class _Footer extends StatelessWidget {
   final bool starting;
   final double level;
   final String heard;
-  final String idlePrompt;
   final String hearingLabel;
   final VoidCallback onMicTap;
   final String micIdleLabel;
@@ -149,7 +145,6 @@ class _Footer extends StatelessWidget {
     required this.starting,
     required this.level,
     required this.heard,
-    required this.idlePrompt,
     required this.hearingLabel,
     required this.onMicTap,
     required this.micIdleLabel,
@@ -164,64 +159,59 @@ class _Footer extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final barColor = dark ? AppColors.nightCard : AppColors.paperEdge;
-    final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
+    final mq = MediaQuery.of(context);
     // The footer lives in [Scaffold.bottomNavigationBar], which resizeToAvoidBottom-
-    // Inset does NOT lift, so pad by the keyboard inset to keep the search field
-    // ABOVE the soft keyboard (the bar stays visually in the footer per the design).
-    final keyboard = MediaQuery.of(context).viewInsets.bottom;
+    // Inset does NOT lift. Pad the content above whatever is at the screen bottom:
+    // the soft keyboard when it's up (viewInsets, which already covers the system
+    // nav bar), otherwise the Android system nav bar itself (viewPadding). Under
+    // Android edge-to-edge the bar draws behind the system nav bar, so the COLOR
+    // must fill down to the physical edge while the CONTENT stays inset — hence the
+    // padding lives inside the colored Container, not an outer SafeArea (which
+    // would leave the nav-bar strip uncolored and could clip the controls).
+    final keyboard = mq.viewInsets.bottom;
+    final bottomInset = keyboard > 0 ? keyboard : mq.viewPadding.bottom;
 
-    return SafeArea(
-      top: false,
-      child: Container(
-        color: barColor,
-        padding: EdgeInsets.fromLTRB(14, 8, 14, 8 + keyboard),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (listening) ...[
-              HeardTicker(heard: heard),
-              const SizedBox(height: 4),
-              HearingIndicator(
-                active: true,
-                level: level,
-                tracking: false,
-                label: hearingLabel,
-              ),
-              const SizedBox(height: 8),
-            ] else ...[
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(idlePrompt,
-                    style:
-                        TextStyle(color: soft, fontSize: 13.5, fontWeight: FontWeight.w500)),
-              ),
-              const SizedBox(height: 8),
-            ],
-            // Search field on the left (thumb rests on the mic to its right — the
-            // one-handed reach every tab shares).
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: _SearchField(
-                    controller: searchController,
-                    onChanged: onSearchChanged,
-                    hint: searchHint,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                MicToggleButton(
-                  active: listening,
-                  starting: starting,
-                  onTap: onMicTap,
-                  idleLabel: micIdleLabel,
-                  activeLabel: micActiveLabel,
-                  startingLabel: micStartingLabel,
-                ),
-              ],
+    return Container(
+      color: barColor,
+      padding: EdgeInsets.fromLTRB(14, 8, 14, 8 + bottomInset),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (listening) ...[
+            HeardTicker(heard: heard),
+            const SizedBox(height: 4),
+            HearingIndicator(
+              active: true,
+              level: level,
+              tracking: false,
+              label: hearingLabel,
             ),
+            const SizedBox(height: 8),
           ],
-        ),
+          // Search field on the left (thumb rests on the mic to its right — the
+          // one-handed reach every tab shares).
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: _SearchField(
+                  controller: searchController,
+                  onChanged: onSearchChanged,
+                  hint: searchHint,
+                ),
+              ),
+              const SizedBox(width: 10),
+              MicToggleButton(
+                active: listening,
+                starting: starting,
+                onTap: onMicTap,
+                idleLabel: micIdleLabel,
+                activeLabel: micActiveLabel,
+                startingLabel: micStartingLabel,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

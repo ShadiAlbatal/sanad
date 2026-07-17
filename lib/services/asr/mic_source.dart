@@ -25,7 +25,23 @@ class MicSource {
   int _pcmChunks = 0;
   int _pcmSamples = 0;
 
-  Future<void> start(void Function(Int16List pcm) onPcm) async {
+  // Serialize start/stop so they never overlap on the shared recorder. The
+  // finder→reader hand-off fires an in-flight `stop()` (unawaited, on a confident
+  // voice pick) and the reader then `start()`s; without ordering, the finder's
+  // late-landing stop cancels the subscription the reader just opened and the
+  // reader's mic goes dead (no _onPcm → no follow-along greening). Chaining every
+  // op guarantees the reader's start runs only after the finder's stop completes.
+  Future<void> _lock = Future.value();
+
+  Future<void> _serialize(Future<void> Function() op) {
+    final result = _lock.then((_) => op());
+    _lock = result.then((_) {}, onError: (_) {});
+    return result;
+  }
+
+  Future<void> start(void Function(Int16List pcm) onPcm) => _serialize(() => _start(onPcm));
+
+  Future<void> _start(void Function(Int16List pcm) onPcm) async {
     // Drop any leftover subscription, then open the stream. A recorder still
     // bound to a previous stream (a session that didn't stop cleanly, or a hot
     // restart) makes startStream throw "StreamSink is bound to a stream" —
@@ -68,7 +84,9 @@ class MicSource {
     }, onError: (e, st) => Log.e('mic', e, st));
   }
 
-  Future<void> stop() async {
+  Future<void> stop() => _serialize(_stop);
+
+  Future<void> _stop() async {
     await _sub?.cancel();
     _sub = null;
     await _recorder.stop();
