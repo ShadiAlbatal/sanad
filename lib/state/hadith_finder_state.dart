@@ -191,6 +191,11 @@ class HadithFinderState extends ChangeNotifier {
     final tailStart = tokens.length <= _probeTail ? 0 : tokens.length - _probeTail;
     final tail = [for (var i = tailStart; i < tokens.length; i++) _collapse(tokens[i])];
     _heardTail = tail;
+    // Readable, ALREADY-collapsed form of the retrieval window — the raw delta
+    // trace above needs manual repeat-collapsing to read as Arabic; this doesn't.
+    // For word-by-word phonemization checks: read this string against what was
+    // actually said, one word at a time.
+    Log.t('hadithphon', 'collapsed window: "${tail.join()}"');
 
     final result = search.find(tail);
     _candidates = result.candidates; // live list stays the CURRENT probe — never a dead end

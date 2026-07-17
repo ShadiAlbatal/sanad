@@ -194,6 +194,10 @@ class HadithReadingState extends ChangeNotifier {
     _heardTail
       ..clear()
       ..addAll([for (var i = tailStart; i < tokens.length; i++) _collapse(tokens[i])]);
+    // Readable, already-collapsed form of the recent tail — see
+    // HadithFinderState._onPcm for why this reads as Arabic without manual
+    // repeat-collapsing (word-by-word phonemization checks inside the reader).
+    Log.t('phon', '[hadith] collapsed tail: "${_heardTail.join()}"');
     _applyOut(matcher.apply(tokens));
   }
 

@@ -99,6 +99,12 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
   void _open(String collection, int number, String text, {bool autoStart = false}) {
     if (_opening) return;
     _opening = true;
+    // Tapping a candidate while still reciting (before the finder auto-picks) left
+    // the search mic running under the pushed reader — only the auto-pick path
+    // stopped it. Stop explicitly here too; a no-op once the finder has already
+    // stopped itself (e.g. the confident-pick autoStart path).
+    final finder = _finder;
+    if (finder != null && finder.listening) finder.stop();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       Navigator.of(context)
