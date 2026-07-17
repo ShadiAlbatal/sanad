@@ -62,15 +62,20 @@ class _CurlPageViewState extends State<CurlPageView>
   bool _neighboursReady = false; // build neighbours only after the settle frame
   bool _bridge = false; // paint the settled bitmap over the swap-in frame
 
-  late final AnimationController _anim = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 200),
-  )..addListener(_onAnim);
+  // NOT `late` — a lazy controller whose first access is dispose()'s _anim.dispose()
+  // (reader opened and popped without ever animating a curl) builds a Ticker via an
+  // inherited-widget lookup on an already-deactivated element → "deactivated widget's
+  // ancestor" crash. Build it eagerly in initState while the element is active.
+  late final AnimationController _anim;
   double _animFrom = 0, _animTo = 0;
 
   @override
   void initState() {
     super.initState();
+    _anim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    )..addListener(_onAnim);
     widget.controller?._bind(this);
     _scheduleCapture();
   }
