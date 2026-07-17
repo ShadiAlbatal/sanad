@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/state/reading_state.dart';
+import 'package:sanad/state/reading_state.dart';
 
 /// Pins the PURE cross-surah re-acquisition decision (decideReacquire). This is
 /// deliberately the only unit-testable slice: ReadingState itself builds a

@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/data/quran_repository.dart';
-import 'package:tilawa_ai/widgets/mushaf_layout.dart';
+import 'package:sanad/data/quran_repository.dart';
+import 'package:sanad/widgets/mushaf_layout.dart';
 
 /// Host-side page-render scan: loads the real mushaf font and every page's
 /// data, then flags any page whose layout would overflow or leave ragged lines

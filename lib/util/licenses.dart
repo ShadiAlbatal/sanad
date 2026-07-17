@@ -12,8 +12,8 @@ import 'package:flutter/foundation.dart';
 void registerThirdPartyLicenses() {
   LicenseRegistry.addLicense(() async* {
     yield const LicenseEntryWithLineBreaks(
-      ['TilawaAi — bundled data & model'],
-      'Tilawa bundles the following third-party components. Their terms apply to '
+      ['Sanad — bundled data & model'],
+      'Sanad bundles the following third-party components. Their terms apply to '
       'this app in addition to the app\'s own license.\n\n'
       'ASR model — "zipformer_p-quran" (Hugging Face: Muno459/zipformer_p-quran).\n'
       'Streaming zipformer2-ctc phoneme model used for recitation follow-along.\n'

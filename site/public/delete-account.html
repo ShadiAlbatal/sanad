@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<title>Sanad — Delete Your Data</title>
+<meta name="robots" content="index,follow" />
+<meta name="description" content="How to delete your Sanad data. The app has no account and stores your data on your device — deletion is a tap or an uninstall." />
+<link rel="canonical" href="https://sanad.ylensolutions.com/delete-account" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#f8f4ea; --surface:#fffdf6; --surface2:#f1eadb; --ink:#17241f; --ink2:#4b574f; --ink3:#7c887e; --line:#e6dcc4; --accent:#0e5e4e; --gold:#9c7518;
+    --serif:"Cormorant Garamond",Georgia,serif;
+    --sans:"Hanken Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --ar:"IBM Plex Sans Arabic",system-ui,sans-serif;
+    --shadow-card:0 8px 30px -14px rgba(23,36,31,0.28);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#071a15; --surface:#0e2a22; --surface2:#0a2019; --ink:#eef3ec; --ink2:#b7c8bd; --ink3:#7d9187; --line:#1b3b31; --accent:#3fbd92; --gold:#e3b757;
+      --shadow-card:0 10px 34px -14px rgba(0,0,0,0.6); }
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.65 var(--sans); -webkit-text-size-adjust:100%; }
+  a { color:var(--accent); }
+  nav { position:sticky; top:0; z-index:10; background:color-mix(in srgb,var(--bg) 88%,transparent); backdrop-filter:saturate(1.2) blur(8px); border-bottom:1px solid var(--line); }
+  .nav-inner { max-width:760px; margin:0 auto; padding:0 22px; display:flex; align-items:center; gap:16px; height:60px; }
+  .logo { display:flex; align-items:center; gap:9px; font-weight:600; color:var(--ink); font-size:17px; }
+  .logo svg { width:26px; height:26px; }
+  .lang { position:relative; margin-inline-start:auto; }
+  .lang > summary { list-style:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px; color:var(--ink2); font-size:14px; padding:6px 11px; border:1px solid var(--line); border-radius:10px; user-select:none; }
+  .lang > summary::-webkit-details-marker { display:none; }
+  .lang > summary::after { content:"▾"; font-size:10px; color:var(--ink3); }
+  .lang-menu { position:absolute; top:calc(100% + 8px); inset-inline-end:0; min-width:150px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:6px; box-shadow:var(--shadow-card); display:flex; flex-direction:column; gap:2px; z-index:20; }
+  .lang-menu button { text-align:start; padding:9px 11px; border:0; background:transparent; border-radius:8px; color:var(--ink2); font:inherit; font-size:14px; cursor:pointer; }
+  .lang-menu button:hover { background:var(--surface2); color:var(--ink); }
+  .lang-menu button.on { color:var(--accent); font-weight:700; }
+  .wrap { max-width:760px; margin:0 auto; padding:44px 22px 96px; }
+  header.pg { border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px; }
+  .brand { display:inline-block; font-weight:600; color:var(--accent); font-size:15px; text-transform:uppercase; letter-spacing:.04em; }
+  h1 { font-family:var(--serif); font-weight:600; font-size:clamp(36px,6vw,50px); line-height:1.08; margin:10px 0 6px; }
+  .updated { color:var(--ink3); font-size:14px; margin:0; }
+  h2 { font-family:var(--serif); font-weight:600; font-size:27px; margin:40px 0 10px; }
+  p, li { color:var(--ink2); }
+  strong { color:var(--ink); }
+  ol, ul { padding-inline-start:22px; }
+  li { margin:6px 0; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:4px 20px 16px; margin-top:16px; }
+  .notice { font-size:13.5px; color:var(--ink3); background:var(--surface2); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:8px 0 4px; }
+  footer { margin-top:56px; padding-top:20px; border-top:1px solid var(--line); color:var(--ink3); font-size:14px; }
+  footer a { color:var(--ink2); }
+  html[lang="ar"] body, html[lang="ar"] .brand, html[lang="ar"] .updated, html[lang="ar"] .lang-menu button { font-family:var(--ar); }
+  html[lang="ar"] h1, html[lang="ar"] h2 { font-family:"Amiri",var(--ar); font-weight:700; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#0e5e4e"/><g fill="none" stroke="#d8b24a" stroke-width="3" opacity="0.55"><rect x="30" y="30" width="40" height="40"/><rect x="30" y="30" width="40" height="40" transform="rotate(45 50 50)"/></g><path d="M50 22c-12 8-20 18-20 32 0 13 9 22 20 26 11-4 20-13 20-26 0-14-8-24-20-32z" fill="none" stroke="#f6efd8" stroke-width="4.5"/><path d="M42 48c0 6 4 10 8 12 4-2 8-6 8-12" fill="none" stroke="#d8b24a" stroke-width="4.5" stroke-linecap="round"/></svg>
+      <span data-i18n="brandword">Sanad</span>
+    </a>
+    <details class="lang">
+      <summary aria-label="Language"><span class="curlang">English</span></summary>
+      <div class="lang-menu">
+        <button type="button" data-lang="en" class="on" lang="en">English</button>
+        <button type="button" data-lang="ar" lang="ar">العربية</button>
+        <button type="button" data-lang="sv" lang="sv">Svenska</button>
+      </div>
+    </details>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="pg">
+    <span class="brand" data-i18n="brand">Sanad</span>
+    <h1 data-i18n="title">Delete Your Data</h1>
+    <p class="updated"><span data-i18n="updated_label">Last updated</span>: 17 July 2026</p>
+  </header>
+
+  <p class="notice" data-i18n="lang_notice">This page is available in English, Arabic, and Swedish. If there is any discrepancy between the translations, the <strong>English version prevails</strong>.</p>
+
+  <p data-i18n="intro">Sanad is an on-device app with <strong>no account</strong>. It does not collect your name, email, or recitation, and it never uploads your voice. Because of this, there is no server-side profile to delete — your data lives on your device, and you are always in control of it. This page, published by <strong>Ylen Solutions AB</strong> (Org.nr 559569-4380), explains how to remove it.</p>
+
+  <h2 data-i18n="h_indevice">Delete your data on your device</h2>
+  <div class="card">
+    <ol>
+      <li data-i18n="s1"><strong>Clear in-app data.</strong> Open Sanad and go to <strong>Settings → Privacy → Clear data</strong> to reset your bookmarks, last-read position, and preferences.</li>
+      <li data-i18n="s2"><strong>Turn off analytics.</strong> In <strong>Settings → Privacy</strong> you can switch off anonymous usage analytics and crash reports at any time.</li>
+      <li data-i18n="s3"><strong>Uninstall the app.</strong> Uninstalling Sanad removes <strong>all</strong> local app data from your device — bookmarks, preferences, and everything else.</li>
+    </ol>
+  </div>
+
+  <h2 data-i18n="h_analytics">Anonymous analytics data</h2>
+  <p data-i18n="p_analytics">If you opted in to anonymous usage analytics, or left anonymous crash reports on, those events are tagged only with a random install identifier — <strong>not</strong> your name, account, or any device identifier, and never your voice or recitation. They are automatically deleted after 90 days. To stop collection immediately, turn both off in <strong>Settings → Privacy</strong>; to request early deletion of any anonymous diagnostics linked to your install identifier, email us (see below) and we will handle it within 30 days.</p>
+
+  <h2 data-i18n="h_email">Request by email</h2>
+  <p data-i18n="p_email">If you have any question about your data or want us to action a deletion request, email <a href="mailto:privacy@ylensolutions.com">privacy@ylensolutions.com</a> and we will respond within 30 days.</p>
+
+  <h2 data-i18n="h_retained">What is retained</h2>
+  <p data-i18n="p_retained">We keep no notes, recitation, or personal profile — there is nothing of yours on our servers to retain. Anonymous diagnostic events are deleted automatically after 90 days. We may retain minimal records where required by law (for example, to document that a request was fulfilled).</p>
+
+  <h2 data-i18n="h_contact">Contact</h2>
+  <p><a href="mailto:privacy@ylensolutions.com">privacy@ylensolutions.com</a> · Ylen Solutions AB, Org.nr 559569-4380, Sweden.</p>
+
+  <footer>
+    <span data-i18n="foot">© 2026 Ylen Solutions · Sanad</span> · <a href="/" data-i18n="foot_home">Home</a> · <a href="/privacy" data-i18n="foot_priv">Privacy</a>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var I18N = {
+    ar: {
+      brand:"سند", brandword:"سند",
+      title:"حذف بياناتك",
+      updated_label:"آخر تحديث",
+      lang_notice:"هذه الصفحة متاحة بالإنجليزية والعربية والسويدية. وفي حال وجود أي اختلاف بين الترجمات، <strong>تكون النسخة الإنجليزية هي المعتمدة</strong>.",
+      intro:"سند تطبيقٌ يعمل على الجهاز <strong>بلا حساب</strong>. لا يجمع اسمك أو بريدك أو تلاوتك، ولا يرفع صوتك أبدًا. ولذلك لا يوجد ملفٌّ على الخادم لحذفه — بياناتك على جهازك، وأنت المتحكّم بها دائمًا. توضّح هذه الصفحة، الصادرة عن <strong>Ylen Solutions AB</strong> (السجل التجاري 559569-4380)، كيفية إزالتها.",
+      h_indevice:"احذف بياناتك على جهازك",
+      s1:"<strong>امسح بيانات التطبيق.</strong> افتح سند واذهب إلى <strong>الإعدادات ← الخصوصية ← مسح البيانات</strong> لإعادة ضبط علاماتك المرجعية وآخر موضع قرأته وتفضيلاتك.",
+      s2:"<strong>أوقف التحليلات.</strong> من <strong>الإعدادات ← الخصوصية</strong> يمكنك إيقاف تحليلات الاستخدام المجهولة وتقارير الأعطال في أي وقت.",
+      s3:"<strong>ألغِ تثبيت التطبيق.</strong> إلغاء تثبيت سند يزيل <strong>كل</strong> بيانات التطبيق المحلية من جهازك — العلامات المرجعية والتفضيلات وكل شيء آخر.",
+      h_analytics:"بيانات التحليلات المجهولة",
+      p_analytics:"إن فعّلتَ تحليلات الاستخدام المجهولة، أو تركتَ تقارير الأعطال المجهولة مفعّلة، فإن تلك الأحداث تُوسَم بمعرّف تثبيت عشوائي فقط — <strong>لا</strong> اسمك أو حسابك أو أي معرّف جهاز، ولا صوتك أو تلاوتك أبدًا. وتُحذَف تلقائيًّا بعد 90 يومًا. لإيقاف الجمع فورًا، أوقِف كليهما من <strong>الإعدادات ← الخصوصية</strong>؛ ولطلب حذف مبكر لأي تشخيصات مجهولة مرتبطة بمعرّف تثبيتك، راسلنا (انظر أدناه) وسنتولّى ذلك خلال 30 يومًا.",
+      h_email:"الطلب عبر البريد",
+      p_email:"إن كان لديك أي سؤال عن بياناتك أو أردتَ منّا تنفيذ طلب حذف، راسِل <a href=\"mailto:privacy@ylensolutions.com\">privacy@ylensolutions.com</a> وسنردّ خلال 30 يومًا.",
+      h_retained:"ما الذي يُحتفَظ به",
+      p_retained:"لا نحتفظ بأي سند أو ملفٍّ شخصي — لا يوجد شيءٌ يخصّك على خوادمنا لنحتفظ به. وتُحذَف الأحداث التشخيصية المجهولة تلقائيًّا بعد 90 يومًا. وقد نحتفظ بسجلّات أدنى حيثما يقتضي القانون (مثل توثيق تنفيذ طلبٍ ما).",
+      h_contact:"التواصل",
+      foot:"© 2026 Ylen Solutions · سند",
+      foot_home:"الرئيسية",
+      foot_priv:"الخصوصية"
+    },
+    sv: {
+      brand:"Sanad", brandword:"Sanad",
+      title:"Radera dina uppgifter",
+      updated_label:"Senast uppdaterad",
+      lang_notice:"Denna sida finns på engelska, arabiska och svenska. Vid eventuella skillnader mellan översättningarna gäller den <strong>engelska versionen</strong>.",
+      intro:"Sanad är en app som körs på enheten <strong>utan konto</strong>. Den samlar inte in ditt namn, din e-post eller din recitation, och laddar aldrig upp din röst. Därför finns ingen profil på servern att radera — dina uppgifter finns på din enhet, och du har alltid kontroll över dem. Denna sida, utgiven av <strong>Ylen Solutions AB</strong> (org.nr 559569-4380), förklarar hur du tar bort dem.",
+      h_indevice:"Radera dina uppgifter på din enhet",
+      s1:"<strong>Rensa appdata.</strong> Öppna Sanad och gå till <strong>Inställningar → Integritet → Rensa data</strong> för att återställa dina bokmärken, din senaste läsposition och dina inställningar.",
+      s2:"<strong>Stäng av statistik.</strong> Under <strong>Inställningar → Integritet</strong> kan du stänga av anonym användningsstatistik och kraschrapporter när som helst.",
+      s3:"<strong>Avinstallera appen.</strong> Att avinstallera Sanad tar bort <strong>alla</strong> lokala appdata från din enhet — bokmärken, inställningar och allt annat.",
+      h_analytics:"Anonyma statistikuppgifter",
+      p_analytics:"Om du valde att slå på anonym användningsstatistik, eller lät anonyma kraschrapporter vara på, märks dessa händelser endast med en slumpmässig installationsidentifierare — <strong>inte</strong> ditt namn, konto eller någon enhetsidentifierare, och aldrig din röst eller recitation. De raderas automatiskt efter 90 dagar. För att stoppa insamlingen omedelbart, stäng av båda under <strong>Inställningar → Integritet</strong>; för att begära tidig radering av anonym diagnostik kopplad till din installationsidentifierare, mejla oss (se nedan) så hanterar vi det inom 30 dagar.",
+      h_email:"Begär via e-post",
+      p_email:"Om du har någon fråga om dina uppgifter eller vill att vi verkställer en raderingsbegäran, mejla <a href=\"mailto:privacy@ylensolutions.com\">privacy@ylensolutions.com</a> så svarar vi inom 30 dagar.",
+      h_retained:"Vad som behålls",
+      p_retained:"Vi behåller ingen recitation eller personlig profil — det finns inget av dina uppgifter på våra servrar att behålla. Anonyma diagnostikhändelser raderas automatiskt efter 90 dagar. Vi kan behålla minimala uppgifter där lag kräver det (till exempel för att dokumentera att en begäran verkställts).",
+      h_contact:"Kontakt",
+      foot:"© 2026 Ylen Solutions · Sanad",
+      foot_home:"Hem",
+      foot_priv:"Integritet"
+    }
+  };
+  var RTL = { ar:true };
+  var LABEL = { en:"English", ar:"العربية", sv:"Svenska" };
+  var nodes = document.querySelectorAll('[data-i18n]');
+  var EN = {};
+  nodes.forEach(function(el){ EN[el.getAttribute('data-i18n')] = el.innerHTML; });
+
+  function apply(lang){
+    var dict = lang === 'en' ? EN : I18N[lang];
+    if (!dict) { lang = 'en'; dict = EN; }
+    nodes.forEach(function(el){
+      var k = el.getAttribute('data-i18n');
+      var v = lang === 'en' ? EN[k] : dict[k];
+      if (v != null) el.innerHTML = v;
+    });
+    var html = document.documentElement;
+    html.setAttribute('lang', lang);
+    html.setAttribute('dir', RTL[lang] ? 'rtl' : 'ltr');
+    document.querySelectorAll('.lang-menu button').forEach(function(b){
+      b.classList.toggle('on', b.getAttribute('data-lang') === lang);
+    });
+    var cur = document.querySelector('.curlang'); if (cur && LABEL[lang]) cur.textContent = LABEL[lang];
+    var dd = document.querySelector('details.lang'); if (dd) dd.removeAttribute('open');
+    try { localStorage.setItem('sanad_lang', lang); } catch(e){}
+  }
+
+  document.querySelectorAll('.lang-menu button').forEach(function(b){
+    b.addEventListener('click', function(){ apply(b.getAttribute('data-lang')); });
+  });
+
+  var saved = null;
+  try { saved = localStorage.getItem('sanad_lang'); } catch(e){}
+  var supported = { ar:true, sv:true, en:true };
+  var navs = (navigator.languages || [navigator.language || 'en']).map(function(x){ return (x||'').slice(0,2).toLowerCase(); });
+  var pick = saved;
+  if (!pick) { for (var i=0;i<navs.length;i++){ if (supported[navs[i]]) { pick = navs[i]; break; } } pick = pick || 'en'; }
+  apply(pick);
+
+  document.addEventListener('click', function(e){
+    document.querySelectorAll('details.lang[open]').forEach(function(d){ if(!d.contains(e.target)) d.removeAttribute('open'); });
+  });
+})();
+</script>
+</body>
+</html>

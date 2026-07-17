@@ -3,22 +3,29 @@ import 'package:provider/provider.dart';
 import '../services/asr/asr_engine.dart';
 import '../state/app_state.dart';
 import '../state/dua_finder_state.dart';
+import '../state/hadith_finder_state.dart';
+import '../state/quran_finder_state.dart';
 import '../state/reading_state.dart';
-import '../widgets/dua_finder_footer.dart';
-import '../widgets/reading_footer.dart';
 import 'dua_list_screen.dart';
+import 'hadith_search_screen.dart';
 import 'home_screen.dart';
-import 'quran_screen.dart';
+import 'quran_list_screen.dart';
 
 class RootScaffold extends StatelessWidget {
   const RootScaffold({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Provided ABOVE the Scaffold so both the bottom DuaFinderFooter and the
-    // DuaListScreen (inside the IndexedStack) read the ONE shared finder.
-    return ChangeNotifierProvider(
-      create: (ctx) => DuaFinderState(ctx.read<AsrEngine>()),
+    // Provided ABOVE the Scaffold so the Dua/Quran list screens (inside the
+    // IndexedStack), which own their footers via the shared SearchListScaffold,
+    // read the ONE shared finder each — and the lifecycle guards below can stop
+    // them on tab-away/background. (The Quran READER is a pushed route driven by
+    // the app-global ReadingState, not these finders.)
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (ctx) => DuaFinderState(ctx.read<AsrEngine>())),
+        ChangeNotifierProvider(create: (ctx) => QuranFinderState(ctx.read<AsrEngine>())),
+      ],
       child: const _RootView(),
     );
   }
@@ -58,14 +65,16 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
     reading.clearRetainedPcm(); // don't hold raw voice audio while backgrounded
     final finder = context.read<DuaFinderState>();
     if (finder.listening) finder.stop();
+    final quran = context.read<QuranFinderState>();
+    if (quran.listening) quran.stop();
+    final hadith = context.read<HadithFinderState>();
+    if (hadith.listening) hadith.stop();
   }
 
   @override
   Widget build(BuildContext context) {
     final app = context.watch<AppState>();
     final tab = app.tabIndex;
-    final onDua = tab == Tabs.dua;
-    final onQuran = tab == Tabs.quran;
 
     // The finder is provided at root and the tabs are an IndexedStack (never
     // disposed on switch), so leaving Azkar won't auto-stop it. Release the
@@ -77,15 +86,22 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
         WidgetsBinding.instance.addPostFrameCallback((_) => finder.stop());
       }
     }
-    // Symmetric guard for the Quran reader: leaving the Quran tab mid-recitation
-    // must stop the mic (the mic control lives only on the Quran footer, and the
-    // IndexedStack keeps ReadingState alive so it would otherwise run invisibly).
+    // Symmetric guard for the Quran list's voice finder: its mic lives in the
+    // screen, kept alive by the IndexedStack, so leaving the tab mid-listen must
+    // stop it (the reader is a pushed route that self-stops on pop).
     if (_lastTab == Tabs.quran && tab != Tabs.quran) {
-      final reading = context.read<ReadingState>();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (reading.asrActive) reading.stopAsrListening();
-        reading.clearRetainedPcm(); // free ~19 MB voice buffer on leaving the reader
-      });
+      final quran = context.read<QuranFinderState>();
+      if (quran.listening) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => quran.stop());
+      }
+    }
+    // Same for the Hadith finder: its mic lives in the screen, kept alive by the
+    // IndexedStack, so leaving the tab mid-listen must stop it.
+    if (_lastTab == Tabs.hadith && tab != Tabs.hadith) {
+      final hadith = context.read<HadithFinderState>();
+      if (hadith.listening) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => hadith.stop());
+      }
     }
     _lastTab = tab;
 
@@ -103,21 +119,16 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
           children: const [
             DuaListScreen(),
             HomeScreen(),
-            QuranScreen(),
+            QuranListScreen(),
+            HadithSearchScreen(),
           ],
         ),
         bottomNavigationBar: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Quran & Azkar are immersive (tab bar hidden), so their footers are
-            // the bottom-most bar and must reserve the system nav-bar inset
-            // themselves; on Home the NavigationBar below owns that inset.
-            if (onQuran)
-              SafeArea(top: false, child: const ReadingFooter(showMic: true)),
-            if (onDua)
-              SafeArea(top: false, child: const DuaFinderFooter()),
             // Only Home shows the tab bar; the phone back button (PopScope above)
-            // returns to Home from the immersive Duas/Quran tabs.
+            // returns to Home from the immersive list tabs. Each list tab (Dua,
+            // Quran, Hadith) carries its own footer via SearchListScaffold.
             if (tab == Tabs.home)
               NavigationBar(
                 selectedIndex: tab,
@@ -137,6 +148,11 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
                     icon: Icon(Icons.menu_book_outlined),
                     selectedIcon: Icon(Icons.menu_book_rounded),
                     label: 'Quran',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.format_quote_outlined),
+                    selectedIcon: Icon(Icons.format_quote_rounded),
+                    label: 'Hadith',
                   ),
                 ],
               ),

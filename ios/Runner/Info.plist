@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Tilawa Ai</string>
+	<string>Sanad</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,9 +15,9 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>tilawa_ai</string>
+	<string>sanad</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Tilawa listens while you recite so it can follow along on the mushaf and give tajwīd feedback. Audio is processed on your device.</string>
+	<string>Sanad listens while you recite so it can follow along on the mushaf and give tajwīd feedback. Audio is processed on your device.</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

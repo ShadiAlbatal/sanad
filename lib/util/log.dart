@@ -47,7 +47,7 @@ class Log {
       final f = File('${logs.path}/run_${_stamp()}.log');
       _sink = f.openWrite(mode: FileMode.append);
       logFilePath = f.path;
-      _sink!.writeln('=== TilawaAi run ${DateTime.now().toIso8601String()} ===');
+      _sink!.writeln('=== Sanad run ${DateTime.now().toIso8601String()} ===');
       d('log', 'file sink -> ${f.path}');
     } catch (e) {
       debugPrint('Log.initFileSink failed: $e');

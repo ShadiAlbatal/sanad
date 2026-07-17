@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/state/reading_state.dart';
+import 'package:sanad/state/reading_state.dart';
 
 /// Pins the hidden-mode footer step-reveal (`< << > >>`): forward/back by word
 /// and by āyah walk the visible page's words in reading order, stay within one

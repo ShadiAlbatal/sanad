@@ -1,0 +1,48 @@
+{
+  "id": "hisn-186",
+  "title": "What to say when you are fasting and someone is rude to you",
+  "source": "Hisn al-Muslim 186",
+  "arabic": "إِنِّي صَائِمٌ إِنِّي صَائِمٌ",
+  "meaning": "I am fasting, I am fasting.",
+  "words": [
+    "إِنِّي",
+    "صَائِمٌ",
+    "إِنِّي",
+    "صَائِمٌ"
+  ],
+  "phonemes": [
+    "ءِ",
+    "ننننِ",
+    "ۦۦ",
+    "صَ",
+    "اا",
+    "ءِ",
+    "م",
+    "ءِ",
+    "ننننِ",
+    "ۦۦ",
+    "صَ",
+    "اا",
+    "ءِ",
+    "م"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

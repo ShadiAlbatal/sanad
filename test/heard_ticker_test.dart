@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/state/reading_state.dart' show recentHeard;
-import 'package:tilawa_ai/widgets/heard_ticker.dart';
+import 'package:sanad/state/reading_state.dart' show recentHeard;
+import 'package:sanad/widgets/heard_ticker.dart';
 
 /// Pins the footer "what the model heard" ticker: the pure recent-phoneme
 /// window and the widget's RTL / placeholder rendering.

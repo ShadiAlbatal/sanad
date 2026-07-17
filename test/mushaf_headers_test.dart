@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/data/quran_repository.dart';
-import 'package:tilawa_ai/models/mushaf.dart';
+import 'package:sanad/data/quran_repository.dart';
+import 'package:sanad/models/mushaf.dart';
 
 /// Pins the mushaf surah-opener integrity across all 604 pages: every one of the
 /// 114 surahs must have EXACTLY ONE name line (a surah-header or a combined

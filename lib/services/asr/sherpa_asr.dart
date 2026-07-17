@@ -71,7 +71,9 @@ class SherpaAsr {
     while (_recognizer.isReady(_stream)) {
       _recognizer.decode(_stream);
     }
-    return _recognizer.getResult(_stream).tokens;
+    final tokens = _recognizer.getResult(_stream).tokens;
+    Log.d('sherpa', 'finish flush (tail-pad) -> ${tokens.length} tokens');
+    return tokens;
   }
 
   /// Start a fresh stream for a new recitation.
@@ -79,6 +81,7 @@ class SherpaAsr {
     if (_disposed) return;
     _stream.free();
     _stream = _recognizer.createStream();
+    Log.t('sherpa', 'stream reset (fresh recitation)');
   }
 
   void dispose() {

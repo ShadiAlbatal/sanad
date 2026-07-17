@@ -1,0 +1,32 @@
+{
+  "id": "hisn-9",
+  "title": "What to say when undressing",
+  "source": "Hisn al-Muslim 9",
+  "arabic": "بِسْمِ اللَّهِ",
+  "meaning": "In the name of Allah.",
+  "words": [
+    "بِسْمِ",
+    "اللَّهِ"
+  ],
+  "phonemes": [
+    "بِ",
+    "س",
+    "م",
+    "ءَ",
+    "للَ",
+    "اااا",
+    "ه"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

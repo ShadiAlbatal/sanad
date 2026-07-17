@@ -1,0 +1,54 @@
+{
+  "id": "hisn-48",
+  "title": "Invocations for sitting between two prostrations",
+  "source": "Hisn al-Muslim 48",
+  "arabic": "رَبِّ اغْفِرْ لِي رَبِّ اغْفِرْ لِي",
+  "meaning": "My Lord forgive me, My Lord forgive me.",
+  "words": [
+    "رَبِّ",
+    "اغْفِرْ",
+    "لِي",
+    "رَبِّ",
+    "اغْفِرْ",
+    "لِي"
+  ],
+  "phonemes": [
+    "رَ",
+    "ببڇ",
+    "ءِ",
+    "غ",
+    "فِ",
+    "ر",
+    "لِ",
+    "ۦۦ",
+    "رَ",
+    "ببڇ",
+    "ءِ",
+    "غ",
+    "فِ",
+    "ر",
+    "لِ",
+    "ۦۦ"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    3,
+    3,
+    4,
+    4,
+    4,
+    4,
+    5,
+    5
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

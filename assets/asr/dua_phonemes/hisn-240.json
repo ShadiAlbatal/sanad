@@ -1,0 +1,36 @@
+{
+  "id": "hisn-240",
+  "title": "What to say when surprised or startled",
+  "source": "Hisn al-Muslim 240",
+  "arabic": "سُبْحَانَ اللَّهِ",
+  "meaning": "How perfect Allah is.",
+  "words": [
+    "سُبْحَانَ",
+    "اللَّهِ"
+  ],
+  "phonemes": [
+    "سُ",
+    "بڇ",
+    "حَ",
+    "اااا",
+    "ن",
+    "ءَ",
+    "للَ",
+    "اااا",
+    "ه"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

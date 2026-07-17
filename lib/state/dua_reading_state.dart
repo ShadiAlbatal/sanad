@@ -55,6 +55,7 @@ class DuaReadingState extends ChangeNotifier {
 
   static const double _rmsFloor = 120;
   double _lastRms = 0; // read-only footer telemetry (see [level])
+  int _prevTokens = 0; // cumulative token count last chunk — for the "heard delta" trace
 
   int _seconds = 0;
   Timer? _timer;
@@ -128,6 +129,7 @@ class DuaReadingState extends ChangeNotifier {
     _currentWord = null;
     _markerCursor = 0;
     _heardTail.clear();
+    _prevTokens = 0;
   }
 
   // ---- Hidden mode ----
@@ -211,7 +213,7 @@ class DuaReadingState extends ChangeNotifier {
         _error = 'Microphone permission denied';
         return;
       }
-      await _engine.claimMic(stopListening); // stop a Quran session still holding the shared mic
+      await _engine.claimMic(stopListening, owner: 'dua-reader'); // stop a Quran session still holding the shared mic
       final asr = await _engine.ready();
       // The screen can be popped (dispose) while ready() awaits — release the
       // shared mic (not yet started here) and bail instead of starting on a dead
@@ -289,6 +291,11 @@ class DuaReadingState extends ChangeNotifier {
       sumsq += s * s;
     }
     _lastRms = pcm.isEmpty ? 0 : math.sqrt(sumsq / pcm.length);
+    if (tokens.length > _prevTokens) {
+      Log.t('phon', '[dua] +${tokens.length - _prevTokens} "${tokens.sublist(_prevTokens).join()}" '
+          '(total=${tokens.length} rms=${_lastRms.toStringAsFixed(0)})');
+    }
+    _prevTokens = tokens.length;
     if (tokens.isEmpty) return;
     const tail = 12;
     final tailStart = tokens.length <= tail ? 0 : tokens.length - tail;
@@ -338,6 +345,8 @@ class DuaReadingState extends ChangeNotifier {
       _revealed.addAll(skipped);
       if (_currentWord != null) _revealed.add(_currentWord!);
     }
+    Log.t('duaread', 'cursor=${out.cursor} cur=$_currentWord read=${_readWords.length} '
+        'skip=${_skippedWords.length} anchored=$anchored rms=${_lastRms.toStringAsFixed(0)}');
     var newSkip = false;
     for (final e in out.events) {
       if (e.type == PhonemeEventType.skipped) newSkip = true;

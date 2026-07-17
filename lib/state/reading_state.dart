@@ -307,7 +307,7 @@ class ReadingState extends ChangeNotifier {
         _asrError = 'Microphone permission denied';
         return;
       }
-      await _engine.claimMic(stopAsrListening); // stop a du'a session still holding the shared mic
+      await _engine.claimMic(stopAsrListening, owner: 'quran'); // stop a du'a session still holding the shared mic
       final asr = await _engine.ready();
       _switchCount = 0;
       await _loadClipAndMatcher(_ctxSurah);

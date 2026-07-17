@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/state/reading_state.dart';
+import 'package:sanad/state/reading_state.dart';
 
 /// Pins the shared anti-teleport marker catch-up ([advanceMarker]) — previously
 /// duplicated byte-for-byte in ReadingState and DuaReadingState (a tuning-drift

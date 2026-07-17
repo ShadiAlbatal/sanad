@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/services/asr/phoneme_corpus.dart';
-import 'package:tilawa_ai/services/asr/phoneme_matcher.dart';
+import 'package:sanad/services/asr/phoneme_corpus.dart';
+import 'package:sanad/services/asr/phoneme_matcher.dart';
 
 /// Two things checked here (pure Dart, no model/device):
 ///  1. TRACKING (smoke): fed a surah's own reference phonemes, the matcher must

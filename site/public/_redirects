@@ -1,0 +1,5 @@
+# Clean URLs (/privacy, /delete-account, /ar/) are handled automatically by
+# Cloudflare Pages — no rules needed. Do NOT add explicit /x -> /x.html rewrites:
+# they collide with Pages' built-in .html canonicalization and cause a redirect loop.
+# SPA fallback only.
+/* /index.html 200

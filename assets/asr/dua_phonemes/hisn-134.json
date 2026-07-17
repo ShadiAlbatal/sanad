@@ -1,0 +1,56 @@
+{
+  "id": "hisn-134",
+  "title": "Invocations for if you are stricken by in your faith",
+  "source": "Hisn al-Muslim 134",
+  "arabic": "يَقُولُ آمَنْتُ بِاللَّهِ وَرُسُلِهِ",
+  "meaning": "He should say: (I have believed in Allah and His Messenger.",
+  "words": [
+    "يَقُولُ",
+    "آمَنْتُ",
+    "بِاللَّهِ",
+    "وَرُسُلِهِ"
+  ],
+  "phonemes": [
+    "يَ",
+    "قُ",
+    "ۥۥۥۥ",
+    "ل",
+    "ءَ",
+    "اا",
+    "مَ",
+    "ن",
+    "ت",
+    "بِ",
+    "للَ",
+    "اااا",
+    "ه",
+    "وَ",
+    "رُ",
+    "سُ",
+    "لِ",
+    "ه"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    3
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

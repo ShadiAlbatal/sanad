@@ -1,0 +1,54 @@
+{
+  "id": "hisn-200",
+  "title": "Invocation for someone who tells you I love you for the sake of Allah",
+  "source": "Hisn al-Muslim 200",
+  "arabic": "أَحَبَّكَ الَّذِي أَحْبَبْتَنِي لَهُ",
+  "meaning": "May He, for whom you have loved me, love you.",
+  "words": [
+    "أَحَبَّكَ",
+    "الَّذِي",
+    "أَحْبَبْتَنِي",
+    "لَهُ"
+  ],
+  "phonemes": [
+    "ءَ",
+    "حَ",
+    "ببَ",
+    "ك",
+    "ءَ",
+    "للَ",
+    "ذِ",
+    "ۦۦ",
+    "ءَ",
+    "ح",
+    "بَ",
+    "بڇ",
+    "تَ",
+    "نِ",
+    "ۦۦ",
+    "لَ",
+    "ه"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

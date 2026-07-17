@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/widgets/mic_toggle_button.dart';
+import 'package:sanad/widgets/mic_toggle_button.dart';
 
 /// Pins the screen-reader label + button/toggle semantics for the shared mic
 /// control (previously three icon-only, unlabeled GestureDetector copies —

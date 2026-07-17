@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<title>سند — اقرأ، وهي تتابع كل كلمة</title>
+<meta name="description" content="سند رفيقٌ للقرآن والأذكار والحديث يعمل على جهازك بالكامل. اقرأ بصوتك فتتابع معك في المصحف المُلوَّن بالتجويد، وتُبرز كل كلمة، وتجد أي آية أو دعاء أو حديث بمجرد أن تتلوه. كل شيء يجري على هاتفك؛ صوتك لا يغادر جهازك." />
+<meta property="og:title" content="سند — اقرأ، وهي تتابع كل كلمة" />
+<meta property="og:description" content="رفيقٌ للقرآن والأذكار والحديث يعمل على جهازك. اقرأ بصوتك فتتابع معك في مصحف التجويد. خصوصية بالتصميم." />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="ar" />
+<link rel="canonical" href="https://sanad.ylensolutions.com/ar/" />
+<link rel="alternate" hreflang="en" href="https://sanad.ylensolutions.com/" />
+<link rel="alternate" hreflang="ar" href="https://sanad.ylensolutions.com/ar/" />
+<link rel="alternate" hreflang="x-default" href="https://sanad.ylensolutions.com/" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#f8f4ea; --bg2:#f1eadb; --surface:#fffdf6; --ink:#17241f; --ink2:#4b574f; --ink3:#7c887e;
+    --line:#e6dcc4; --accent:#0e5e4e; --accent-press:#0a493d; --accent-weak:#e2eee8; --on-accent:#ffffff;
+    --gold:#9c7518; --gold-soft:#c49a3f;
+    --hl-bg:color-mix(in srgb,var(--accent) 22%,transparent);
+    --tj-red:#c0453b; --tj-blue:#2f6fb0; --tj-purple:#8a4b96;
+    --serif:"Amiri",Georgia,serif;
+    --sans:"IBM Plex Sans Arabic",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --quran:"Amiri",Georgia,serif;
+    --shadow-card:0 8px 30px -14px rgba(23,36,31,0.28);
+    --shadow-pop:0 30px 60px -30px rgba(23,36,31,0.5);
+    --pattern:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='72'%20height='72'%3E%3Cg%20fill='none'%20stroke='%23c8a24a'%20stroke-width='1.2'%3E%3Cpolygon%20points='36,3%2069,36%2036,69%203,36'/%3E%3Crect%20x='13'%20y='13'%20width='46'%20height='46'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#071a15; --bg2:#0a2019; --surface:#0e2a22; --ink:#eef3ec; --ink2:#b7c8bd; --ink3:#7d9187;
+      --line:#1b3b31; --accent:#3fbd92; --accent-press:#57cfa4; --accent-weak:#123029; --on-accent:#04140f;
+      --gold:#e3b757; --gold-soft:#d4a63f;
+      --hl-bg:color-mix(in srgb,var(--accent) 30%,transparent);
+      --tj-red:#e07d74; --tj-blue:#6ba4dd; --tj-purple:#c184cf;
+      --shadow-card:0 10px 34px -14px rgba(0,0,0,0.6);
+      --shadow-pop:0 30px 70px -26px rgba(0,0,0,0.7);
+    }
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.7 var(--sans); -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+  a { color:var(--accent); text-decoration:none; }
+  .wrap { max-width:1080px; margin:0 auto; padding:0 22px; }
+  h1,h2,h3,.serif { font-family:var(--serif); font-weight:700; }
+
+  .ornament { display:flex; align-items:center; justify-content:center; gap:16px; color:var(--gold-soft); margin:6px 0; }
+  .ornament span { height:1px; width:64px; max-width:22vw; background:linear-gradient(to right,transparent,currentColor); }
+  .ornament span:last-child { background:linear-gradient(to left,transparent,currentColor); }
+  .ornament svg { width:22px; height:22px; opacity:.95; }
+
+  nav { position:sticky; top:0; z-index:10; background:color-mix(in srgb,var(--bg) 88%,transparent);
+        backdrop-filter:saturate(1.2) blur(8px); border-bottom:1px solid var(--line); }
+  .nav-inner { display:flex; align-items:center; gap:16px; height:64px; }
+  .logo { display:flex; align-items:center; gap:10px; font-weight:600; color:var(--ink); font-size:19px; }
+  .logo svg { width:30px; height:30px; border-radius:8px; }
+  .nav-links { margin-inline-start:auto; display:flex; align-items:center; gap:22px; }
+  .nav-links a { color:var(--ink2); font-size:15px; }
+  .nav-links a:hover { color:var(--ink); }
+  .lang { position:relative; }
+  .lang > summary { list-style:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+    color:var(--ink2); font-size:14px; padding:6px 11px; border:1px solid var(--line); border-radius:10px; user-select:none; }
+  .lang > summary::-webkit-details-marker { display:none; }
+  .lang > summary::after { content:"▾"; font-size:10px; color:var(--ink3); }
+  .lang > summary:hover { color:var(--ink); border-color:var(--gold-soft); }
+  .lang-menu { position:absolute; top:calc(100% + 8px); inset-inline-end:0; min-width:156px;
+    background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:6px;
+    box-shadow:var(--shadow-card); display:flex; flex-direction:column; gap:2px; z-index:20; }
+  .lang-menu a { padding:9px 11px; border-radius:8px; color:var(--ink2); font-size:14px; white-space:nowrap; }
+  .lang-menu a:hover { background:var(--accent-weak); color:var(--ink); }
+  .lang-menu a.active { color:var(--accent); font-weight:600; }
+  @media (max-width:640px){ .nav-links a.hide-sm{ display:none; } }
+
+  .hero { position:relative; text-align:center; padding:74px 22px 26px; overflow:hidden; }
+  .hero::before { content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background-image:var(--pattern); background-size:72px 72px; opacity:.06;
+    -webkit-mask-image:radial-gradient(125% 92% at 50% 0%, #000 0%, transparent 70%);
+            mask-image:radial-gradient(125% 92% at 50% 0%, #000 0%, transparent 70%); }
+  @media (prefers-color-scheme: dark){ .hero::before{ opacity:.10; } }
+  .hero > * { position:relative; z-index:1; }
+  .eyebrow { color:var(--gold); font-weight:700; font-size:14px; letter-spacing:.02em; }
+  h1 { font-size:clamp(40px,6.6vw,66px); line-height:1.15; margin:14px 0 16px; }
+  .lede { color:var(--ink2); font-size:clamp(16px,2.2vw,19px); max-width:60ch; margin:0 auto; }
+  .cta { display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; margin-top:28px; }
+  .play { display:inline-flex; align-items:center; gap:10px; background:var(--ink); color:var(--bg); padding:11px 18px; border-radius:12px; font-weight:600; }
+  .play small { display:block; font-size:10px; font-weight:500; opacity:.75; line-height:1; }
+  .play b { font-size:15px; line-height:1.1; }
+  .weblink { color:var(--ink2); font-size:14px; }
+
+  .showcase { padding:30px 0 6px; }
+  .phones { display:flex; gap:26px; justify-content:center; align-items:flex-start; flex-wrap:wrap; }
+  .phone-wrap { display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .cap { text-align:center; }
+  .cap b { display:block; font-family:var(--serif); font-weight:700; font-size:20px; color:var(--ink); }
+  .cap span { color:var(--ink3); font-size:12.5px; }
+
+  .phone { width:268px; height:536px; border-radius:38px; background:var(--surface);
+           border:1px solid var(--line); box-shadow:var(--shadow-pop); padding:14px; position:relative; }
+  .phone::before { content:""; position:absolute; top:14px; left:50%; transform:translateX(-50%); width:110px; height:22px; border-radius:0 0 14px 14px; background:var(--bg2); }
+  .screen { height:100%; border-radius:26px; background:linear-gradient(180deg,var(--bg2),var(--bg)); overflow:hidden; display:flex; flex-direction:column; }
+  .screen-hd { padding:26px 18px 8px; display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .screen-hd .sname { font-family:var(--quran); font-size:23px; color:var(--accent); }
+  .screen-hd .smeta { color:var(--ink3); font-size:11px; white-space:nowrap; }
+  .mushaf { flex:1; padding:14px 16px 6px; direction:rtl; text-align:center; font-family:var(--quran);
+            font-size:22px; line-height:2.15; color:var(--ink); }
+  .mushaf.dua { font-size:20px; line-height:2.35; }
+  .mushaf.hadith { font-size:20px; line-height:2.35; }
+  .mushaf .ln { display:block; margin-bottom:2px; }
+  .mushaf .r { color:var(--tj-red); }
+  .mushaf .b { color:var(--tj-blue); }
+  .mushaf .p { color:var(--tj-purple); }
+
+  .follow .w { border-radius:6px; padding:0 3px; background:transparent;
+               box-decoration-break:clone; -webkit-box-decoration-break:clone;
+               animation:recite 10s linear infinite; animation-delay:var(--d,0s); }
+  @keyframes recite {
+    0%   { background:transparent; }
+    5%   { background:var(--hl-bg); }
+    82%  { background:var(--hl-bg); }
+    94%,100% { background:transparent; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .follow .w { animation:none; }
+    .follow .w.lit { background:var(--hl-bg); }
+  }
+
+  .mic { margin:6px 14px 16px; display:flex; align-items:center; justify-content:center; gap:8px;
+         height:42px; border-radius:21px; background:var(--accent); color:var(--on-accent);
+         font-family:var(--sans); font-size:12.5px; font-weight:600;
+         box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent); animation:pulse 2.2s ease-out infinite; }
+  .mic svg { width:15px; height:15px; }
+  @keyframes pulse { 0%{ box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent);} 70%{ box-shadow:0 0 0 14px transparent;} 100%{ box-shadow:0 0 0 0 transparent;} }
+  @media (prefers-reduced-motion: reduce){ .mic{ animation:none; } }
+
+  .strip { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line);
+           border-radius:16px; overflow:hidden; margin:36px 0 8px; }
+  @media(max-width:720px){ .strip{ grid-template-columns:repeat(2,1fr); } }
+  .strip > div { background:var(--surface); padding:20px 18px; text-align:center; }
+  .strip .n { font-family:var(--serif); font-weight:700; font-size:26px; line-height:1.1; color:var(--accent); }
+  .strip .l { color:var(--ink3); font-size:12.5px; margin-top:5px; }
+
+  section.features { padding:56px 0 8px; }
+  .sec-head { text-align:center; max-width:56ch; margin:0 auto; }
+  .kicker { color:var(--gold); font-weight:700; font-size:13px; margin-bottom:10px; }
+  .sec-head h2 { font-size:clamp(30px,4.6vw,44px); margin:0 0 10px; }
+  .sec-head p { color:var(--ink2); margin:0; }
+
+  .collections { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:36px; }
+  @media (max-width:860px){ .collections{ grid-template-columns:1fr; max-width:560px; margin-inline:auto; } }
+  .collection { position:relative; background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:24px 22px; overflow:hidden; transition:transform .15s,border-color .15s; }
+  .collection::before { content:""; position:absolute; top:0; inset-inline:0; height:3px; background:linear-gradient(-90deg,var(--gold-soft),transparent 70%); }
+  .collection:hover { transform:translateY(-3px); border-color:var(--gold-soft); }
+  .col-head { display:flex; align-items:center; gap:13px; margin-bottom:16px; }
+  .col-head .ic { width:44px; height:44px; border-radius:12px; background:var(--accent-weak); color:var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .col-head .ic svg { width:23px; height:23px; }
+  .col-head h3 { font-size:24px; margin:0; }
+  .col-head .meta { display:block; color:var(--ink3); font-size:12.5px; font-family:var(--sans); }
+  .caps { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:11px; }
+  .caps li { position:relative; padding-inline-start:24px; color:var(--ink2); font-size:14.5px; line-height:1.7; }
+  .caps li::before { content:"✦"; position:absolute; inset-inline-start:0; top:0; color:var(--gold); font-size:13px; }
+  .caps b { color:var(--ink); font-weight:600; }
+
+  .shared { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
+  @media (max-width:640px){ .shared{ grid-template-columns:1fr; max-width:560px; margin-inline:auto; } }
+  .trait { display:flex; gap:14px; align-items:flex-start; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:20px 22px; }
+  .trait .ic { width:40px; height:40px; border-radius:11px; background:var(--accent-weak); color:var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .trait .ic svg { width:21px; height:21px; }
+  .trait h3 { font-size:20px; margin:0 0 4px; }
+  .trait p { color:var(--ink2); font-size:14px; margin:0; }
+
+  section.how { padding:64px 0 8px; }
+  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:34px; }
+  @media (max-width:760px){ .steps{ grid-template-columns:1fr; } }
+  .step { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:24px; }
+  .step .no { font-family:var(--serif); font-weight:700; font-size:17px; color:var(--gold); }
+  .step h3 { font-size:21px; margin:8px 0 6px; }
+  .step p { color:var(--ink2); font-size:14.5px; margin:0; }
+
+  .privacy { background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:32px; max-width:760px; margin:30px auto 0; box-shadow:var(--shadow-card); }
+  .privacy ul { list-style:none; display:flex; flex-direction:column; gap:12px; margin:0; padding:0; }
+  .privacy li { display:flex; gap:12px; align-items:flex-start; color:var(--ink2); font-size:14.5px; }
+  .privacy li .ck { color:var(--accent); flex-shrink:0; margin-top:2px; }
+  .privacy li b { color:var(--ink); font-weight:600; }
+
+  section.cta-sec { padding:64px 0 8px; }
+  .cta-box { position:relative; overflow:hidden; background:linear-gradient(135deg,var(--accent),var(--accent-press)); border-radius:24px; padding:56px 32px; text-align:center; color:#fff; box-shadow:var(--shadow-pop); }
+  .cta-box::before { content:""; position:absolute; inset:0; background-image:var(--pattern); background-size:64px 64px; opacity:.14; pointer-events:none; }
+  .cta-box > * { position:relative; z-index:1; }
+  .cta-box h2 { color:#fff; font-size:clamp(28px,4vw,40px); margin:0 0 10px; }
+  .cta-box p { color:rgba(255,255,255,.9); max-width:52ch; margin:0 auto 22px; }
+  .cta-box .play { background:#fff; color:var(--accent-press); }
+
+  footer { margin-top:64px; border-top:1px solid var(--line); }
+  .foot-inner { display:flex; flex-wrap:wrap; gap:14px 26px; align-items:center; padding:26px 0; color:var(--ink3); font-size:14px; }
+  .foot-inner a { color:var(--ink2); }
+  .foot-inner .sp { margin-inline-start:auto; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="wrap nav-inner">
+    <span class="logo">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#0e5e4e"/><g fill="none" stroke="#d8b24a" stroke-width="3" opacity="0.55"><rect x="30" y="30" width="40" height="40"/><rect x="30" y="30" width="40" height="40" transform="rotate(45 50 50)"/></g><path d="M50 22c-12 8-20 18-20 32 0 13 9 22 20 26 11-4 20-13 20-26 0-14-8-24-20-32z" fill="none" stroke="#f6efd8" stroke-width="4.5"/><path d="M42 48c0 6 4 10 8 12 4-2 8-6 8-12" fill="none" stroke="#d8b24a" stroke-width="4.5" stroke-linecap="round"/></svg>
+      سند
+    </span>
+    <div class="nav-links">
+      <a href="#features" class="hide-sm">المزايا</a>
+      <a href="/privacy" class="hide-sm">الخصوصية</a>
+      <details class="lang">
+        <summary aria-label="اللغة: العربية">
+          <svg class="globe" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+          العربية
+        </summary>
+        <div class="lang-menu">
+          <a href="/ar/" class="active" lang="ar" aria-current="page">العربية</a>
+          <a href="/" lang="en" hreflang="en">English</a>
+        </div>
+      </details>
+      <a href="https://app.sanad.ylensolutions.com" style="background:var(--accent);color:var(--on-accent);padding:9px 16px;border-radius:11px;font-weight:600;font-size:14px;white-space:nowrap;">افتح التطبيق</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="eyebrow">رفيقٌ على جهازك · قرآن وأذكار وحديث</div>
+  <h1>اقرأ، وهي تتابع كل كلمة.</h1>
+  <p class="lede">افتح سورةً أو دعاءً أو حديثًا واقرأ بصوتك — فتتابعك سند كلمةً كلمة في مصحف التجويد، وتجد لك أي آية أو دعاء أو حديث لحظةَ أن تتلوه. كل شيء يجري على هاتفك؛ وصوتك لا يغادر جهازك أبدًا.</p>
+  <div class="cta">
+    <span class="play" title="قريبًا على Google Play">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.6 2.3 13 12 3.6 21.7c-.4-.2-.6-.6-.6-1.1V3.4c0-.5.2-.9.6-1.1Zm11.1 8.3 2.9-2.9 3.5 2c.8.5.8 1.6 0 2l-3.5 2-2.9-3.1Zm-1.1 1.4-9 9.2 11-6.3-2-2.9Zm0-.4 2-2.9-11-6.3 9 9.2Z"/></svg>
+      <span><small>قريبًا على</small><b>Google Play</b></span>
+    </span>
+    <a class="weblink" href="https://app.sanad.ylensolutions.com">أو افتح تطبيق الويب ←</a>
+  </div>
+</header>
+
+<section class="showcase wrap" aria-label="سند في القرآن والأذكار والحديث">
+  <div class="phones">
+
+    <div class="phone-wrap">
+      <div class="phone" aria-hidden="true">
+        <div class="screen">
+          <div class="screen-hd">
+            <span class="sname">الفاتحة</span>
+            <span class="smeta">١</span>
+          </div>
+          <div class="mushaf follow">
+            <span class="ln"><span class="w lit" style="--d:0s">بِسْمِ</span> <span class="w" style="--d:.4s">اللَّهِ</span> <span class="w" style="--d:.8s">ال<span class="r">رَّ</span>حْمَٰ<span class="p">نِ</span></span> <span class="w" style="--d:1.2s">ال<span class="r">رَّ</span>حِيمِ</span></span>
+            <span class="ln"><span class="w" style="--d:1.6s">الْحَمْدُ</span> <span class="w" style="--d:2s">لِلَّهِ</span> <span class="w" style="--d:2.4s">رَبِّ</span> <span class="w" style="--d:2.8s">الْعَالَمِي<span class="p">نَ</span></span></span>
+            <span class="ln"><span class="w" style="--d:3.2s">ال<span class="r">رَّ</span>حْمَٰ<span class="p">نِ</span></span> <span class="w" style="--d:3.6s">ال<span class="r">رَّ</span>حِيمِ</span></span>
+            <span class="ln"><span class="w" style="--d:4s">مَالِكِ</span> <span class="w" style="--d:4.4s">يَوْمِ</span> <span class="w" style="--d:4.8s">الدِّي<span class="p">نِ</span></span></span>
+            <span class="ln"><span class="w" style="--d:5.2s">إِيَّاكَ</span> <span class="w" style="--d:5.6s">نَعْبُ<span class="b">دُ</span></span> <span class="w" style="--d:6s">وَإِيَّاكَ</span> <span class="w" style="--d:6.4s">نَسْتَعِي<span class="p">نُ</span></span></span>
+          </div>
+          <div class="mic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>
+            يُنصِت…
+          </div>
+        </div>
+      </div>
+      <div class="cap"><b>القرآن</b><span>مصحف التجويد · متابعة</span></div>
+    </div>
+
+    <div class="phone-wrap">
+      <div class="phone" aria-hidden="true">
+        <div class="screen">
+          <div class="screen-hd">
+            <span class="sname">دعاء الاستيقاظ</span>
+            <span class="smeta">حصن المسلم</span>
+          </div>
+          <div class="mushaf dua follow">
+            <span class="ln"><span class="w lit" style="--d:0s">الْحَمْدُ</span> <span class="w" style="--d:.5s">لِلَّهِ</span> <span class="w" style="--d:1s">الَّذِي</span></span>
+            <span class="ln"><span class="w" style="--d:1.5s">أَحْيَانَا</span> <span class="w" style="--d:2s">بَعْدَ</span> <span class="w" style="--d:2.5s">مَا</span> <span class="w" style="--d:3s">أَمَاتَنَا</span></span>
+            <span class="ln"><span class="w" style="--d:3.5s">وَإِلَيْهِ</span> <span class="w" style="--d:4s">النُّشُورُ</span></span>
+          </div>
+          <div class="mic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>
+            يُنصِت…
+          </div>
+        </div>
+      </div>
+      <div class="cap"><b>الأذكار والأدعية</b><span>حصن المسلم · متابعة</span></div>
+    </div>
+
+    <div class="phone-wrap">
+      <div class="phone" aria-hidden="true">
+        <div class="screen">
+          <div class="screen-hd">
+            <span class="sname">الأعمال بالنيّات</span>
+            <span class="smeta">البخاري · ١</span>
+          </div>
+          <div class="mushaf hadith follow">
+            <span class="ln"><span class="w lit" style="--d:0s">إِنَّمَا</span> <span class="w" style="--d:.5s">الْأَعْمَالُ</span> <span class="w" style="--d:1s">بِالنِّيَّاتِ،</span></span>
+            <span class="ln"><span class="w" style="--d:1.5s">وَإِنَّمَا</span> <span class="w" style="--d:2s">لِكُلِّ</span> <span class="w" style="--d:2.5s">امْرِئٍ</span></span>
+            <span class="ln"><span class="w" style="--d:3s">مَا</span> <span class="w" style="--d:3.5s">نَوَى</span></span>
+          </div>
+          <div class="mic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>
+            يُنصِت…
+          </div>
+        </div>
+      </div>
+      <div class="cap"><b>الحديث</b><span>البخاري ومسلم · متابعة</span></div>
+    </div>
+
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="strip">
+    <div><div class="n">١١٤ · ٦٢٣٦</div><div class="l">سورة · آية</div></div>
+    <div><div class="n">~٢٦٠</div><div class="l">ذِكر · حصن المسلم</div></div>
+    <div><div class="n">+١٢٠٠٠</div><div class="l">حديث · البخاري ومسلم</div></div>
+    <div><div class="n">١٠٠٪</div><div class="l">على الجهاز</div></div>
+  </div>
+</div>
+
+<div class="ornament" aria-hidden="true"><span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="6" y="6" width="12" height="12"/><rect x="6" y="6" width="12" height="12" transform="rotate(45 12 12)"/></svg><span></span></div>
+
+<section class="features wrap" id="features">
+  <div class="sec-head">
+    <p class="kicker">ماذا تفعل</p>
+    <h2>ثلاث مجموعات، وطريقة واحدة للقراءة</h2>
+    <p>المتابعة أثناء التلاوة والبحث بالصوت أو النص يعملان في الثلاثة جميعًا — لكلٍّ مدخله.</p>
+  </div>
+
+  <div class="collections">
+    <div class="collection">
+      <div class="col-head">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM4 4v14M12 4v12"/></svg></div>
+        <div><h3>القرآن</h3><span class="meta">١١٤ سورة · ٦٢٣٦ آية</span></div>
+      </div>
+      <ul class="caps">
+        <li>اقرأ فتتابعك <b>كلمةً كلمة</b> في مصحف التجويد بحروفه المُلوَّنة، مع تقليب صفحات ورقيّ طبيعيّ.</li>
+        <li>اتلُ <b>أو اكتب أي آية</b> فتقفز إليها مباشرةً في أي موضع من السور المئة والأربع عشرة.</li>
+        <li><b>مراجعة لطيفة لزلل التجويد</b> بعد تلاوتك، لتنتبه لما قد يفوتك.</li>
+      </ul>
+    </div>
+
+    <div class="collection">
+      <div class="col-head">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/></svg></div>
+        <div><h3>الأذكار والأدعية</h3><span class="meta">حصن المسلم · ~٢٦٠</span></div>
+      </div>
+      <ul class="caps">
+        <li><b>تصفَّح حسب المناسبة</b> — الصباح والمساء والنوم والسفر وسائر حصن المسلم.</li>
+        <li>اتلُ دعاءً <b>فيتابعك كلمةً كلمة</b>، تمامًا كالمصحف.</li>
+        <li>اتلُ أو اكتب <b>جزءًا</b> فيفتح لك ما تقصده.</li>
+      </ul>
+    </div>
+
+    <div class="collection">
+      <div class="col-head">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <div><h3>الحديث</h3><span class="meta">البخاري ومسلم · +١٢٠٠٠</span></div>
+      </div>
+      <ul class="caps">
+        <li>اتلُ جزءًا — <b>أو اكتب كلمةً تذكرها</b> — فتجد الحديث.</li>
+        <li>افتحه <b>فيتابع تلاوتك</b> كلمةً كلمة كذلك.</li>
+        <li>تأتيك النتائج <b>وكلماتُك مُبرَزة</b>، فتميّز الحديث المقصود بسرعة.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="shared">
+    <div class="trait">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div><h3>على الجهاز وبخصوصية</h3><p>تُعرَّف السند على هاتفك بالكامل. لا حساب ولا سحابة، وصوتك لا يغادر الجهاز.</p></div>
+    </div>
+    <div class="trait">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h13"/></svg></div>
+      <div><h3>بالصوت أو بالكتابة</h3><p>اتلُه، أو اكتب كلمةً تذكرها. كل مجموعة تبحث بالطريقتين وتُبرز ما قلته.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="ornament" aria-hidden="true"><span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="6" y="6" width="12" height="12"/><rect x="6" y="6" width="12" height="12" transform="rotate(45 12 12)"/></svg><span></span></div>
+
+<section class="how wrap">
+  <div class="sec-head">
+    <p class="kicker">كيف تعمل</p>
+    <h2>افتحها، واتلُ، وهي تواكبك</h2>
+  </div>
+  <div class="steps">
+    <div class="step"><div class="no">٠١</div><h3>افتح أو انقر الميكروفون</h3><p>افتح سورة أو دعاءً أو حديثًا — أو انقر الميكروفون لتبدأ من أي موضع.</p></div>
+    <div class="step"><div class="no">٠٢</div><h3>اتلُ بصوتك</h3><p>سواءٌ أكانت سورةً أم دعاءً أم حديثًا، تُنصِت سند على جهازك وتتابع كل كلمة، مُبرِزةً موضعك أثناء قراءتك.</p></div>
+    <div class="step"><div class="no">٠٣</div><h3>جِد موضعك أو انتقل</h3><p>أضعتَ موضعك، أو أردتَ غيره؟ اتلُ أو اكتب جزءًا فتجده وتفتحه.</p></div>
+  </div>
+</section>
+
+<section class="wrap" style="padding-top:56px;">
+  <div class="sec-head">
+    <p class="kicker">تلاوتك، على جهازك</p>
+    <h2>خصوصيّة بالتصميم</h2>
+  </div>
+  <div class="privacy">
+    <ul>
+      <li><span class="ck">✓</span><span><b>معالجة التلاوة على الجهاز</b> — يُعالَج الصوت على هاتفك، لا على أي خادم.</span></li>
+      <li><span class="ck">✓</span><span><b>صوتك لا يغادر هاتفك</b> — لا يُرفع شيء ولا يُسجَّل في السحابة.</span></li>
+      <li><span class="ck">✓</span><span><b>لا حاجة إلى حساب</b> — افتح التطبيق واتلُ؛ لا شيء تسجّل فيه.</span></li>
+      <li><span class="ck">✓</span><span><b>تحليلات اختيارية ومجهولة فقط</b> — معطّلة افتراضيًّا، ولا تُربَط بك ولا بصوتك.</span></li>
+      <li><span class="ck">✓</span><span><b>لا إعلانات ولا بيع للبيانات</b> — التطبيق لا يتاجر بانتباهك.</span></li>
+    </ul>
+    <p style="margin:18px 0 0"><a href="/privacy" style="font-weight:600">اقرأ سياسة الخصوصية ←</a></p>
+  </div>
+</section>
+
+<section class="cta-sec wrap">
+  <div class="cta-box">
+    <h2>اقرأ، وهي تتابع كل كلمة.</h2>
+    <p>رفيقٌ للقرآن والأذكار والحديث يُنصِت إليك وأنت تقرأ، يعمل على جهازك. قريبًا على أندرويد.</p>
+    <span class="play" title="قريبًا على Google Play">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.6 2.3 13 12 3.6 21.7c-.4-.2-.6-.6-.6-1.1V3.4c0-.5.2-.9.6-1.1Zm11.1 8.3 2.9-2.9 3.5 2c.8.5.8 1.6 0 2l-3.5 2-2.9-3.1Zm-1.1 1.4-9 9.2 11-6.3-2-2.9Zm0-.4 2-2.9-11-6.3 9 9.2Z"/></svg>
+      <span><small>قريبًا على</small><b>Google Play</b></span>
+    </span>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <span class="logo" style="font-size:15px;">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#0e5e4e"/><g fill="none" stroke="#d8b24a" stroke-width="3" opacity="0.55"><rect x="30" y="30" width="40" height="40"/><rect x="30" y="30" width="40" height="40" transform="rotate(45 50 50)"/></g><path d="M50 22c-12 8-20 18-20 32 0 13 9 22 20 26 11-4 20-13 20-26 0-14-8-24-20-32z" fill="none" stroke="#f6efd8" stroke-width="4.5"/><path d="M42 48c0 6 4 10 8 12 4-2 8-6 8-12" fill="none" stroke="#d8b24a" stroke-width="4.5" stroke-linecap="round"/></svg>
+      سند
+    </span>
+    <a href="https://app.sanad.ylensolutions.com">افتح التطبيق</a>
+    <a href="/privacy">الخصوصية</a>
+    <a href="/delete-account">حذف الحساب</a>
+    <a href="mailto:support@ylensolutions.com">تواصل</a>
+    <a href="https://ylensolutions.com">Ylen Solutions</a>
+    <span class="sp">© 2026 Ylen Solutions</span>
+  </div>
+</footer>
+<script>
+  document.addEventListener('click', function (e) {
+    document.querySelectorAll('details.lang[open]').forEach(function (d) {
+      if (!d.contains(e.target)) d.removeAttribute('open');
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') document.querySelectorAll('details.lang[open]').forEach(function (d) { d.removeAttribute('open'); });
+  });
+</script>
+</body>
+</html>

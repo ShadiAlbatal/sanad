@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/theme/app_theme.dart';
-import 'package:tilawa_ai/widgets/hearing_indicator.dart';
+import 'package:sanad/theme/app_theme.dart';
+import 'package:sanad/widgets/hearing_indicator.dart';
 
 /// Pins the footer "is it hearing / tracking me?" indicator: hidden when
 /// inactive, and the three live states (waiting → Listening → Following) with

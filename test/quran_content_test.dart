@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/data/quran_repository.dart';
+import 'package:sanad/data/quran_repository.dart';
 
 /// Content-integrity gate for the actual Qur'an scripture: loads all 604
 /// bundled mushaf pages and asserts every word's Uthmani text exactly matches

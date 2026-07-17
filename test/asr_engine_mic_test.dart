@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/services/asr/asr_engine.dart';
+import 'package:sanad/services/asr/asr_engine.dart';
 
 /// Pins the single-owner-mic contract ([MicOwnership]) — the mechanism behind
 /// the device-confirmed dua-reader degradation fix (one shared engine + one mic

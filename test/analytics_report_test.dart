@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/services/analytics.dart';
-import 'package:tilawa_ai/services/asr/pronunciation_head.dart' show Deviation;
-import 'package:tilawa_ai/services/asr/session.dart';
+import 'package:sanad/services/analytics.dart';
+import 'package:sanad/services/asr/pronunciation_head.dart' show Deviation;
+import 'package:sanad/services/asr/session.dart';
 
 /// Pins the pure end-of-session report builder — its shape for both pipelines and,
 /// most importantly, the "never audio / never PII" guarantee: the report can only

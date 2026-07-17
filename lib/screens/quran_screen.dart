@@ -8,6 +8,7 @@ import '../theme/app_theme.dart';
 import '../util/log.dart';
 import '../widgets/curl_page_view.dart';
 import '../widgets/mushaf_page_view.dart';
+import '../widgets/reading_footer.dart';
 import '../widgets/surah_list_sheet.dart';
 
 class QuranScreen extends StatefulWidget {
@@ -73,6 +74,11 @@ class _QuranScreenState extends State<QuranScreen> {
   void dispose() {
     _app.jumpTarget.removeListener(_handleJump);
     _reading.asrNavigate.removeListener(_handleAsrNavigate);
+    // The reader is now a PUSHED route (was an always-alive IndexedStack tab whose
+    // mic the root scaffold stopped on tab-away). Popping it must release the shared
+    // mic itself — otherwise a live follow-along would run invisibly on the engine.
+    if (_reading.asrActive) _reading.stopAsrListening();
+    _reading.clearRetainedPcm(); // free the ~19 MB voice buffer on leaving the reader
     super.dispose();
   }
 
@@ -190,6 +196,11 @@ class _QuranScreenState extends State<QuranScreen> {
           ],
         ),
       ),
+      // As a pushed route the reader owns its recitation footer (it used to be
+      // rendered by the root scaffold while the reader was the Quran tab). SafeArea
+      // reserves the system nav-bar inset since this is the bottom-most bar.
+      bottomNavigationBar:
+          SafeArea(top: false, child: const ReadingFooter(showMic: true)),
     );
   }
 }
@@ -333,6 +344,19 @@ class _PageContent extends StatefulWidget {
 class _PageContentState extends State<_PageContent> {
   late Future<MushafPage> _future = widget.repo.page(widget.page);
 
+  // The curl view holds the current/neighbour leaves under stable GlobalKeys, so
+  // this State object is reused when its slot is asked to render a different page
+  // (e.g. a surah-index jump or an ASR follow). Re-fetch the future when the page
+  // number changes, otherwise the FutureBuilder keeps resolving the old page and
+  // the render stays frozen while the title/footer advance.
+  @override
+  void didUpdateWidget(_PageContent old) {
+    super.didUpdateWidget(old);
+    if (old.page != widget.page) {
+      _future = widget.repo.page(widget.page);
+    }
+  }
+
   void _retry() => setState(() => _future = widget.repo.page(widget.page));
 
   @override
@@ -445,6 +469,13 @@ class _TopBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 4, 12, 2),
       child: Row(
         children: [
+          // The reader is a pushed route now, so it needs its own way back to the
+          // list/home it was opened from.
+          IconButton(
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: () => Navigator.of(context).maybePop(),
+            tooltip: 'Back',
+          ),
           IconButton(
             icon: const Icon(Icons.menu_book_rounded),
             onPressed: onIndex,

@@ -1,0 +1,55 @@
+{
+  "id": "hisn-172",
+  "title": "Invocation for when it rains",
+  "source": "Hisn al-Muslim 172",
+  "arabic": "اللَّهُمَّ صَيِّباً نَافِعاً",
+  "meaning": "O Allah, may it be a beneficial rain cloud.",
+  "words": [
+    "اللَّهُمَّ",
+    "صَيِّباً",
+    "نَافِعاً"
+  ],
+  "phonemes": [
+    "ءَ",
+    "للَ",
+    "اا",
+    "هُ",
+    "ممم",
+    "صَ",
+    "ييِ",
+    "ب",
+    "ا",
+    "َ",
+    "اا",
+    "نَ",
+    "اا",
+    "فِ",
+    "ع",
+    "ا",
+    "َ",
+    "اا"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

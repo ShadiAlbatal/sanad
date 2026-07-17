@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/services/analytics.dart';
+import 'package:sanad/services/analytics.dart';
 
 /// Pins the opt-in gate: a session reaches the sink ONLY when usage consent is
 /// on. This is the single line between "nothing leaves the device" and "a report

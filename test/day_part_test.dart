@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/data/quotes.dart';
-import 'package:tilawa_ai/util/day_part.dart';
+import 'package:sanad/data/quotes.dart';
+import 'package:sanad/util/day_part.dart';
 
 void main() {
   group('dayPartOf', () {

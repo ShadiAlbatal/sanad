@@ -1,0 +1,9 @@
+# Marketing/landing deploy for Sanad — maps to sanad.ylensolutions.com.
+# Static only (landing + legal), separate from the app so marketing can be
+# updated without rebuilding the app. Deploy: `wrangler deploy` from this dir.
+name = "sanad-site"
+compatibility_date = "2026-01-01"
+
+[assets]
+directory = "public"
+not_found_handling = "single-page-application"

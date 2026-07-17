@@ -1,0 +1,56 @@
+{
+  "id": "hisn-7",
+  "title": "Invocations for someone who has put on new clothes",
+  "source": "Hisn al-Muslim 7",
+  "arabic": "تُبْلِي وَيُخْلِفُ اللَّهُ تَعَالَى",
+  "meaning": "May you wear it out and Allah تعالى replace it (with another).’ The intended meaning: A supplication for long life.",
+  "words": [
+    "تُبْلِي",
+    "وَيُخْلِفُ",
+    "اللَّهُ",
+    "تَعَالَى"
+  ],
+  "phonemes": [
+    "تُ",
+    "بڇ",
+    "لِ",
+    "ۦۦ",
+    "وَ",
+    "يُ",
+    "خ",
+    "لِ",
+    "ف",
+    "ءَ",
+    "للَ",
+    "اااا",
+    "ه",
+    "تَ",
+    "عَ",
+    "اا",
+    "لَ",
+    "اا"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    3
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

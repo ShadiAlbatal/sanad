@@ -7,9 +7,9 @@ import '../state/app_state.dart';
 import '../theme/app_theme.dart';
 import '../util/day_part.dart';
 import '../util/log.dart';
-import '../widgets/surah_list_sheet.dart';
 import 'adzkar_screen.dart';
 import 'debug_log_screen.dart';
+import 'quran_screen.dart';
 import 'user_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -45,7 +45,7 @@ class HomeScreen extends StatelessWidget {
                         ? () => Navigator.of(context).push(MaterialPageRoute(
                             builder: (_) => const DebugLogScreen()))
                         : null,
-                    child: const Text('Tilawa',
+                    child: const Text('Sanad',
                         style:
                             TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
                   ),
@@ -96,9 +96,9 @@ class HomeScreen extends StatelessWidget {
               _QuickTile(
                 icon: Icons.menu_book_rounded,
                 label: 'Quran',
-                subtitle: 'Browse surahs',
-                onTap: () =>
-                    showSurahList(context, onSelect: (p) => app.openReaderAt(p)),
+                subtitle: 'Open the mushaf',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => QuranScreen(initialPage: app.lastPage))),
               ),
               const SizedBox(width: 12),
               _QuickTile(
@@ -184,13 +184,13 @@ class _ContinueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final app = context.read<AppState>();
     final accent = context.accent;
     final accentHsl = HSLColor.fromColor(accent);
     final accentDeep =
         accentHsl.withLightness((accentHsl.lightness * 0.72).clamp(0.0, 1.0)).toColor();
     return GestureDetector(
-      onTap: () => app.openReaderAt(page),
+      onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => QuranScreen(initialPage: page))),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(

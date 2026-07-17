@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/services/asr/phoneme_corpus.dart';
-import 'package:tilawa_ai/services/asr/tajweed_review.dart';
+import 'package:sanad/services/asr/phoneme_corpus.dart';
+import 'package:sanad/services/asr/tajweed_review.dart';
 
 // REGRESSION: replay the real device Al-Baqara run (run_20260715_154405.log,
 // TOKENSTREAM surah=2 n=315). It ORIGINALLY produced 3 FALSE makhraj flags at

@@ -1,0 +1,48 @@
+{
+  "id": "hisn-38",
+  "title": "Invocations for rising from the Ruki'",
+  "source": "Hisn al-Muslim 38",
+  "arabic": "سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ",
+  "meaning": "May Allah answer he who praises Him.)(This supplication is to be made while rising.",
+  "words": [
+    "سَمِعَ",
+    "اللَّهُ",
+    "لِمَنْ",
+    "حَمِدَهُ"
+  ],
+  "phonemes": [
+    "سَ",
+    "مِ",
+    "ع",
+    "ءَ",
+    "للَ",
+    "اااا",
+    "ه",
+    "لِ",
+    "مَ",
+    "ن",
+    "حَ",
+    "مِ",
+    "دَ",
+    "ه"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

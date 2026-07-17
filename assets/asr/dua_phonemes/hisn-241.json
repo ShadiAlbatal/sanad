@@ -1,0 +1,34 @@
+{
+  "id": "hisn-241",
+  "title": "What to say when surprised or startled",
+  "source": "Hisn al-Muslim 241",
+  "arabic": "اللَّهُ أَكْبَرُ",
+  "meaning": "Allah is the greatest.",
+  "words": [
+    "اللَّهُ",
+    "أَكْبَرُ"
+  ],
+  "phonemes": [
+    "ءَ",
+    "للَ",
+    "اااا",
+    "ه",
+    "ءَ",
+    "ك",
+    "بَ",
+    "ر"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

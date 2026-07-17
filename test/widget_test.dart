@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/models/mushaf.dart';
+import 'package:sanad/models/mushaf.dart';
 
 void main() {
   test('MushafWord parses location into surah:ayah:index', () {

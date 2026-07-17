@@ -1,0 +1,47 @@
+{
+  "id": "hisn-198",
+  "title": "Invocation for someone who does good to you",
+  "source": "Hisn al-Muslim 198",
+  "arabic": "جَزَاكَ اللَّهُ خَيْراً",
+  "meaning": "If someone does you a favour and you say: (May Allah reward you with goodness.) then you have indeed excelled in praising him.",
+  "words": [
+    "جَزَاكَ",
+    "اللَّهُ",
+    "خَيْراً"
+  ],
+  "phonemes": [
+    "جَ",
+    "زَ",
+    "اااا",
+    "ك",
+    "ءَ",
+    "للَ",
+    "اااا",
+    "ه",
+    "خَ",
+    "ي",
+    "ر",
+    "ا",
+    "َ",
+    "اا"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

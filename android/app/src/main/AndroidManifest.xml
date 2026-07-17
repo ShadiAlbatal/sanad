@@ -3,7 +3,7 @@
     <!-- For anonymous session analytics upload (Supabase), disabled until keys set. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="tilawa_ai"
+        android:label="Sanad"
         android:name="${applicationName}"
         android:allowBackup="false"
         android:fullBackupContent="false"

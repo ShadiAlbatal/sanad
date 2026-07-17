@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/widgets/chevron_button.dart';
+import 'package:sanad/widgets/chevron_button.dart';
 
 /// Pins the screen-reader label for the shared reveal-chevron control
 /// (previously three icon-only, unlabeled InkWell copies -- the memorization

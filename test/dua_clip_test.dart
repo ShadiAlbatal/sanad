@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/data/duas.dart';
-import 'package:tilawa_ai/services/asr/phoneme_corpus.dart';
+import 'package:sanad/data/duas.dart';
+import 'package:sanad/services/asr/phoneme_corpus.dart';
 
 /// Data-foundation checks for the du'a corpus (pure Dart, no model/device):
 ///  - every du'a in the content list loads its phoneme clip;

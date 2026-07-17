@@ -1,0 +1,56 @@
+{
+  "id": "hisn-132",
+  "title": "What to say if you fear people may harm you",
+  "source": "Hisn al-Muslim 132",
+  "arabic": "اللَّهُمَّ اكْفِنِيهِمْ بِمَا شِئْتَ",
+  "meaning": "O Allah, protect me from them with what You choose.",
+  "words": [
+    "اللَّهُمَّ",
+    "اكْفِنِيهِمْ",
+    "بِمَا",
+    "شِئْتَ"
+  ],
+  "phonemes": [
+    "ءَ",
+    "للَ",
+    "اا",
+    "هُ",
+    "ممم",
+    "ءَ",
+    "ك",
+    "فِ",
+    "نِ",
+    "ۦۦ",
+    "هِ",
+    "م",
+    "بِ",
+    "مَ",
+    "اا",
+    "شِ",
+    "ء",
+    "ت"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

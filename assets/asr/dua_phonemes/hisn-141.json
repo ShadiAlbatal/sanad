@@ -1,0 +1,51 @@
+{
+  "id": "hisn-141",
+  "title": "Invocations against the Devil and his promptings",
+  "source": "Hisn al-Muslim 141",
+  "arabic": "الْاسْتِعَاذَةُ بِاللَّهِ مِنْهُ",
+  "meaning": "Seeking refuge from him.",
+  "words": [
+    "الْاسْتِعَاذَةُ",
+    "بِاللَّهِ",
+    "مِنْهُ"
+  ],
+  "phonemes": [
+    "ءَ",
+    "ل",
+    "ا",
+    "س",
+    "تِ",
+    "عَ",
+    "اا",
+    "ذَ",
+    "ه",
+    "بِ",
+    "للَ",
+    "اااا",
+    "ه",
+    "مِ",
+    "ن",
+    "ه"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

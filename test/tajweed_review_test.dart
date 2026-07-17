@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/services/asr/phoneme_corpus.dart';
-import 'package:tilawa_ai/services/asr/phoneme_matcher.dart';
-import 'package:tilawa_ai/services/asr/tajweed_review.dart';
+import 'package:sanad/services/asr/phoneme_corpus.dart';
+import 'package:sanad/services/asr/phoneme_matcher.dart';
+import 'package:sanad/services/asr/tajweed_review.dart';
 
 /// Pure unit tests for the post-recitation tajwīd review, ported from the
 /// validated ZikirAi cases (src/lib/matcher/tajweedReview.ts). A tiny synthetic

@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<title>Sanad — Recite. It follows every word.</title>
+<meta name="description" content="Sanad is an on-device Qur'an, Adhkār, and Hadith companion. Recite aloud and it follows along in the tajwīd mushaf — highlighting each word — and finds any āyah, du'ā, or hadith by voice. Everything runs on your phone." />
+<meta property="og:title" content="Sanad — Recite. It follows every word." />
+<meta property="og:description" content="An on-device Qur'an, Adhkār & Hadith companion. Recite aloud and it follows along in the tajwīd mushaf. Private by design." />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="en" />
+<link rel="canonical" href="https://sanad.ylensolutions.com/" />
+<link rel="alternate" hreflang="en" href="https://sanad.ylensolutions.com/" />
+<link rel="alternate" hreflang="ar" href="https://sanad.ylensolutions.com/ar/" />
+<link rel="alternate" hreflang="x-default" href="https://sanad.ylensolutions.com/" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#f8f4ea; --bg2:#f1eadb; --surface:#fffdf6; --ink:#17241f; --ink2:#4b574f; --ink3:#7c887e;
+    --line:#e6dcc4; --accent:#0e5e4e; --accent-press:#0a493d; --accent-weak:#e2eee8; --on-accent:#ffffff;
+    --gold:#9c7518; --gold-soft:#c49a3f;
+    --hl-bg:color-mix(in srgb,var(--accent) 22%,transparent);
+    --tj-red:#c0453b; --tj-blue:#2f6fb0; --tj-purple:#8a4b96;
+    --serif:"Cormorant Garamond",Georgia,serif;
+    --sans:"Hanken Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --quran:"Amiri",Georgia,serif;
+    --shadow-card:0 8px 30px -14px rgba(23,36,31,0.28);
+    --shadow-pop:0 30px 60px -30px rgba(23,36,31,0.5);
+    --pattern:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='72'%20height='72'%3E%3Cg%20fill='none'%20stroke='%23c8a24a'%20stroke-width='1.2'%3E%3Cpolygon%20points='36,3%2069,36%2036,69%203,36'/%3E%3Crect%20x='13'%20y='13'%20width='46'%20height='46'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#071a15; --bg2:#0a2019; --surface:#0e2a22; --ink:#eef3ec; --ink2:#b7c8bd; --ink3:#7d9187;
+      --line:#1b3b31; --accent:#3fbd92; --accent-press:#57cfa4; --accent-weak:#123029; --on-accent:#04140f;
+      --gold:#e3b757; --gold-soft:#d4a63f;
+      --hl-bg:color-mix(in srgb,var(--accent) 30%,transparent);
+      --tj-red:#e07d74; --tj-blue:#6ba4dd; --tj-purple:#c184cf;
+      --shadow-card:0 10px 34px -14px rgba(0,0,0,0.6);
+      --shadow-pop:0 30px 70px -26px rgba(0,0,0,0.7);
+    }
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 var(--sans); -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+  a { color:var(--accent); text-decoration:none; }
+  .wrap { max-width:1080px; margin:0 auto; padding:0 22px; }
+  h1,h2,h3,.serif { font-family:var(--serif); font-weight:600; letter-spacing:-0.005em; }
+
+  /* geometric ornament divider */
+  .ornament { display:flex; align-items:center; justify-content:center; gap:16px; color:var(--gold-soft); margin:6px 0; }
+  .ornament span { height:1px; width:64px; max-width:22vw; background:linear-gradient(to right,transparent,currentColor); }
+  .ornament span:last-child { background:linear-gradient(to left,transparent,currentColor); }
+  .ornament svg { width:22px; height:22px; opacity:.95; }
+
+  nav { position:sticky; top:0; z-index:10; background:color-mix(in srgb,var(--bg) 88%,transparent);
+        backdrop-filter:saturate(1.2) blur(8px); border-bottom:1px solid var(--line); }
+  .nav-inner { display:flex; align-items:center; gap:16px; height:64px; }
+  .logo { display:flex; align-items:center; gap:10px; font-weight:600; letter-spacing:-0.01em; color:var(--ink); font-size:18px; }
+  .logo svg { width:30px; height:30px; border-radius:8px; }
+  .nav-links { margin-inline-start:auto; display:flex; align-items:center; gap:22px; }
+  .nav-links a { color:var(--ink2); font-size:15px; }
+  .nav-links a:hover { color:var(--ink); }
+  .lang { position:relative; }
+  .lang > summary { list-style:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+    color:var(--ink2); font-size:14px; padding:6px 11px; border:1px solid var(--line); border-radius:10px; user-select:none; }
+  .lang > summary::-webkit-details-marker { display:none; }
+  .lang > summary::after { content:"▾"; font-size:10px; color:var(--ink3); }
+  .lang > summary:hover { color:var(--ink); border-color:var(--gold-soft); }
+  .lang .globe { opacity:.85; }
+  .lang-menu { position:absolute; top:calc(100% + 8px); inset-inline-end:0; min-width:156px;
+    background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:6px;
+    box-shadow:var(--shadow-card); display:flex; flex-direction:column; gap:2px; z-index:20; }
+  .lang-menu a { padding:9px 11px; border-radius:8px; color:var(--ink2); font-size:14px; white-space:nowrap; }
+  .lang-menu a:hover { background:var(--accent-weak); color:var(--ink); }
+  .lang-menu a.active { color:var(--accent); font-weight:600; }
+  .btn { display:inline-flex; align-items:center; gap:8px; background:var(--accent); color:var(--on-accent);
+         padding:10px 16px; border-radius:11px; font-weight:600; font-size:14px; transition:background .15s; white-space:nowrap; }
+  .btn:hover { background:var(--accent-press); }
+  @media (max-width:640px){ .nav-links a.hide-sm{ display:none; } }
+
+  .hero { position:relative; text-align:center; padding:74px 22px 26px; overflow:hidden; }
+  .hero::before { content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background-image:var(--pattern); background-size:72px 72px; opacity:.06;
+    -webkit-mask-image:radial-gradient(125% 92% at 50% 0%, #000 0%, transparent 70%);
+            mask-image:radial-gradient(125% 92% at 50% 0%, #000 0%, transparent 70%); }
+  @media (prefers-color-scheme: dark){ .hero::before{ opacity:.10; } }
+  .hero > * { position:relative; z-index:1; }
+  .eyebrow { color:var(--gold); font-weight:700; font-size:13px; letter-spacing:.08em; text-transform:uppercase; font-family:var(--sans); }
+  h1 { font-size:clamp(44px,7.2vw,74px); line-height:1.0; margin:14px 0 16px; }
+  .lede { color:var(--ink2); font-size:clamp(16px,2.2vw,19px); max-width:56ch; margin:0 auto; }
+  .cta { display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center; margin-top:28px; }
+  .play { display:inline-flex; align-items:center; gap:10px; background:var(--ink); color:var(--bg); padding:11px 18px; border-radius:12px; font-weight:600; }
+  .play small { display:block; font-size:10px; font-weight:500; opacity:.75; letter-spacing:.04em; text-transform:uppercase; line-height:1; }
+  .play b { font-size:16px; line-height:1.1; }
+  .weblink { color:var(--ink2); font-size:14px; }
+
+  /* phone showcase */
+  .showcase { padding:30px 0 6px; }
+  .phones { display:flex; gap:26px; justify-content:center; align-items:flex-start; flex-wrap:wrap; }
+  .phone-wrap { display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .cap { text-align:center; }
+  .cap b { display:block; font-family:var(--serif); font-weight:600; font-size:20px; color:var(--ink); }
+  .cap span { color:var(--ink3); font-size:12.5px; }
+
+  .phone { width:268px; height:536px; border-radius:38px; background:var(--surface);
+           border:1px solid var(--line); box-shadow:var(--shadow-pop); padding:14px; position:relative; }
+  .phone::before { content:""; position:absolute; top:14px; left:50%; transform:translateX(-50%); width:110px; height:22px; border-radius:0 0 14px 14px; background:var(--bg2); }
+  .screen { height:100%; border-radius:26px; background:linear-gradient(180deg,var(--bg2),var(--bg)); overflow:hidden; display:flex; flex-direction:column; }
+  .screen-hd { padding:26px 18px 8px; display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .screen-hd .sname { font-family:var(--quran); font-size:23px; color:var(--accent); }
+  .screen-hd .smeta { color:var(--ink3); font-size:11px; white-space:nowrap; }
+  .mushaf { flex:1; padding:14px 16px 6px; direction:rtl; text-align:center; font-family:var(--quran);
+            font-size:22px; line-height:2.15; color:var(--ink); }
+  .mushaf.dua { font-size:20px; line-height:2.35; }
+  .mushaf.hadith { font-size:20px; line-height:2.35; }
+  .mushaf .ln { display:block; margin-bottom:2px; }
+  .mushaf .r { color:var(--tj-red); }
+  .mushaf .b { color:var(--tj-blue); }
+  .mushaf .p { color:var(--tj-purple); }
+
+  /* follow-along recitation animation */
+  .follow .w { border-radius:6px; padding:0 3px; background:transparent;
+               box-decoration-break:clone; -webkit-box-decoration-break:clone;
+               animation:recite 10s linear infinite; animation-delay:var(--d,0s); }
+  @keyframes recite {
+    0%   { background:transparent; }
+    5%   { background:var(--hl-bg); }
+    82%  { background:var(--hl-bg); }
+    94%,100% { background:transparent; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .follow .w { animation:none; }
+    .follow .w.lit { background:var(--hl-bg); }
+  }
+
+  .mic { margin:6px 14px 16px; display:flex; align-items:center; justify-content:center; gap:8px;
+         height:42px; border-radius:21px; background:var(--accent); color:var(--on-accent);
+         font-family:var(--sans); font-size:12.5px; font-weight:600;
+         box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent); animation:pulse 2.2s ease-out infinite; }
+  .mic svg { width:15px; height:15px; }
+  @keyframes pulse { 0%{ box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent);} 70%{ box-shadow:0 0 0 14px transparent;} 100%{ box-shadow:0 0 0 0 transparent;} }
+  @media (prefers-reduced-motion: reduce){ .mic{ animation:none; } }
+
+  /* stats strip */
+  .strip { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line);
+           border-radius:16px; overflow:hidden; margin:36px 0 8px; }
+  @media(max-width:720px){ .strip{ grid-template-columns:repeat(2,1fr); } }
+  .strip > div { background:var(--surface); padding:20px 18px; text-align:center; }
+  .strip .n { font-family:var(--serif); font-weight:600; font-size:26px; line-height:1.1; color:var(--accent); }
+  .strip .l { color:var(--ink3); font-size:12.5px; margin-top:5px; }
+
+  section.features { padding:56px 0 8px; }
+  .sec-head { text-align:center; max-width:52ch; margin:0 auto; }
+  .kicker { font-family:var(--sans); color:var(--gold); font-weight:700; font-size:13px; letter-spacing:.08em; text-transform:uppercase; margin-bottom:10px; }
+  .sec-head h2 { font-size:clamp(32px,5vw,48px); margin:0 0 10px; }
+  .sec-head p { color:var(--ink2); margin:0; }
+
+  /* per-collection cards */
+  .collections { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:36px; }
+  @media (max-width:860px){ .collections{ grid-template-columns:1fr; max-width:560px; margin-inline:auto; } }
+  .collection { position:relative; background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:24px 22px; overflow:hidden; transition:transform .15s,border-color .15s; }
+  .collection::before { content:""; position:absolute; top:0; inset-inline:0; height:3px; background:linear-gradient(90deg,var(--gold-soft),transparent 70%); }
+  .collection:hover { transform:translateY(-3px); border-color:var(--gold-soft); }
+  .col-head { display:flex; align-items:center; gap:13px; margin-bottom:16px; }
+  .col-head .ic { width:44px; height:44px; border-radius:12px; background:var(--accent-weak); color:var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .col-head .ic svg { width:23px; height:23px; }
+  .col-head h3 { font-size:24px; margin:0; }
+  .col-head .meta { display:block; color:var(--ink3); font-size:12.5px; font-family:var(--sans); }
+  .caps { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:11px; }
+  .caps li { position:relative; padding-inline-start:24px; color:var(--ink2); font-size:14.5px; line-height:1.5; }
+  .caps li::before { content:"✦"; position:absolute; inset-inline-start:0; top:0; color:var(--gold); font-size:13px; }
+  .caps b { color:var(--ink); font-weight:600; }
+
+  /* shared traits */
+  .shared { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
+  @media (max-width:640px){ .shared{ grid-template-columns:1fr; max-width:560px; margin-inline:auto; } }
+  .trait { display:flex; gap:14px; align-items:flex-start; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:20px 22px; }
+  .trait .ic { width:40px; height:40px; border-radius:11px; background:var(--accent-weak); color:var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .trait .ic svg { width:21px; height:21px; }
+  .trait h3 { font-size:20px; margin:0 0 4px; }
+  .trait p { color:var(--ink2); font-size:14px; margin:0; }
+
+  /* how it works */
+  section.how { padding:64px 0 8px; }
+  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:34px; }
+  @media (max-width:760px){ .steps{ grid-template-columns:1fr; } }
+  .step { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:24px; }
+  .step .no { font-family:var(--serif); font-weight:700; font-size:17px; color:var(--gold); }
+  .step h3 { font-size:21px; margin:8px 0 6px; }
+  .step p { color:var(--ink2); font-size:14.5px; margin:0; }
+
+  /* private by design */
+  .privacy { background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:32px; max-width:760px; margin:30px auto 0; box-shadow:var(--shadow-card); }
+  .privacy ul { list-style:none; display:flex; flex-direction:column; gap:12px; margin:0; padding:0; }
+  .privacy li { display:flex; gap:12px; align-items:flex-start; color:var(--ink2); font-size:14.5px; }
+  .privacy li .ck { color:var(--accent); flex-shrink:0; margin-top:2px; }
+  .privacy li b { color:var(--ink); }
+
+  /* gradient CTA */
+  section.cta-sec { padding:64px 0 8px; }
+  .cta-box { position:relative; overflow:hidden; background:linear-gradient(135deg,var(--accent),var(--accent-press)); border-radius:24px; padding:56px 32px; text-align:center; color:#fff; box-shadow:var(--shadow-pop); }
+  .cta-box::before { content:""; position:absolute; inset:0; background-image:var(--pattern); background-size:64px 64px; opacity:.14; pointer-events:none; }
+  .cta-box > * { position:relative; z-index:1; }
+  .cta-box h2 { color:#fff; font-size:clamp(30px,4.4vw,44px); margin:0 0 10px; }
+  .cta-box p { color:rgba(255,255,255,.9); max-width:52ch; margin:0 auto 22px; }
+  .cta-box .play { background:#fff; color:var(--accent-press); }
+
+  footer { margin-top:64px; border-top:1px solid var(--line); }
+  .foot-inner { display:flex; flex-wrap:wrap; gap:14px 26px; align-items:center; padding:26px 0; color:var(--ink3); font-size:14px; }
+  .foot-inner a { color:var(--ink2); }
+  .foot-inner .sp { margin-inline-start:auto; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="wrap nav-inner">
+    <span class="logo">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#0e5e4e"/><g fill="none" stroke="#d8b24a" stroke-width="3" opacity="0.55"><rect x="30" y="30" width="40" height="40"/><rect x="30" y="30" width="40" height="40" transform="rotate(45 50 50)"/></g><path d="M50 22c-12 8-20 18-20 32 0 13 9 22 20 26 11-4 20-13 20-26 0-14-8-24-20-32z" fill="none" stroke="#f6efd8" stroke-width="4.5"/><path d="M42 48c0 6 4 10 8 12 4-2 8-6 8-12" fill="none" stroke="#d8b24a" stroke-width="4.5" stroke-linecap="round"/></svg>
+      Sanad
+    </span>
+    <div class="nav-links">
+      <a href="#features" class="hide-sm">Features</a>
+      <a href="/privacy" class="hide-sm">Privacy</a>
+      <details class="lang">
+        <summary aria-label="Language: English">
+          <svg class="globe" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+          English
+        </summary>
+        <div class="lang-menu">
+          <a href="/" class="active" lang="en" aria-current="page">English</a>
+          <a href="/ar/" lang="ar" hreflang="ar">العربية</a>
+        </div>
+      </details>
+      <a class="btn" href="https://app.sanad.ylensolutions.com">Open the app</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="eyebrow">On-device · Qur'an, Adhkār &amp; Hadith</div>
+  <h1>Recite. It follows every word.</h1>
+  <p class="lede">Open a surah, a duʿā, or a hadith and recite aloud — Sanad follows you word by word on the tajwīd mushaf, and finds any āyah, duʿā, or hadith the moment you recite it. Everything runs on your phone; your voice never leaves your device.</p>
+  <div class="cta">
+    <span class="play" title="Coming soon to Google Play">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.6 2.3 13 12 3.6 21.7c-.4-.2-.6-.6-.6-1.1V3.4c0-.5.2-.9.6-1.1Zm11.1 8.3 2.9-2.9 3.5 2c.8.5.8 1.6 0 2l-3.5 2-2.9-3.1Zm-1.1 1.4-9 9.2 11-6.3-2-2.9Zm0-.4 2-2.9-11-6.3 9 9.2Z"/></svg>
+      <span><small>Coming soon to</small><b>Google Play</b></span>
+    </span>
+    <a class="weblink" href="https://app.sanad.ylensolutions.com">or open the web app →</a>
+  </div>
+</header>
+
+<section class="showcase wrap" aria-label="Sanad across the Qur'an, Adhkār, and Hadith">
+  <div class="phones">
+
+    <div class="phone-wrap">
+      <div class="phone" aria-hidden="true">
+        <div class="screen">
+          <div class="screen-hd">
+            <span class="sname">الفاتحة</span>
+            <span class="smeta">Al-Fātiḥa · 1</span>
+          </div>
+          <div class="mushaf follow">
+            <span class="ln"><span class="w lit" style="--d:0s">بِسْمِ</span> <span class="w" style="--d:.4s">اللَّهِ</span> <span class="w" style="--d:.8s">ال<span class="r">رَّ</span>حْمَٰ<span class="p">نِ</span></span> <span class="w" style="--d:1.2s">ال<span class="r">رَّ</span>حِيمِ</span></span>
+            <span class="ln"><span class="w" style="--d:1.6s">الْحَمْدُ</span> <span class="w" style="--d:2s">لِلَّهِ</span> <span class="w" style="--d:2.4s">رَبِّ</span> <span class="w" style="--d:2.8s">الْعَالَمِي<span class="p">نَ</span></span></span>
+            <span class="ln"><span class="w" style="--d:3.2s">ال<span class="r">رَّ</span>حْمَٰ<span class="p">نِ</span></span> <span class="w" style="--d:3.6s">ال<span class="r">رَّ</span>حِيمِ</span></span>
+            <span class="ln"><span class="w" style="--d:4s">مَالِكِ</span> <span class="w" style="--d:4.4s">يَوْمِ</span> <span class="w" style="--d:4.8s">الدِّي<span class="p">نِ</span></span></span>
+            <span class="ln"><span class="w" style="--d:5.2s">إِيَّاكَ</span> <span class="w" style="--d:5.6s">نَعْبُ<span class="b">دُ</span></span> <span class="w" style="--d:6s">وَإِيَّاكَ</span> <span class="w" style="--d:6.4s">نَسْتَعِي<span class="p">نُ</span></span></span>
+          </div>
+          <div class="mic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>
+            Listening…
+          </div>
+        </div>
+      </div>
+      <div class="cap"><b>Qur'an</b><span>tajwīd mushaf · follow-along</span></div>
+    </div>
+
+    <div class="phone-wrap">
+      <div class="phone" aria-hidden="true">
+        <div class="screen">
+          <div class="screen-hd">
+            <span class="sname">دعاء الاستيقاظ</span>
+            <span class="smeta">Ḥiṣn al-Muslim</span>
+          </div>
+          <div class="mushaf dua follow">
+            <span class="ln"><span class="w lit" style="--d:0s">الْحَمْدُ</span> <span class="w" style="--d:.5s">لِلَّهِ</span> <span class="w" style="--d:1s">الَّذِي</span></span>
+            <span class="ln"><span class="w" style="--d:1.5s">أَحْيَانَا</span> <span class="w" style="--d:2s">بَعْدَ</span> <span class="w" style="--d:2.5s">مَا</span> <span class="w" style="--d:3s">أَمَاتَنَا</span></span>
+            <span class="ln"><span class="w" style="--d:3.5s">وَإِلَيْهِ</span> <span class="w" style="--d:4s">النُّشُورُ</span></span>
+          </div>
+          <div class="mic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>
+            Listening…
+          </div>
+        </div>
+      </div>
+      <div class="cap"><b>Adhkār &amp; Duʿā</b><span>Hisn al-Muslim · follow-along</span></div>
+    </div>
+
+    <div class="phone-wrap">
+      <div class="phone" aria-hidden="true">
+        <div class="screen">
+          <div class="screen-hd">
+            <span class="sname">الأعمال بالنيّات</span>
+            <span class="smeta">Bukhārī · 1</span>
+          </div>
+          <div class="mushaf hadith follow">
+            <span class="ln"><span class="w lit" style="--d:0s">إِنَّمَا</span> <span class="w" style="--d:.5s">الْأَعْمَالُ</span> <span class="w" style="--d:1s">بِالنِّيَّاتِ،</span></span>
+            <span class="ln"><span class="w" style="--d:1.5s">وَإِنَّمَا</span> <span class="w" style="--d:2s">لِكُلِّ</span> <span class="w" style="--d:2.5s">امْرِئٍ</span></span>
+            <span class="ln"><span class="w" style="--d:3s">مَا</span> <span class="w" style="--d:3.5s">نَوَى</span></span>
+          </div>
+          <div class="mic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>
+            Listening…
+          </div>
+        </div>
+      </div>
+      <div class="cap"><b>Hadith</b><span>Bukhari + Muslim · follow-along</span></div>
+    </div>
+
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="strip">
+    <div><div class="n">114 · 6,236</div><div class="l">surahs · āyāt</div></div>
+    <div><div class="n">~260</div><div class="l">adhkār · Hisn al-Muslim</div></div>
+    <div><div class="n">12,000+</div><div class="l">hadith · Bukhari + Muslim</div></div>
+    <div><div class="n">100%</div><div class="l">on-device</div></div>
+  </div>
+</div>
+
+<div class="ornament" aria-hidden="true"><span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="6" y="6" width="12" height="12"/><rect x="6" y="6" width="12" height="12" transform="rotate(45 12 12)"/></svg><span></span></div>
+
+<section class="features wrap" id="features">
+  <div class="sec-head">
+    <p class="kicker">What you can do</p>
+    <h2>Three collections. One way to read.</h2>
+    <p>Follow-along recitation and voice-or-text search work across all three — each with its own way in.</p>
+  </div>
+
+  <div class="collections">
+    <div class="collection">
+      <div class="col-head">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM4 4v14M12 4v12"/></svg></div>
+        <div><h3>The Qur'an</h3><span class="meta">114 surahs · 6,236 āyāt</span></div>
+      </div>
+      <ul class="caps">
+        <li>Recite and it follows you <b>word by word</b> on the tajwīd mushaf — colored letters, with a natural paper-curl page turn.</li>
+        <li>Recite <b>or type any āyah</b> to jump straight to it, anywhere across the 114 surahs.</li>
+        <li>A gentle <b>tajwīd-mistake review</b> after you recite, so you notice the slips.</li>
+      </ul>
+    </div>
+
+    <div class="collection">
+      <div class="col-head">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/></svg></div>
+        <div><h3>Adhkār &amp; Duʿās</h3><span class="meta">Hisn al-Muslim · ~260</span></div>
+      </div>
+      <ul class="caps">
+        <li><b>Browse by occasion</b> — morning, evening, sleep, travel, and the rest of Hisn al-Muslim.</li>
+        <li>Recite a duʿā and it <b>follows along word by word</b>, just like the mushaf.</li>
+        <li>Recite or type a <b>fragment</b> to find the one you mean.</li>
+      </ul>
+    </div>
+
+    <div class="collection">
+      <div class="col-head">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+        <div><h3>Hadith</h3><span class="meta">Bukhari + Muslim · 12,000+</span></div>
+      </div>
+      <ul class="caps">
+        <li>Recite a fragment — <b>or just type a word you remember</b> — to find the hadith.</li>
+        <li>Open it and it <b>follows your recitation</b> word by word too.</li>
+        <li>Matches come back with <b>your words highlighted</b>, so you spot the right one fast.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="shared">
+    <div class="trait">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div><h3>On-device &amp; private</h3><p>Recitation is recognized entirely on your phone. No account, no cloud — your audio never leaves the device.</p></div>
+    </div>
+    <div class="trait">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h13"/></svg></div>
+      <div><h3>Voice or text</h3><p>Recite it, or only remember a word and type it. Every collection searches both ways and highlights what you said.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="ornament" aria-hidden="true"><span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="6" y="6" width="12" height="12"/><rect x="6" y="6" width="12" height="12" transform="rotate(45 12 12)"/></svg><span></span></div>
+
+<section class="how wrap">
+  <div class="sec-head">
+    <p class="kicker">How it works</p>
+    <h2>Open it, recite, and it keeps up</h2>
+  </div>
+  <div class="steps">
+    <div class="step"><div class="no">01</div><h3>Open or tap the mic</h3><p>Open a surah, du'ā, or hadith — or just tap the mic to start from anywhere.</p></div>
+    <div class="step"><div class="no">02</div><h3>Recite aloud</h3><p>Whether it's a surah, a duʿā, or a hadith, Sanad listens on-device and follows every word, highlighting your place as you go.</p></div>
+    <div class="step"><div class="no">03</div><h3>Find or move on</h3><p>Lost your place, or want another? Recite or type a fragment — it finds and opens it.</p></div>
+  </div>
+</section>
+
+<section class="wrap" style="padding-top:56px;">
+  <div class="sec-head">
+    <p class="kicker">Your recitation, your device</p>
+    <h2>Private by design</h2>
+  </div>
+  <div class="privacy">
+    <ul>
+      <li><span class="ck">✓</span><span><b>On-device recitation</b> — speech is processed on your phone, never on a server.</span></li>
+      <li><span class="ck">✓</span><span><b>Your audio never leaves your phone</b> — nothing is uploaded or recorded to the cloud.</span></li>
+      <li><span class="ck">✓</span><span><b>No account required</b> — open the app and recite; there is nothing to sign up for.</span></li>
+      <li><span class="ck">✓</span><span><b>Opt-in, anonymous analytics only</b> — off by default, never tied to you or your voice.</span></li>
+      <li><span class="ck">✓</span><span><b>No ads, no selling data</b> — the app is not in the business of your attention.</span></li>
+    </ul>
+    <p style="margin:18px 0 0"><a href="/privacy" style="font-weight:600">Read the privacy policy →</a></p>
+  </div>
+</section>
+
+<section class="cta-sec wrap">
+  <div class="cta-box">
+    <h2>Recite. It follows every word.</h2>
+    <p>An on-device Qur'an, Adhkār, and Hadith companion that listens as you read. Coming soon to Android.</p>
+    <span class="play" title="Coming soon to Google Play">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.6 2.3 13 12 3.6 21.7c-.4-.2-.6-.6-.6-1.1V3.4c0-.5.2-.9.6-1.1Zm11.1 8.3 2.9-2.9 3.5 2c.8.5.8 1.6 0 2l-3.5 2-2.9-3.1Zm-1.1 1.4-9 9.2 11-6.3-2-2.9Zm0-.4 2-2.9-11-6.3 9 9.2Z"/></svg>
+      <span><small>Coming soon to</small><b>Google Play</b></span>
+    </span>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <span class="logo" style="font-size:15px;">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#0e5e4e"/><g fill="none" stroke="#d8b24a" stroke-width="3" opacity="0.55"><rect x="30" y="30" width="40" height="40"/><rect x="30" y="30" width="40" height="40" transform="rotate(45 50 50)"/></g><path d="M50 22c-12 8-20 18-20 32 0 13 9 22 20 26 11-4 20-13 20-26 0-14-8-24-20-32z" fill="none" stroke="#f6efd8" stroke-width="4.5"/><path d="M42 48c0 6 4 10 8 12 4-2 8-6 8-12" fill="none" stroke="#d8b24a" stroke-width="4.5" stroke-linecap="round"/></svg>
+      Sanad
+    </span>
+    <a href="https://app.sanad.ylensolutions.com">Open the app</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/delete-account">Delete account</a>
+    <a href="mailto:support@ylensolutions.com">Contact</a>
+    <a href="https://ylensolutions.com">Ylen Solutions</a>
+    <span class="sp">© 2026 Ylen Solutions</span>
+  </div>
+</footer>
+<script>
+  document.addEventListener('click', function (e) {
+    document.querySelectorAll('details.lang[open]').forEach(function (d) {
+      if (!d.contains(e.target)) d.removeAttribute('open');
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') document.querySelectorAll('details.lang[open]').forEach(function (d) { d.removeAttribute('open'); });
+  });
+</script>
+</body>
+</html>

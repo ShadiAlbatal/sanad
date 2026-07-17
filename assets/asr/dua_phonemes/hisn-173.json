@@ -1,0 +1,58 @@
+{
+  "id": "hisn-173",
+  "title": "Supplication after it rains",
+  "source": "Hisn al-Muslim 173",
+  "arabic": "مُطِرْنَا بِفَضْلِ اللَّهِ وَرَحْمَتِهِ",
+  "meaning": "We have been given rain by the grace and mercy of Allah.",
+  "words": [
+    "مُطِرْنَا",
+    "بِفَضْلِ",
+    "اللَّهِ",
+    "وَرَحْمَتِهِ"
+  ],
+  "phonemes": [
+    "مُ",
+    "طِ",
+    "ر",
+    "نَ",
+    "اا",
+    "بِ",
+    "فَ",
+    "ض",
+    "ل",
+    "ءَ",
+    "للَ",
+    "اااا",
+    "ه",
+    "وَ",
+    "رَ",
+    "ح",
+    "مَ",
+    "تِ",
+    "ه"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

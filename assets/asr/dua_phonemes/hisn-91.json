@@ -1,0 +1,63 @@
+{
+  "id": "hisn-91",
+  "title": "Words of remembrance for morning and evening",
+  "source": "Hisn al-Muslim 91",
+  "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ مائة مرَّةٍ",
+  "meaning": "How perfect Allah is and I praise Him.)(one hundred times",
+  "words": [
+    "سُبْحَانَ",
+    "اللَّهِ",
+    "وَبِحَمْدِهِ",
+    "مائة",
+    "مرَّةٍ"
+  ],
+  "phonemes": [
+    "سُ",
+    "بڇ",
+    "حَ",
+    "اااا",
+    "ن",
+    "ءَ",
+    "للَ",
+    "اااا",
+    "ه",
+    "وَ",
+    "بِ",
+    "حَ",
+    "م",
+    "دِ",
+    "ه",
+    "م",
+    "ا",
+    "ء",
+    "ه",
+    "رَ",
+    "ه"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    4,
+    4
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

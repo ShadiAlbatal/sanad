@@ -7,6 +7,7 @@ import 'data/prefs.dart';
 import 'data/quran_repository.dart';
 import 'services/analytics.dart';
 import 'services/asr/asr_engine.dart';
+import 'state/hadith_finder_state.dart';
 import 'state/reading_state.dart';
 import 'util/log.dart';
 import 'screens/root_scaffold.dart';
@@ -72,11 +73,12 @@ class TilawaApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AppState(prefs)),
         Provider<AsrEngine>(create: (_) => AsrEngine(), dispose: (_, e) => e.dispose()),
         ChangeNotifierProvider(create: (ctx) => ReadingState(ctx.read<AsrEngine>())),
+        ChangeNotifierProvider(create: (ctx) => HadithFinderState(ctx.read<AsrEngine>())),
         Provider(create: (_) => QuranRepository()),
       ],
       child: Consumer<AppState>(
         builder: (context, app, _) => MaterialApp(
-          title: 'Tilawa',
+          title: 'Sanad',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(app.accentColor),
           darkTheme: AppTheme.dark(app.accentColor),

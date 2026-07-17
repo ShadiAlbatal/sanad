@@ -80,7 +80,7 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 22),
-          _SectionLabel('Help improve TilawaAi', color: soft),
+          _SectionLabel('Help improve Sanad', color: soft),
           _Card(
             dark: dark,
             child: Column(
@@ -144,7 +144,7 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Tilawa',
+                const Text('Sanad',
                     style:
                         TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
                 const SizedBox(height: 6),
@@ -161,7 +161,7 @@ class SettingsScreen extends StatelessWidget {
                 InkWell(
                   onTap: () => showLicensePage(
                     context: context,
-                    applicationName: 'Tilawa',
+                    applicationName: 'Sanad',
                     applicationVersion: _appVersion,
                   ),
                   child: Padding(

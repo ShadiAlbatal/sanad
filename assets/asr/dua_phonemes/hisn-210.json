@@ -1,0 +1,32 @@
+{
+  "id": "hisn-210",
+  "title": "Invocation for when your vehicle or mount begins to fail",
+  "source": "Hisn al-Muslim 210",
+  "arabic": "بِسْمِ اللَّهِ",
+  "meaning": "In the name of Allah.",
+  "words": [
+    "بِسْمِ",
+    "اللَّهِ"
+  ],
+  "phonemes": [
+    "بِ",
+    "س",
+    "م",
+    "ءَ",
+    "للَ",
+    "اااا",
+    "ه"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

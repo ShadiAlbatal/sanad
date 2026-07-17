@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/state/dua_finder_state.dart';
+import 'package:sanad/state/dua_finder_state.dart';
 
 /// Pins the PURE du'a-identify decision ([identifyDua]) — the "Shazam for du'ās"
 /// picker. This is the only unit-testable slice: DuaFinderState itself builds on

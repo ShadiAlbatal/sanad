@@ -1,0 +1,58 @@
+{
+  "id": "hisn-147",
+  "title": "Invocations for visiting the sick",
+  "source": "Hisn al-Muslim 147",
+  "arabic": "لاَ بأْسَ طَهُورٌ إِنْ شَاءَ اللَّهُ",
+  "meaning": "Never mind, may it (the sickness) be a purification, if Allah wills.",
+  "words": [
+    "لاَ",
+    "بأْسَ",
+    "طَهُورٌ",
+    "إِنْ",
+    "شَاءَ",
+    "اللَّهُ"
+  ],
+  "phonemes": [
+    "ل",
+    "ا",
+    "ب",
+    "ء",
+    "س",
+    "طَ",
+    "هُ",
+    "ۥۥۥۥ",
+    "ر",
+    "ءِ",
+    "ن",
+    "شَ",
+    "اااا",
+    "ء",
+    "ءَ",
+    "للَ",
+    "اااا",
+    "ه"
+  ],
+  "phonemeToWord": [
+    0,
+    0,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3,
+    4,
+    4,
+    4,
+    5,
+    5,
+    5,
+    5
+  ],
+  "ayahBoundaries": [
+    0
+  ]
+}

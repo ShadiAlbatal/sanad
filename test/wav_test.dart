@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/services/asr/wav.dart';
+import 'package:sanad/services/asr/wav.dart';
 
 /// The Mistakes sheet plays a raw session PCM slice via BytesSource(mimeType:
 /// 'audio/wav'), so the 44-byte header must be exactly right and the payload

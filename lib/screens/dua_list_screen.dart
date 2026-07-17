@@ -1,14 +1,24 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/duas.dart';
+import '../services/asr/dua_corpus.dart';
+import '../services/asr/dua_search.dart';
+import '../services/search/corpus_text_search.dart';
+import '../services/search/text_search.dart';
 import '../state/dua_finder_state.dart';
 import '../theme/app_theme.dart';
+import '../util/log.dart';
+import '../widgets/highlighted_arabic.dart';
+import '../widgets/search_list_scaffold.dart';
 import 'dua_reader_screen.dart';
 
-/// The Azkar tab's root: the list of du'ās & adhkār. Tapping a card opens its
-/// reader. The "recite to open" control lives in the bottom footer
-/// (DuaFinderFooter, provided at root); this screen only listens for the finder's
-/// pick and opens that du'a's reader, already following along.
+/// The Azkar tab's root: the browsable list of du'ās & adhkār (existing 5 + Hisn
+/// al-Muslim, ~260), sourced from the bundled du'a corpus, rendered through the
+/// shared [SearchListScaffold] (content list + unified footer). Tapping a card
+/// opens its reader. The footer's mic runs the "recite to open" finder
+/// ([DuaFinderState]); this screen also listens for the finder's pick and opens
+/// that du'a's reader, already following along.
 class DuaListScreen extends StatefulWidget {
   const DuaListScreen({super.key});
 
@@ -18,6 +28,42 @@ class DuaListScreen extends StatefulWidget {
 
 class _DuaListScreenState extends State<DuaListScreen> {
   DuaFinderState? _finder;
+  DuaSearch? _search;
+  TextSearch? _textSearch;
+  final _searchController = TextEditingController();
+
+  Timer? _debounce;
+  String _query = '';
+  List<TextSearchHit> _results = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Same cached, off-thread corpus the finder uses — rendered here for browsing.
+    loadDuaSearch().then((s) {
+      if (mounted) setState(() => _search = s);
+    }).catchError((Object e) {
+      Log.e('dualist', 'corpus load failed: $e');
+    });
+    // The typed-search BM25 index (built off-thread from the same corpus).
+    loadDuaTextSearch().then((t) {
+      if (mounted) setState(() => _textSearch = t);
+    }).catchError((Object e) {
+      Log.e('dualist', 'text index load failed: $e');
+    });
+  }
+
+  void _onSearchChanged(String q) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 220), () {
+      if (!mounted) return;
+      final query = q.trim();
+      setState(() {
+        _query = query;
+        _results = query.isEmpty ? const [] : (_textSearch?.search(query) ?? const []);
+      });
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -27,19 +73,30 @@ class _DuaListScreenState extends State<DuaListScreen> {
       _finder?.removeListener(_onFinder);
       _finder = finder;
       _finder!.addListener(_onFinder);
+      finder.preload();
     }
   }
+
+  Dua _duaFromMeta(DuaMeta m) => Dua(
+        id: m.id,
+        title: m.title,
+        source: m.source,
+        arabic: m.arabic,
+        meaning: m.meaning,
+      );
 
   void _onFinder() {
     final finder = _finder;
     final id = finder?.identifiedDuaId;
     if (finder == null || id == null) return;
-    final dua = duas.firstWhere((d) => d.id == id);
+    final meta = _search?.metaById(id);
     finder.clearIdentified(); // consume the pick so we open exactly once
+    if (meta == null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => DuaReaderScreen(dua: dua, autoStart: true)),
+        MaterialPageRoute(
+            builder: (_) => DuaReaderScreen(dua: _duaFromMeta(meta), autoStart: true)),
       );
     });
   }
@@ -47,36 +104,97 @@ class _DuaListScreenState extends State<DuaListScreen> {
   @override
   void dispose() {
     _finder?.removeListener(_onFinder);
+    _debounce?.cancel();
+    _searchController.dispose();
     super.dispose();
   }
+
+  Future<void> _toggleMic(DuaFinderState finder) async {
+    if (finder.listening) {
+      await finder.stop();
+      return;
+    }
+    await finder.start();
+    if (finder.error != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(finder.error!)));
+    }
+  }
+
+  String _finderLabel(DuaFinderState finder) {
+    if (!finder.heardSomething) return 'Listening…';
+    final title = finder.leadingDuaTitle;
+    if (title != null) return 'Hearing: $title?';
+    return 'Matching…';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final finder = context.watch<DuaFinderState>();
+    final candidates = finder.candidates;
+    final showCandidates = finder.listening && candidates.isNotEmpty;
+    final searching = !showCandidates && _query.isNotEmpty;
+    final metas = _search?.allDuas;
+
+    // Three renderings through one card + scaffold, in priority order (mirrors the
+    // Hadith/Quran tabs):
+    //  1. reciting → the finder's live ranked candidates, each row bolding the words
+    //     the recitation matched (finder.matchedWords, via the corpus word map);
+    //  2. a typed query → ranked BM25 results with the matched words highlighted;
+    //  3. idle → browse the whole corpus. Never a dead end.
+    final int count;
+    final IndexedWidgetBuilder builder;
+    if (showCandidates) {
+      count = candidates.length;
+      builder = (_, i) => _DuaCard(
+            dua: _duaFromMeta(candidates[i].meta),
+            matched: finder.matchedWords(candidates[i].id),
+          );
+    } else if (searching) {
+      count = _results.length;
+      builder = (_, i) {
+        final hit = _results[i];
+        final meta = _search!.metaById(hit.id)!;
+        return _DuaCard(dua: _duaFromMeta(meta), matched: hit.matchedWords);
+      };
+    } else {
+      count = metas?.length ?? 0;
+      builder = (_, i) => _DuaCard(dua: _duaFromMeta(metas![i]));
+    }
+
+    return SearchListScaffold(
+      title: 'Duas & Adhkār',
+      subtitle: 'Recite to open, or tap a du\'ā — words light up as you read',
+      loading: !showCandidates && metas == null,
+      itemCount: count,
+      itemBuilder: builder,
+      emptyState: searching ? const _NoMatches() : null,
+      listening: finder.listening,
+      starting: finder.starting,
+      level: finder.level,
+      heard: finder.heard,
+      idlePrompt: 'Recite to open a du\'ā',
+      hearingLabel: _finderLabel(finder),
+      onMicTap: () => _toggleMic(finder),
+      micIdleLabel: 'Recite to find a du\'ā',
+      searchController: _searchController,
+      onSearchChanged: _onSearchChanged,
+      searchHint: 'Search du\'ās',
+    );
+  }
+}
+
+class _NoMatches extends StatelessWidget {
+  const _NoMatches();
 
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
-
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20, 18, 20, 2),
-            child: Text('Duas & Adhkār',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-            child: Text('Recite to open, or tap a du\'ā — words light up as you read',
-                style: TextStyle(color: soft, fontSize: 13.5)),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 6, 16, 28),
-              itemCount: duas.length,
-              itemBuilder: (_, i) => _DuaCard(dua: duas[i]),
-            ),
-          ),
-        ],
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Text('No matches — clear the search to browse all',
+            textAlign: TextAlign.center, style: TextStyle(color: soft, fontSize: 14)),
       ),
     );
   }
@@ -84,7 +202,8 @@ class _DuaListScreenState extends State<DuaListScreen> {
 
 class _DuaCard extends StatelessWidget {
   final Dua dua;
-  const _DuaCard({required this.dua});
+  final Set<String> matched; // typed-search matched words to highlight ('' when browsing)
+  const _DuaCard({required this.dua, this.matched = const {}});
 
   @override
   Widget build(BuildContext context) {
@@ -117,11 +236,10 @@ class _DuaCard extends StatelessWidget {
             const SizedBox(height: 10),
             Directionality(
               textDirection: TextDirection.rtl,
-              child: Text(
-                dua.arabic,
-                textAlign: TextAlign.right,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              child: HighlightedArabic(
+                text: dua.arabic,
+                matched: matched,
+                highlight: context.accent,
                 style: const TextStyle(
                   fontFamily: 'UthmanicHafs',
                   fontSize: 22,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/data/quran_repository.dart';
-import 'package:tilawa_ai/models/mushaf.dart';
-import 'package:tilawa_ai/widgets/mushaf_page_view.dart';
+import 'package:sanad/data/quran_repository.dart';
+import 'package:sanad/models/mushaf.dart';
+import 'package:sanad/widgets/mushaf_page_view.dart';
 
 /// Host-side landscape fit check: short surahs (<14 lines) took the non-scrolling
 /// `!full` branch, which stacked fixed-gap lines with no height constraint and

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/services/asr/session.dart';
-import 'package:tilawa_ai/services/asr/tajweed_review.dart';
-import 'package:tilawa_ai/state/dua_reading_state.dart';
+import 'package:sanad/services/asr/session.dart';
+import 'package:sanad/services/asr/tajweed_review.dart';
+import 'package:sanad/state/dua_reading_state.dart';
 
 /// Pins the pure du'a flag→mistake mapping: makhraj flags become mispronounced
 /// records (word index as location, display word as expected, span×16k as

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/screens/privacy_screen.dart';
+import 'package:sanad/screens/privacy_screen.dart';
 
 /// Smoke-pins the Data & Privacy screen: it renders (all color tokens resolve),
 /// shows both the shared / never-shared groups, and states plainly that nothing

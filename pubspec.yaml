@@ -1,5 +1,5 @@
-name: tilawa_ai
-description: "A new Flutter project."
+name: sanad
+description: "Sanad — recite the Qur'an, Adhkar, and Hadith aloud, followed word by word on-device."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -72,6 +72,8 @@ flutter:
     - assets/asr/phoneme/
     - assets/asr/quran_phonemes/
     - assets/asr/dua_phonemes/
+    - assets/asr/dua/
+    - assets/asr/hadith/
     - assets/asr/align/
     - assets/debug_audio/
     - assets/eval_audio/

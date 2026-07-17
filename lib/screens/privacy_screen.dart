@@ -38,7 +38,7 @@ class PrivacyScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
         children: [
           Text(
-            'TilawaAi works fully offline and needs no account. The two “Help '
+            'Sanad works fully offline and needs no account. The two “Help '
             'improve” switches are optional and independent: “Performance & '
             'usage” records an anonymous summary of each recitation, and '
             '“Essential app data” records anonymous crash/error summaries. Both '

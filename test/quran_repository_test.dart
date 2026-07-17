@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ai/data/quran_repository.dart';
+import 'package:sanad/data/quran_repository.dart';
 
 /// Pins that a FAILED page load is never memoized: before the fix,
 /// `_pageFutures.putIfAbsent` cached the already-failed Future forever, so a

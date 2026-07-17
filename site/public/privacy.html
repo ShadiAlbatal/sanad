@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<title>Sanad — Privacy Policy</title>
+<meta name="robots" content="index,follow" />
+<meta name="description" content="Sanad privacy policy: what the app handles, why, and how you stay in control. Recitation is processed on-device; your audio never leaves your phone." />
+<link rel="canonical" href="https://sanad.ylensolutions.com/privacy" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#f8f4ea; --surface:#fffdf6; --surface2:#f1eadb; --ink:#17241f; --ink2:#4b574f; --ink3:#7c887e; --line:#e6dcc4; --accent:#0e5e4e; --gold:#9c7518;
+    --serif:"Cormorant Garamond",Georgia,serif;
+    --sans:"Hanken Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --ar:"IBM Plex Sans Arabic",system-ui,sans-serif;
+    --shadow-card:0 8px 30px -14px rgba(23,36,31,0.28);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#071a15; --surface:#0e2a22; --surface2:#0a2019; --ink:#eef3ec; --ink2:#b7c8bd; --ink3:#7d9187; --line:#1b3b31; --accent:#3fbd92; --gold:#e3b757;
+      --shadow-card:0 10px 34px -14px rgba(0,0,0,0.6); }
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.65 var(--sans); -webkit-text-size-adjust:100%; }
+  a { color:var(--accent); }
+  nav { position:sticky; top:0; z-index:10; background:color-mix(in srgb,var(--bg) 88%,transparent); backdrop-filter:saturate(1.2) blur(8px); border-bottom:1px solid var(--line); }
+  .nav-inner { max-width:760px; margin:0 auto; padding:0 22px; display:flex; align-items:center; gap:16px; height:60px; }
+  .logo { display:flex; align-items:center; gap:9px; font-weight:600; color:var(--ink); font-size:17px; }
+  .logo svg { width:26px; height:26px; }
+  .lang { position:relative; margin-inline-start:auto; }
+  .lang > summary { list-style:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px; color:var(--ink2); font-size:14px; padding:6px 11px; border:1px solid var(--line); border-radius:10px; user-select:none; }
+  .lang > summary::-webkit-details-marker { display:none; }
+  .lang > summary::after { content:"▾"; font-size:10px; color:var(--ink3); }
+  .lang-menu { position:absolute; top:calc(100% + 8px); inset-inline-end:0; min-width:150px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:6px; box-shadow:var(--shadow-card); display:flex; flex-direction:column; gap:2px; z-index:20; }
+  .lang-menu button { text-align:start; padding:9px 11px; border:0; background:transparent; border-radius:8px; color:var(--ink2); font:inherit; font-size:14px; cursor:pointer; }
+  .lang-menu button:hover { background:var(--surface2); color:var(--ink); }
+  .lang-menu button.on { color:var(--accent); font-weight:700; }
+  .wrap { max-width:760px; margin:0 auto; padding:44px 22px 96px; }
+  header.pg { border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:8px; }
+  .brand { display:inline-block; font-weight:600; color:var(--accent); font-size:15px; text-transform:uppercase; letter-spacing:.04em; }
+  h1 { font-family:var(--serif); font-weight:600; font-size:clamp(36px,6vw,50px); line-height:1.08; margin:10px 0 6px; }
+  .updated { color:var(--ink3); font-size:14px; margin:0; }
+  h2 { font-family:var(--serif); font-weight:600; font-size:27px; margin:40px 0 10px; }
+  p, li { color:var(--ink2); }
+  strong { color:var(--ink); }
+  ul { padding-inline-start:22px; }
+  li { margin:6px 0; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:4px 20px 16px; margin-top:16px; }
+  .notice { font-size:13.5px; color:var(--ink3); background:var(--surface2); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:8px 0 4px; }
+  footer { margin-top:56px; padding-top:20px; border-top:1px solid var(--line); color:var(--ink3); font-size:14px; }
+  footer a { color:var(--ink2); }
+  html[lang="ar"] body, html[lang="ar"] .brand, html[lang="ar"] .updated, html[lang="ar"] .lang-menu button { font-family:var(--ar); }
+  html[lang="ar"] h1, html[lang="ar"] h2 { font-family:"Amiri",var(--ar); font-weight:700; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#0e5e4e"/><g fill="none" stroke="#d8b24a" stroke-width="3" opacity="0.55"><rect x="30" y="30" width="40" height="40"/><rect x="30" y="30" width="40" height="40" transform="rotate(45 50 50)"/></g><path d="M50 22c-12 8-20 18-20 32 0 13 9 22 20 26 11-4 20-13 20-26 0-14-8-24-20-32z" fill="none" stroke="#f6efd8" stroke-width="4.5"/><path d="M42 48c0 6 4 10 8 12 4-2 8-6 8-12" fill="none" stroke="#d8b24a" stroke-width="4.5" stroke-linecap="round"/></svg>
+      <span data-i18n="brandword">Sanad</span>
+    </a>
+    <details class="lang">
+      <summary aria-label="Language"><span class="curlang">English</span></summary>
+      <div class="lang-menu">
+        <button type="button" data-lang="en" class="on" lang="en">English</button>
+        <button type="button" data-lang="ar" lang="ar">العربية</button>
+        <button type="button" data-lang="sv" lang="sv">Svenska</button>
+      </div>
+    </details>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="pg">
+    <span class="brand" data-i18n="brand">Sanad</span>
+    <h1 data-i18n="title">Privacy Policy</h1>
+    <p class="updated"><span data-i18n="updated_label">Last updated</span>: 17 July 2026</p>
+  </header>
+
+  <p class="notice" data-i18n="lang_notice">This policy is available in English, Arabic, and Swedish. If there is any discrepancy between the translations, the <strong>English version prevails</strong>.</p>
+
+  <p data-i18n="intro">Sanad (“the app”, “we”) is an on-device Qur’an, Adhkār, and Hadith companion. This policy explains what data the app handles and how. In short: the app runs on your phone, your recitation is processed on your device, and your audio never leaves it.</p>
+
+  <h2 data-i18n="h_who">Who we are</h2>
+  <p data-i18n="p_who">Sanad is published by <strong>Ylen Solutions AB</strong> (Org.nr 559569-4380), a company registered in Sweden, which is the data controller for any personal data processed. For any privacy question, contact us at <a href="mailto:privacy@ylensolutions.com">privacy@ylensolutions.com</a>.</p>
+
+  <h2 data-i18n="h_handles">What data the app handles</h2>
+  <div class="card">
+    <p data-i18n="d_voice"><strong>Your voice, while you recite.</strong> When you use follow-along or voice search, audio from your microphone is processed <strong>entirely on your device</strong> to recognise the words you recite. It is used only to follow your place or find a match, and is <strong>never recorded, stored, or uploaded</strong> to us or any third party.</p>
+    <p data-i18n="d_content"><strong>The Qur’an, Adhkār, and Hadith content.</strong> The scripture, du’ās (Hisn al-Muslim), and hadith collections (Sahih Bukhari &amp; Muslim) ship <strong>inside the app</strong>. Reading and searching them needs no network connection.</p>
+    <p data-i18n="d_local"><strong>Your in-app preferences.</strong> Things like your last-read position, bookmarks, theme, and settings are stored <strong>locally on your device</strong>. They are never sent anywhere.</p>
+    <p data-i18n="d_analytics"><strong>Anonymous usage analytics (off by default — opt-in).</strong> To understand how the app is used, Sanad can collect anonymous usage data — but only if you turn it on. It is off by default; you can enable or disable it anytime in <strong>Settings → Privacy</strong>. Legal basis: your consent. When enabled, it collects only short, pre-defined values such as which screens you open (e.g. “Qur’an”, “Adhkār”) and which features you use, as counts/flags. It <strong>never</strong> includes your voice, audio, or what you recited.</p>
+    <p data-i18n="d_crash"><strong>Anonymous crash reports (on by default — opt-out).</strong> To keep the app stable we collect anonymous crash and error reports: the error type and a short technical message only. This is on by default under our legitimate interest in a working, secure app, and you can turn it off anytime in <strong>Settings → Privacy</strong>. These diagnostic events are automatically deleted after 90 days.</p>
+    <p data-i18n="d_tag">Every analytics and crash event is tagged only with a random install identifier that is <strong>not</strong> linked to any account or device identifier, plus the app version, platform, and language. No account is required to use Sanad, and no event ever includes your recitation, audio, or any personal data.</p>
+  </div>
+
+  <h2 data-i18n="h_not">What we do NOT do</h2>
+  <ul>
+    <li data-i18n="n1">We do not record, store, or upload your voice or audio.</li>
+    <li data-i18n="n2">We do not require an account, and we do not collect your name or email.</li>
+    <li data-i18n="n3">We do not sell your data or use it for advertising.</li>
+    <li data-i18n="n4">We do not collect location, contacts, or device identifiers for tracking.</li>
+  </ul>
+
+  <h2 data-i18n="h_perm">Microphone permission</h2>
+  <p data-i18n="p_perm">The microphone permission is requested only when you use recitation follow-along or voice search, and is used solely for on-device speech recognition. You can revoke it in your device settings at any time; the rest of the app continues to work by text and touch.</p>
+
+  <h2 data-i18n="h_security">Data security</h2>
+  <p data-i18n="p_security">Because recitation runs on-device and there is no account, there is very little data to protect in transit. Where the app does send anonymous diagnostics, it is protected with HTTPS/TLS. Your reading data and preferences stay in the app’s private storage on your device.</p>
+
+  <h2 data-i18n="h_retention">Data retention and deletion</h2>
+  <p data-i18n="p_retention">Your preferences and reading data remain on your device until you clear them in the app or uninstall it. Uninstalling Sanad removes all local app data. Anonymous diagnostic events are deleted automatically after 90 days. See <a href="/delete-account">Delete your data</a> for details.</p>
+
+  <h2 data-i18n="h_children">Children</h2>
+  <p data-i18n="p_children">Sanad is suitable for all ages and does not knowingly collect personal data from anyone, including children.</p>
+
+  <h2 data-i18n="h_changes">Changes</h2>
+  <p data-i18n="p_changes">We may update this policy; the “Last updated” date above reflects the latest version.</p>
+
+  <h2 data-i18n="h_contact">Contact</h2>
+  <p><a href="mailto:privacy@ylensolutions.com">privacy@ylensolutions.com</a> · Ylen Solutions AB, Org.nr 559569-4380, Sweden.</p>
+
+  <footer>
+    <span data-i18n="foot">© 2026 Ylen Solutions · Sanad</span> · <a href="/" data-i18n="foot_home">Home</a> · <a href="/delete-account" data-i18n="foot_del">Delete account</a>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var I18N = {
+    ar: {
+      brand:"سند", brandword:"سند",
+      title:"سياسة الخصوصية",
+      updated_label:"آخر تحديث",
+      lang_notice:"هذه السياسة متاحة بالإنجليزية والعربية والسويدية. وفي حال وجود أي اختلاف بين الترجمات، <strong>تكون النسخة الإنجليزية هي المعتمدة</strong>.",
+      intro:"سند («التطبيق»، «نحن») رفيقٌ للقرآن والأذكار والحديث يعمل على جهازك. توضّح هذه السياسة ما الذي يعالجه التطبيق من بيانات وكيف. باختصار: يعمل التطبيق على هاتفك، وتُعالَج تلاوتك على جهازك، وصوتك لا يغادره أبدًا.",
+      h_who:"من نحن",
+      p_who:"سند تصدره <strong>Ylen Solutions AB</strong> (السجل التجاري رقم 559569-4380)، وهي شركة مسجّلة في السويد، وهي المتحكّم في أي بيانات شخصية تُعالَج. لأي استفسار عن الخصوصية، تواصل معنا على <a href=\"mailto:privacy@ylensolutions.com\">privacy@ylensolutions.com</a>.",
+      h_handles:"البيانات التي يعالجها التطبيق",
+      d_voice:"<strong>صوتك أثناء السند.</strong> عند استخدام المتابعة أو البحث الصوتي، يُعالَج الصوت من ميكروفونك <strong>على جهازك بالكامل</strong> للتعرّف على الكلمات التي تتلوها. ويُستخدم فقط لمتابعة موضعك أو إيجاد نتيجة، ولا يُسجَّل أو يُخزَّن أو يُرفَع أبدًا إلينا أو إلى أي طرف ثالث.",
+      d_content:"<strong>محتوى القرآن والأذكار والحديث.</strong> النصّ والأدعية (حصن المسلم) ومجموعات الحديث (صحيحا البخاري ومسلم) تأتي <strong>داخل التطبيق</strong>. ولا تحتاج قراءتها والبحث فيها إلى اتصال بالشبكة.",
+      d_local:"<strong>تفضيلاتك داخل التطبيق.</strong> أمورٌ مثل آخر موضع قرأته والعلامات المرجعية والسِّمة والإعدادات تُخزَّن <strong>محليًّا على جهازك</strong>. ولا تُرسَل إلى أي مكان.",
+      d_analytics:"<strong>تحليلات استخدام مجهولة (معطّلة افتراضيًّا — اشتراك اختياري).</strong> لفهم كيفية استخدام التطبيق، يمكن لسند جمع بيانات استخدام مجهولة — لكن فقط إن فعّلتها. وهي معطّلة افتراضيًّا، ويمكنك تفعيلها أو إيقافها في أي وقت من <strong>الإعدادات ← الخصوصية</strong>. الأساس القانوني: موافقتك. عند التفعيل، تجمع فقط قيمًا قصيرة محدّدة مسبقًا مثل الشاشات التي تفتحها (مثل «القرآن»، «الأذكار») والميزات التي تستخدمها. ولا تتضمّن <strong>أبدًا</strong> صوتك أو ما تلوته.",
+      d_crash:"<strong>تقارير أعطال مجهولة (مفعّلة افتراضيًّا — يمكن إيقافها).</strong> للحفاظ على استقرار التطبيق نجمع تقارير أعطال وأخطاء مجهولة: نوع الخطأ ورسالة تقنية قصيرة فقط. وهذا مفعّل افتراضيًّا استنادًا إلى مصلحتنا المشروعة في تطبيق يعمل بأمان، ويمكنك إيقافه في أي وقت من <strong>الإعدادات ← الخصوصية</strong>. وتُحذَف هذه الأحداث التشخيصية تلقائيًّا بعد 90 يومًا.",
+      d_tag:"يُوسَم كل حدث تحليلات أو عطل بمعرّف تثبيت عشوائي <strong>غير</strong> مرتبط بأي حساب أو معرّف جهاز، إضافةً إلى إصدار التطبيق والمنصّة واللغة. ولا يتطلّب استخدام سند أي حساب، ولا يتضمّن أي حدث تلاوتك أو صوتك أو أي بيانات شخصية.",
+      h_not:"ما لا نفعله",
+      n1:"لا نسجّل صوتك أو نخزّنه أو نرفعه.",
+      n2:"لا نطلب حسابًا، ولا نجمع اسمك أو بريدك.",
+      n3:"لا نبيع بياناتك ولا نستخدمها للإعلانات.",
+      n4:"لا نجمع الموقع أو جهات الاتصال أو معرّفات الجهاز للتتبّع.",
+      h_perm:"إذن الميكروفون",
+      p_perm:"يُطلَب إذن الميكروفون فقط عند استخدام متابعة السند أو البحث الصوتي، ويُستخدم حصريًّا للتعرّف على الكلام على الجهاز. يمكنك سحبه من إعدادات جهازك في أي وقت؛ ويظلّ باقي التطبيق يعمل بالنص واللمس.",
+      h_security:"أمن البيانات",
+      p_security:"لأن السند تجري على الجهاز ولا يوجد حساب، فليس هناك إلا القليل جدًّا من البيانات لحمايته أثناء النقل. وحيثما يرسل التطبيق تشخيصات مجهولة، تُحمى بـ HTTPS/TLS. وتبقى بيانات قراءتك وتفضيلاتك في التخزين الخاص للتطبيق على جهازك.",
+      h_retention:"الاحتفاظ بالبيانات وحذفها",
+      p_retention:"تبقى تفضيلاتك وبيانات قراءتك على جهازك حتى تمسحها من التطبيق أو تلغي تثبيته. وإلغاء تثبيت سند يزيل كل بيانات التطبيق المحلية. وتُحذَف الأحداث التشخيصية المجهولة تلقائيًّا بعد 90 يومًا. انظر <a href=\"/delete-account\">حذف بياناتك</a> للتفاصيل.",
+      h_children:"الأطفال",
+      p_children:"سند مناسب لجميع الأعمار، ولا يجمع عمدًا بيانات شخصية من أحد، بمن فيهم الأطفال.",
+      h_changes:"التغييرات",
+      p_changes:"قد نحدّث هذه السياسة؛ ويعكس تاريخ «آخر تحديث» أعلاه أحدث نسخة.",
+      h_contact:"التواصل",
+      foot:"© 2026 Ylen Solutions · سند",
+      foot_home:"الرئيسية",
+      foot_del:"حذف الحساب"
+    },
+    sv: {
+      brand:"Sanad", brandword:"Sanad",
+      title:"Integritetspolicy",
+      updated_label:"Senast uppdaterad",
+      lang_notice:"Denna policy finns på engelska, arabiska och svenska. Vid eventuella skillnader mellan översättningarna gäller den <strong>engelska versionen</strong>.",
+      intro:"Sanad (”appen”, ”vi”) är en följeslagare för Koranen, Adhkār och Hadith som körs på din enhet. Denna policy förklarar vilka uppgifter appen hanterar och hur. Kort sagt: appen körs på din telefon, din recitation behandlas på din enhet, och din ljudinspelning lämnar den aldrig.",
+      h_who:"Vilka vi är",
+      p_who:"Sanad ges ut av <strong>Ylen Solutions AB</strong> (org.nr 559569-4380), ett företag registrerat i Sverige, som är personuppgiftsansvarig för alla personuppgifter som behandlas. Vid frågor om integritet, kontakta oss på <a href=\"mailto:privacy@ylensolutions.com\">privacy@ylensolutions.com</a>.",
+      h_handles:"Vilka uppgifter appen hanterar",
+      d_voice:"<strong>Din röst medan du reciterar.</strong> När du använder följa-med eller röstsökning behandlas ljud från din mikrofon <strong>helt på din enhet</strong> för att känna igen orden du reciterar. Det används endast för att följa din plats eller hitta en träff, och <strong>spelas aldrig in, lagras eller laddas upp</strong> till oss eller någon tredje part.",
+      d_content:"<strong>Innehållet i Koranen, Adhkār och Hadith.</strong> Skriften, du’ā (Hisn al-Muslim) och hadith-samlingarna (Sahih Bukhari &amp; Muslim) medföljer <strong>i appen</strong>. Att läsa och söka i dem kräver ingen nätverksanslutning.",
+      d_local:"<strong>Dina inställningar i appen.</strong> Sådant som din senaste läsposition, bokmärken, tema och inställningar lagras <strong>lokalt på din enhet</strong>. De skickas aldrig någonstans.",
+      d_analytics:"<strong>Anonym användningsstatistik (av som standard — frivillig).</strong> För att förstå hur appen används kan Sanad samla in anonym användningsdata — men bara om du slår på det. Den är av som standard, och du kan slå på eller av den när som helst i <strong>Inställningar → Integritet</strong>. Rättslig grund: ditt samtycke. När den är påslagen samlar den endast in korta, fördefinierade värden såsom vilka skärmar du öppnar (t.ex. ”Koranen”, ”Adhkār”) och vilka funktioner du använder. Den innehåller <strong>aldrig</strong> din röst, ditt ljud eller vad du reciterade.",
+      d_crash:"<strong>Anonyma kraschrapporter (på som standard — kan stängas av).</strong> För att hålla appen stabil samlar vi in anonyma krasch- och felrapporter: endast feltypen och ett kort tekniskt meddelande. Detta är på som standard under vårt berättigade intresse av en fungerande, säker app, och du kan stänga av det när som helst i <strong>Inställningar → Integritet</strong>. Dessa diagnostikhändelser raderas automatiskt efter 90 dagar.",
+      d_tag:"Varje statistik- och kraschhändelse märks endast med en slumpmässig installationsidentifierare som <strong>inte</strong> är kopplad till något konto eller någon enhetsidentifierare, plus appversion, plattform och språk. Inget konto krävs för att använda Sanad, och ingen händelse innehåller någonsin din recitation, ditt ljud eller några personuppgifter.",
+      h_not:"Vad vi INTE gör",
+      n1:"Vi spelar inte in, lagrar eller laddar upp din röst eller ditt ljud.",
+      n2:"Vi kräver inget konto och samlar inte in ditt namn eller din e-post.",
+      n3:"Vi säljer inte dina uppgifter och använder dem inte för annonsering.",
+      n4:"Vi samlar inte in plats, kontakter eller enhetsidentifierare för spårning.",
+      h_perm:"Mikrofonbehörighet",
+      p_perm:"Mikrofonbehörigheten begärs endast när du använder följa-med vid recitation eller röstsökning, och används enbart för taligenkänning på enheten. Du kan återkalla den i dina enhetsinställningar när som helst; resten av appen fungerar vidare med text och tryck.",
+      h_security:"Datasäkerhet",
+      p_security:"Eftersom recitation körs på enheten och det inte finns något konto finns det mycket lite data att skydda under överföring. Där appen skickar anonym diagnostik skyddas den med HTTPS/TLS. Dina läsdata och inställningar stannar i appens privata lagring på din enhet.",
+      h_retention:"Lagring och radering av uppgifter",
+      p_retention:"Dina inställningar och läsdata stannar på din enhet tills du rensar dem i appen eller avinstallerar den. Att avinstallera Sanad tar bort alla lokala appdata. Anonyma diagnostikhändelser raderas automatiskt efter 90 dagar. Se <a href=\"/delete-account\">Radera dina uppgifter</a> för detaljer.",
+      h_children:"Barn",
+      p_children:"Sanad passar alla åldrar och samlar inte medvetet in personuppgifter från någon, inklusive barn.",
+      h_changes:"Ändringar",
+      p_changes:"Vi kan uppdatera denna policy; datumet ”Senast uppdaterad” ovan återspeglar den senaste versionen.",
+      h_contact:"Kontakt",
+      foot:"© 2026 Ylen Solutions · Sanad",
+      foot_home:"Hem",
+      foot_del:"Radera konto"
+    }
+  };
+  var RTL = { ar:true };
+  var LABEL = { en:"English", ar:"العربية", sv:"Svenska" };
+  var nodes = document.querySelectorAll('[data-i18n]');
+  var EN = {};
+  nodes.forEach(function(el){ EN[el.getAttribute('data-i18n')] = el.innerHTML; });
+
+  function apply(lang){
+    var dict = lang === 'en' ? EN : I18N[lang];
+    if (!dict) { lang = 'en'; dict = EN; }
+    nodes.forEach(function(el){
+      var k = el.getAttribute('data-i18n');
+      var v = lang === 'en' ? EN[k] : dict[k];
+      if (v != null) el.innerHTML = v;
+    });
+    var html = document.documentElement;
+    html.setAttribute('lang', lang);
+    html.setAttribute('dir', RTL[lang] ? 'rtl' : 'ltr');
+    document.querySelectorAll('.lang-menu button').forEach(function(b){
+      b.classList.toggle('on', b.getAttribute('data-lang') === lang);
+    });
+    var cur = document.querySelector('.curlang'); if (cur && LABEL[lang]) cur.textContent = LABEL[lang];
+    var dd = document.querySelector('details.lang'); if (dd) dd.removeAttribute('open');
+    try { localStorage.setItem('sanad_lang', lang); } catch(e){}
+  }
+
+  document.querySelectorAll('.lang-menu button').forEach(function(b){
+    b.addEventListener('click', function(){ apply(b.getAttribute('data-lang')); });
+  });
+
+  var saved = null;
+  try { saved = localStorage.getItem('sanad_lang'); } catch(e){}
+  var supported = { ar:true, sv:true, en:true };
+  var navs = (navigator.languages || [navigator.language || 'en']).map(function(x){ return (x||'').slice(0,2).toLowerCase(); });
+  var pick = saved;
+  if (!pick) { for (var i=0;i<navs.length;i++){ if (supported[navs[i]]) { pick = navs[i]; break; } } pick = pick || 'en'; }
+  apply(pick);
+
+  document.addEventListener('click', function(e){
+    document.querySelectorAll('details.lang[open]').forEach(function(d){ if(!d.contains(e.target)) d.removeAttribute('open'); });
+  });
+})();
+</script>
+</body>
+</html>

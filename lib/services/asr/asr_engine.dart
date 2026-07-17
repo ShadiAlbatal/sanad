@@ -26,7 +26,8 @@ class AsrEngine {
 
   final MicOwnership _owner = MicOwnership();
 
-  Future<void> claimMic(Future<void> Function() releaseSelf) => _owner.claim(releaseSelf);
+  Future<void> claimMic(Future<void> Function() releaseSelf, {String owner = '?'}) =>
+      _owner.claim(releaseSelf, owner);
 
   void releaseMic(Future<void> Function() releaseSelf) => _owner.release(releaseSelf);
 
@@ -84,17 +85,26 @@ class AsrEngine {
 /// [identifyDua] was extracted from DuaFinderState.
 class MicOwnership {
   Future<void> Function()? _releaseActive;
+  String _activeOwner = 'none'; // label of the current owner, for the handoff trace
 
-  Future<void> claim(Future<void> Function() releaseSelf) async {
+  Future<void> claim(Future<void> Function() releaseSelf, [String owner = '?']) async {
     final prev = _releaseActive;
     if (prev != null && !identical(prev, releaseSelf)) {
+      Log.d('mic', 'owner: "$owner" claims mic, preempting "$_activeOwner"');
       _releaseActive = null;
       await prev();
+    } else {
+      Log.d('mic', 'owner: "$owner" claims mic (prev="$_activeOwner")');
     }
     _releaseActive = releaseSelf;
+    _activeOwner = owner;
   }
 
   void release(Future<void> Function() releaseSelf) {
-    if (identical(_releaseActive, releaseSelf)) _releaseActive = null;
+    if (identical(_releaseActive, releaseSelf)) {
+      Log.d('mic', 'owner: "$_activeOwner" released mic');
+      _releaseActive = null;
+      _activeOwner = 'none';
+    }
   }
 }
