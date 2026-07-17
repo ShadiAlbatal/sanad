@@ -22,9 +22,16 @@ class ReadingFooter extends StatelessWidget {
     final barColor = dark ? AppColors.nightCard : AppColors.paperEdge;
     final fg = dark ? AppColors.nightInk : AppColors.ink;
 
+    // Pad above the Android edge-to-edge system nav bar / keyboard (see
+    // SearchListScaffold._Footer) — this footer previously had no bottom-inset
+    // handling at all.
+    final mq = MediaQuery.of(context);
+    final keyboard = mq.viewInsets.bottom;
+    final bottomInset = keyboard > 0 ? keyboard : mq.viewPadding.bottom;
+
     return Container(
       color: barColor,
-      padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
+      padding: EdgeInsets.fromLTRB(14, 8, 14, 8 + bottomInset),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

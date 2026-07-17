@@ -22,69 +22,73 @@ class DuaReadingFooter extends StatelessWidget {
     final barColor = dark ? AppColors.nightCard : AppColors.paperEdge;
     final fg = dark ? AppColors.nightInk : AppColors.ink;
 
+    // SafeArea doesn't reliably pick up the Android edge-to-edge system nav bar
+    // in this bottomNavigationBar slot (see SearchListScaffold._Footer) — pad
+    // explicitly instead, above the keyboard when it's up, else the nav bar.
+    final mq = MediaQuery.of(context);
+    final keyboard = mq.viewInsets.bottom;
+    final bottomInset = keyboard > 0 ? keyboard : mq.viewPadding.bottom;
+
     return Container(
       color: barColor,
-      padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (dua.hidden) ...[
-              _RevealRow(dua: dua, fg: fg, dark: dark),
-              const SizedBox(height: 8),
-            ],
-            if (dua.active) ...[
-              HeardTicker(heard: dua.heard),
-              const SizedBox(height: 4),
-            ],
-            Row(
-              children: [
-                _PillButton(
-                  icon: Icons.spellcheck_rounded,
-                  label: 'Mistakes',
-                  fg: fg,
-                  dark: dark,
-                  onTap: () => showDuaMistakesSheet(context),
-                ),
-                const SizedBox(width: 10),
-                _PillButton(
-                  icon: dua.hidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                  label: dua.hidden ? 'Reveal' : 'Hide',
-                  fg: dua.hidden ? Colors.white : fg,
-                  dark: dark,
-                  active: dua.hidden,
-                  onTap: dua.toggleHidden,
-                ),
-                if (dua.active) ...[
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: HearingIndicator(
-                        active: true,
-                        level: dua.level,
-                        tracking: dua.anchored,
-                      ),
+      padding: EdgeInsets.fromLTRB(14, 8, 14, 8 + bottomInset),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (dua.hidden) ...[
+            _RevealRow(dua: dua, fg: fg, dark: dark),
+            const SizedBox(height: 8),
+          ],
+          if (dua.active) ...[
+            HeardTicker(heard: dua.heard),
+            const SizedBox(height: 4),
+          ],
+          Row(
+            children: [
+              _PillButton(
+                icon: Icons.spellcheck_rounded,
+                label: 'Mistakes',
+                fg: fg,
+                dark: dark,
+                onTap: () => showDuaMistakesSheet(context),
+              ),
+              const SizedBox(width: 10),
+              _PillButton(
+                icon: dua.hidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                label: dua.hidden ? 'Reveal' : 'Hide',
+                fg: dua.hidden ? Colors.white : fg,
+                dark: dark,
+                active: dua.hidden,
+                onTap: dua.toggleHidden,
+              ),
+              if (dua.active) ...[
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: HearingIndicator(
+                      active: true,
+                      level: dua.level,
+                      tracking: dua.anchored,
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Text(dua.durationLabel,
-                      style: TextStyle(
-                          color: fg,
-                          fontWeight: FontWeight.w600,
-                          fontFeatures: const [FontFeature.tabularFigures()])),
-                  const SizedBox(width: 12),
-                ] else
-                  const Spacer(),
-                MicToggleButton(
-                  active: dua.active,
-                  starting: dua.starting,
-                  onTap: () => _toggleMic(context, dua),
                 ),
-              ],
-            ),
-          ],
-        ),
+                const SizedBox(width: 10),
+                Text(dua.durationLabel,
+                    style: TextStyle(
+                        color: fg,
+                        fontWeight: FontWeight.w600,
+                        fontFeatures: const [FontFeature.tabularFigures()])),
+                const SizedBox(width: 12),
+              ] else
+                const Spacer(),
+              MicToggleButton(
+                active: dua.active,
+                starting: dua.starting,
+                onTap: () => _toggleMic(context, dua),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
