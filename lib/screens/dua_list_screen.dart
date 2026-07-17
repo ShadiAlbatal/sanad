@@ -92,12 +92,24 @@ class _DuaListScreenState extends State<DuaListScreen> {
     final meta = _search?.metaById(id);
     finder.clearIdentified(); // consume the pick so we open exactly once
     if (meta == null) return;
+    _open(_duaFromMeta(meta), autoStart: true);
+  }
+
+  // See QuranListScreen._opening — same rapid-double-tap guard against stacked
+  // pushes while the reader takes a beat to open.
+  bool _opening = false;
+
+  void _open(Dua dua, {bool autoStart = false}) {
+    if (_opening) return;
+    _opening = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute(
-            builder: (_) => DuaReaderScreen(dua: _duaFromMeta(meta), autoStart: true)),
-      );
+      Navigator.of(context)
+          .push(MaterialPageRoute(
+              builder: (_) => DuaReaderScreen(dua: dua, autoStart: autoStart)))
+          .then((_) {
+        if (mounted) setState(() => _opening = false);
+      });
     });
   }
 
@@ -148,17 +160,22 @@ class _DuaListScreenState extends State<DuaListScreen> {
       builder = (_, i) => _DuaCard(
             dua: _duaFromMeta(candidates[i].meta),
             matched: finder.matchedWords(candidates[i].id),
+            onTap: () => _open(_duaFromMeta(candidates[i].meta)),
           );
     } else if (searching) {
       count = _results.length;
       builder = (_, i) {
         final hit = _results[i];
         final meta = _search!.metaById(hit.id)!;
-        return _DuaCard(dua: _duaFromMeta(meta), matched: hit.matchedWords);
+        return _DuaCard(
+            dua: _duaFromMeta(meta),
+            matched: hit.matchedWords,
+            onTap: () => _open(_duaFromMeta(meta)));
       };
     } else {
       count = metas?.length ?? 0;
-      builder = (_, i) => _DuaCard(dua: _duaFromMeta(metas![i]));
+      builder = (_, i) => _DuaCard(
+          dua: _duaFromMeta(metas![i]), onTap: () => _open(_duaFromMeta(metas[i])));
     }
 
     return SearchListScaffold(
@@ -203,7 +220,8 @@ class _NoMatches extends StatelessWidget {
 class _DuaCard extends StatelessWidget {
   final Dua dua;
   final Set<String> matched; // typed-search matched words to highlight ('' when browsing)
-  const _DuaCard({required this.dua, this.matched = const {}});
+  final VoidCallback onTap;
+  const _DuaCard({required this.dua, required this.onTap, this.matched = const {}});
 
   @override
   Widget build(BuildContext context) {
@@ -211,8 +229,7 @@ class _DuaCard extends StatelessWidget {
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
 
     return GestureDetector(
-      onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => DuaReaderScreen(dua: dua))),
+      onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(18),

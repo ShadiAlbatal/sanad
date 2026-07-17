@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/asr/asr_engine.dart';
 import '../services/asr/hadith_corpus.dart' show hadithCollectionName;
+import '../state/app_state.dart';
 import '../state/hadith_finder_state.dart';
 import '../state/hadith_reading_state.dart';
 import '../theme/app_theme.dart';
@@ -80,6 +81,7 @@ class _HadithReaderScreenState extends State<HadithReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.read<AppState>().setLastHadithId(widget._id);
     return ChangeNotifierProvider(
       create: (ctx) {
         final state = HadithReadingState(ctx.read<AsrEngine>());

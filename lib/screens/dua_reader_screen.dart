@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/duas.dart';
 import '../services/asr/asr_engine.dart';
+import '../state/app_state.dart';
 import '../state/dua_reading_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/dua_reading_footer.dart';
@@ -23,6 +24,7 @@ class DuaReaderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.read<AppState>().setLastDuaId(dua.id);
     return ChangeNotifierProvider(
       create: (ctx) {
         final state = DuaReadingState(ctx.read<AsrEngine>());

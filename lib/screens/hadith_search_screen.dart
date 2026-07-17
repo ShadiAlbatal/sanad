@@ -88,12 +88,22 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
     _open(pick.collection, pick.number, pick.text, autoStart: true);
   }
 
+  // See QuranListScreen._opening — same rapid-double-tap guard against stacked
+  // pushes while the reader takes a beat to open.
+  bool _opening = false;
+
   void _open(String collection, int number, String text, {bool autoStart = false}) {
+    if (_opening) return;
+    _opening = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => HadithReaderScreen(
-              collection: collection, number: number, text: text, autoStart: autoStart)));
+      Navigator.of(context)
+          .push(MaterialPageRoute(
+              builder: (_) => HadithReaderScreen(
+                  collection: collection, number: number, text: text, autoStart: autoStart)))
+          .then((_) {
+        if (mounted) setState(() => _opening = false);
+      });
     });
   }
 

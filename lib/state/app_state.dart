@@ -15,7 +15,10 @@ enum AccentChoice { auto, iris, emerald, coral, ocean }
 
 class AppState extends ChangeNotifier {
   final Prefs prefs;
-  AppState(this.prefs) : _lastPage = prefs.lastPage {
+  AppState(this.prefs)
+      : _lastPage = prefs.lastPage,
+        _lastDuaId = prefs.lastDuaId,
+        _lastHadithId = prefs.lastHadithId {
     _themeMode = _parse(prefs.themeMode);
     _accentChoice = _parseAccent(prefs.accent);
     _shareEssential = prefs.shareEssential;
@@ -32,6 +35,22 @@ class AppState extends ChangeNotifier {
     prefs.setLastPage(page);
     // No notify: Home re-reads lastPage when it rebuilds on tab switch, and
     // notifying here would rebuild the whole scaffold on every page turn.
+  }
+
+  String? _lastDuaId;
+  String? get lastDuaId => _lastDuaId;
+  void setLastDuaId(String id) {
+    if (id == _lastDuaId) return;
+    _lastDuaId = id;
+    prefs.setLastDuaId(id); // no notify — same rationale as setLastPage
+  }
+
+  String? _lastHadithId;
+  String? get lastHadithId => _lastHadithId;
+  void setLastHadithId(String id) {
+    if (id == _lastHadithId) return;
+    _lastHadithId = id;
+    prefs.setLastHadithId(id); // no notify — same rationale as setLastPage
   }
 
   late ThemeMode _themeMode;

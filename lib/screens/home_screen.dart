@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../data/duas.dart';
 import '../data/quotes.dart';
 import '../data/quran_repository.dart';
 import '../models/mushaf.dart';
+import '../services/asr/dua_search.dart';
+import '../services/asr/hadith_corpus.dart' show hadithCollectionName;
+import '../services/asr/hadith_search.dart';
 import '../state/app_state.dart';
 import '../theme/app_theme.dart';
 import '../util/day_part.dart';
 import '../util/log.dart';
 import 'adzkar_screen.dart';
 import 'debug_log_screen.dart';
+import 'dua_reader_screen.dart';
+import 'hadith_reader_screen.dart';
 import 'quran_screen.dart';
 import 'user_screen.dart';
 
@@ -74,7 +80,16 @@ class HomeScreen extends StatelessWidget {
           _QuoteCard(quote: dailyQuote(now)),
           const SizedBox(height: 20),
           _ContinueCard(page: app.lastPage, repo: repo),
-          const SizedBox(height: 22),
+          const SizedBox(height: 14),
+          if (app.lastDuaId != null) ...[
+            _DuaContinueCard(id: app.lastDuaId!),
+            const SizedBox(height: 14),
+          ],
+          if (app.lastHadithId != null) ...[
+            _HadithContinueCard(id: app.lastHadithId!),
+            const SizedBox(height: 14),
+          ],
+          const SizedBox(height: 8),
           Text('Explore',
               style: TextStyle(
                 fontSize: 13,
@@ -83,31 +98,12 @@ class HomeScreen extends StatelessWidget {
                 color: soft,
               )),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              _QuickTile(
-                icon: Icons.touch_app_rounded,
-                label: 'Counter',
-                subtitle: 'Tasbih & adhkār',
-                onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const AdzkarScreen(pushed: true))),
-              ),
-              const SizedBox(width: 12),
-              _QuickTile(
-                icon: Icons.menu_book_rounded,
-                label: 'Quran',
-                subtitle: 'Open the mushaf',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => QuranScreen(initialPage: app.lastPage))),
-              ),
-              const SizedBox(width: 12),
-              _QuickTile(
-                icon: Icons.wb_twilight_rounded,
-                label: 'Adhkar',
-                subtitle: 'Remembrance',
-                onTap: () => app.tabIndex = Tabs.dua,
-              ),
-            ],
+          _QuickTile(
+            icon: Icons.touch_app_rounded,
+            label: 'Counter',
+            subtitle: 'Tasbih & adhkār',
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const AdzkarScreen(pushed: true))),
           ),
           const SizedBox(height: 22),
           _SuggestionCard(
@@ -253,6 +249,137 @@ class _ContinueCard extends StatelessWidget {
   }
 }
 
+/// Shared shell for the Dua/Hadith "continue reading" cards — same gradient card
+/// as Quran's [_ContinueCard], just resolving its title/subtitle from an async
+/// lookup (the corpus search index) instead of the always-loaded [QuranRepository].
+class _ResumeCard extends StatelessWidget {
+  final String eyebrow;
+  final Future<(String title, String subtitle)?> future;
+  final VoidCallback onTap;
+  const _ResumeCard({required this.eyebrow, required this.future, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = context.accent;
+    final accentHsl = HSLColor.fromColor(accent);
+    final accentDeep =
+        accentHsl.withLightness((accentHsl.lightness * 0.72).clamp(0.0, 1.0)).toColor();
+    return FutureBuilder<(String, String)?>(
+      future: future,
+      builder: (context, snap) {
+        final data = snap.data;
+        if (snap.connectionState == ConnectionState.done && data == null) {
+          return const SizedBox.shrink(); // id no longer resolves — fail quiet
+        }
+        return GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [accent, accentDeep],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: accent.withValues(alpha: 0.35),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(eyebrow,
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 8),
+                      Text(data?.$1 ?? '…',
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 2),
+                      Text(data?.$2 ?? '',
+                          style: const TextStyle(color: Colors.white70)),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _DuaContinueCard extends StatelessWidget {
+  final String id;
+  const _DuaContinueCard({required this.id});
+
+  @override
+  Widget build(BuildContext context) {
+    return _ResumeCard(
+      eyebrow: 'Continue reading',
+      future: loadDuaSearch().then((s) {
+        final meta = s.metaById(id);
+        return meta == null ? null : (meta.title, meta.source);
+      }),
+      onTap: () async {
+        final search = await loadDuaSearch();
+        final meta = search.metaById(id);
+        if (meta == null || !context.mounted) return;
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => DuaReaderScreen(
+                dua: Dua(
+                    id: meta.id,
+                    title: meta.title,
+                    source: meta.source,
+                    arabic: meta.arabic,
+                    meaning: meta.meaning))));
+      },
+    );
+  }
+}
+
+class _HadithContinueCard extends StatelessWidget {
+  final String id;
+  const _HadithContinueCard({required this.id});
+
+  @override
+  Widget build(BuildContext context) {
+    return _ResumeCard(
+      eyebrow: 'Continue reading',
+      future: loadHadithSearch().then((s) {
+        final e = s.entryById(id);
+        return e == null ? null : (e.label, hadithCollectionName(e.collection));
+      }),
+      onTap: () async {
+        final search = await loadHadithSearch();
+        final e = search.entryById(id);
+        if (e == null || !context.mounted) return;
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) =>
+                HadithReaderScreen(collection: e.collection, number: e.number, text: e.text)));
+      },
+    );
+  }
+}
+
 class _QuickTile extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -269,28 +396,32 @@ class _QuickTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
-          decoration: BoxDecoration(
-            color: dark ? AppColors.nightCard : AppColors.paperEdge,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            children: [
-              Icon(icon, color: context.accent, size: 28),
-              const SizedBox(height: 10),
-              Text(label,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 15)),
-              const SizedBox(height: 2),
-              Text(subtitle,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: soft, fontSize: 12)),
-            ],
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+        decoration: BoxDecoration(
+          color: dark ? AppColors.nightCard : AppColors.paperEdge,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: context.accent, size: 26),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                  const SizedBox(height: 2),
+                  Text(subtitle, style: TextStyle(color: soft, fontSize: 12)),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: soft),
+          ],
         ),
       ),
     );

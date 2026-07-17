@@ -181,27 +181,35 @@ class _Footer extends StatelessWidget {
             if (listening) ...[
               HeardTicker(heard: heard),
               const SizedBox(height: 4),
+              HearingIndicator(
+                active: true,
+                level: level,
+                tracking: false,
+                label: hearingLabel,
+              ),
+              const SizedBox(height: 8),
+            ] else ...[
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(idlePrompt,
+                    style:
+                        TextStyle(color: soft, fontSize: 13.5, fontWeight: FontWeight.w500)),
+              ),
+              const SizedBox(height: 8),
             ],
+            // Search field on the left (thumb rests on the mic to its right — the
+            // one-handed reach every tab shares).
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (listening)
-                  Flexible(
-                    child: HearingIndicator(
-                      active: true,
-                      level: level,
-                      tracking: false,
-                      label: hearingLabel,
-                    ),
-                  )
-                else
-                  Flexible(
-                    child: Text(idlePrompt,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: soft, fontSize: 13.5, fontWeight: FontWeight.w500)),
+                Expanded(
+                  child: _SearchField(
+                    controller: searchController,
+                    onChanged: onSearchChanged,
+                    hint: searchHint,
                   ),
-                const SizedBox(width: 14),
+                ),
+                const SizedBox(width: 10),
                 MicToggleButton(
                   active: listening,
                   starting: starting,
@@ -211,12 +219,6 @@ class _Footer extends StatelessWidget {
                   startingLabel: micStartingLabel,
                 ),
               ],
-            ),
-            const SizedBox(height: 8),
-            _SearchField(
-              controller: searchController,
-              onChanged: onSearchChanged,
-              hint: searchHint,
             ),
           ],
         ),

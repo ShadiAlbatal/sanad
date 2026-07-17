@@ -92,13 +92,24 @@ class _QuranListScreenState extends State<QuranListScreen> {
     _open(pick.page);
   }
 
+  // Opening the reader takes a beat (asset decode, curl setup) with no visible
+  // feedback in between — without this guard a user who taps again (thinking the
+  // first tap missed) stacks a duplicate push per extra tap, so Back has to pop
+  // through all of them. One in-flight navigation at a time.
+  bool _opening = false;
+
   void _open(int page) {
+    if (_opening) return;
+    _opening = true;
     final finder = _finder;
     if (finder != null && finder.listening) finder.stop(); // clean mic handoff to the reader
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => QuranScreen(initialPage: page)));
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => QuranScreen(initialPage: page)))
+          .then((_) {
+        if (mounted) setState(() => _opening = false);
+      });
     });
   }
 
