@@ -24,7 +24,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$pkg = 'com.tilawa.tilawa_ai'
+$pkg = 'com.sanad.sanad'
 $proj = $PSScriptRoot
 $stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
 $outDir = Join-Path $proj "pulls\run_$stamp"
