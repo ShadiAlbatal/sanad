@@ -61,7 +61,17 @@ class DuaFinderState extends ChangeNotifier {
   // reached [_minQueryLen] collapsed phonemes, and the same du'a holds for
   // [_confirm] consecutive probes.
   static const int _probeTail = 24; // recent collapsed tokens fed to the finder
-  static const int _minQueryLen = 12; // ~3–4 words before a pick is allowed
+  // 12 (was) let short/generic openings shared across many du'ās (e.g. an early
+  // "Allahumma"-type phrase) fold a false tied peak into TWO OR MORE unrelated
+  // candidates' best-ever score before the query grew distinctive — that false
+  // peak then permanently blocked the real match's margin later, even once it
+  // clearly won the CURRENT probe (confirmed on a real device log 2026-07-18:
+  // three unrelated du'ās tied at 0.69 by length 13-18, then the true match
+  // climbed to 1.13 by length 24 but needed >1.19 to clear that stale peak by
+  // margin — never picked despite winning every live probe from length 22 on).
+  // 20 keeps a real margin under [_probeTail] (still pickable) while skipping
+  // the short ties that caused it.
+  static const int _minQueryLen = 20;
   static const int _confirm = 3; // consecutive winning probes before we commit
 
   bool get listening => _listening;
