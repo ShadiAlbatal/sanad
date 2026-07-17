@@ -252,11 +252,33 @@ class _ContinueCard extends StatelessWidget {
 /// Shared shell for the Dua/Hadith "continue reading" cards — same gradient card
 /// as Quran's [_ContinueCard], just resolving its title/subtitle from an async
 /// lookup (the corpus search index) instead of the always-loaded [QuranRepository].
-class _ResumeCard extends StatelessWidget {
+///
+/// [id]-keyed and STATEFUL so the lookup [Future] is built once (in [initState] /
+/// on an actual [id] change), not on every Home rebuild — Home rebuilds on every
+/// tab switch anywhere in the app (see AppState.tabIndex), and re-running
+/// `loadDuaSearch().then(...)` there each time handed [FutureBuilder] a
+/// freshly-identical-but-new [Future], which reset it to "waiting" and
+/// re-subscribed on every switch for no reason.
+class _ResumeCard extends StatefulWidget {
+  final String id;
   final String eyebrow;
-  final Future<(String title, String subtitle)?> future;
-  final VoidCallback onTap;
-  const _ResumeCard({required this.eyebrow, required this.future, required this.onTap});
+  final Future<(String title, String subtitle)?> Function(String id) loader;
+  final void Function(BuildContext context, String id) onOpen;
+  const _ResumeCard(
+      {required this.id, required this.eyebrow, required this.loader, required this.onOpen});
+
+  @override
+  State<_ResumeCard> createState() => _ResumeCardState();
+}
+
+class _ResumeCardState extends State<_ResumeCard> {
+  late Future<(String, String)?> _future = widget.loader(widget.id);
+
+  @override
+  void didUpdateWidget(_ResumeCard old) {
+    super.didUpdateWidget(old);
+    if (old.id != widget.id) _future = widget.loader(widget.id);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -265,14 +287,14 @@ class _ResumeCard extends StatelessWidget {
     final accentDeep =
         accentHsl.withLightness((accentHsl.lightness * 0.72).clamp(0.0, 1.0)).toColor();
     return FutureBuilder<(String, String)?>(
-      future: future,
+      future: _future,
       builder: (context, snap) {
         final data = snap.data;
         if (snap.connectionState == ConnectionState.done && data == null) {
           return const SizedBox.shrink(); // id no longer resolves — fail quiet
         }
         return GestureDetector(
-          onTap: onTap,
+          onTap: () => widget.onOpen(context, widget.id),
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -296,7 +318,7 @@ class _ResumeCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(eyebrow,
+                      Text(widget.eyebrow,
                           style: const TextStyle(
                               color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
@@ -331,53 +353,49 @@ class _DuaContinueCard extends StatelessWidget {
   final String id;
   const _DuaContinueCard({required this.id});
 
-  @override
-  Widget build(BuildContext context) {
-    return _ResumeCard(
-      eyebrow: 'Continue reading',
-      future: loadDuaSearch().then((s) {
-        final meta = s.metaById(id);
-        return meta == null ? null : (meta.title, meta.source);
-      }),
-      onTap: () async {
-        final search = await loadDuaSearch();
-        final meta = search.metaById(id);
-        if (meta == null || !context.mounted) return;
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => DuaReaderScreen(
-                dua: Dua(
-                    id: meta.id,
-                    title: meta.title,
-                    source: meta.source,
-                    arabic: meta.arabic,
-                    meaning: meta.meaning))));
-      },
-    );
+  static Future<(String, String)?> _load(String id) async {
+    final meta = (await loadDuaSearch()).metaById(id);
+    return meta == null ? null : (meta.title, meta.source);
   }
+
+  static void _open(BuildContext context, String id) async {
+    final meta = (await loadDuaSearch()).metaById(id);
+    if (meta == null || !context.mounted) return;
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => DuaReaderScreen(
+            dua: Dua(
+                id: meta.id,
+                title: meta.title,
+                source: meta.source,
+                arabic: meta.arabic,
+                meaning: meta.meaning))));
+  }
+
+  @override
+  Widget build(BuildContext context) => _ResumeCard(
+      id: id, eyebrow: 'Continue reading', loader: _load, onOpen: _open);
 }
 
 class _HadithContinueCard extends StatelessWidget {
   final String id;
   const _HadithContinueCard({required this.id});
 
-  @override
-  Widget build(BuildContext context) {
-    return _ResumeCard(
-      eyebrow: 'Continue reading',
-      future: loadHadithSearch().then((s) {
-        final e = s.entryById(id);
-        return e == null ? null : (e.label, hadithCollectionName(e.collection));
-      }),
-      onTap: () async {
-        final search = await loadHadithSearch();
-        final e = search.entryById(id);
-        if (e == null || !context.mounted) return;
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) =>
-                HadithReaderScreen(collection: e.collection, number: e.number, text: e.text)));
-      },
-    );
+  static Future<(String, String)?> _load(String id) async {
+    final e = (await loadHadithSearch()).entryById(id);
+    return e == null ? null : (e.label, hadithCollectionName(e.collection));
   }
+
+  static void _open(BuildContext context, String id) async {
+    final e = (await loadHadithSearch()).entryById(id);
+    if (e == null || !context.mounted) return;
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) =>
+            HadithReaderScreen(collection: e.collection, number: e.number, text: e.text)));
+  }
+
+  @override
+  Widget build(BuildContext context) => _ResumeCard(
+      id: id, eyebrow: 'Continue reading', loader: _load, onOpen: _open);
 }
 
 class _QuickTile extends StatelessWidget {
