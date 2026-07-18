@@ -1,10 +1,8 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/quran_repository.dart';
 import '../models/mushaf.dart';
 import '../services/asr/quran_search.dart';
-import '../services/search/search_confidence.dart';
 import '../state/app_state.dart';
 import '../state/voice_search_state.dart';
 import '../theme/app_theme.dart';
@@ -12,12 +10,13 @@ import '../util/log.dart';
 import '../widgets/highlighted_arabic.dart';
 import '../widgets/search_list_scaffold.dart';
 import 'quran_screen.dart';
+import 'voice_search_list_mixin.dart';
 
 /// The Quran TAB, rendered through the shared [SearchListScaffold] (content list +
-/// unified footer) — the Quran sibling of the Du'a and Hadith tabs. Three renderings
-/// through one shell, in priority order:
-///  1. reciting → the finder's live ranked verse candidates (VOICE, global over all
-///     114 surahs via [QuranFinderState]); a confident pick opens the reader at that
+/// unified footer) — the Quran sibling of the Du'a and Hadith tabs. Three
+/// renderings through one shell, in priority order:
+///  1. reciting → live ranked verse candidates (VOICE, global over all 114 surahs
+///     via [VoiceSearchListMixin]); a confident pick opens the reader at that
 ///     verse's page;
 ///  2. a typed query → ranked BM25 verse results with the matched words highlighted;
 ///  3. idle → browse the 114-surah index.
@@ -32,18 +31,10 @@ class QuranListScreen extends StatefulWidget {
   State<QuranListScreen> createState() => _QuranListScreenState();
 }
 
-class _QuranListScreenState extends State<QuranListScreen> {
-  VoiceSearchState? _voice;
+class _QuranListScreenState extends State<QuranListScreen>
+    with VoiceSearchListMixin<QuranListScreen, QuranTextHit> {
   QuranSearch? _search;
   List<Chapter>? _chapters;
-  final _searchController = TextEditingController();
-
-  Timer? _debounce;
-  String _query = '';
-  List<QuranTextHit> _results = const [];
-  final _confidence = SearchConfidence();
-  double _conf = 0;
-  bool _voiceQuery = false;
 
   @override
   void initState() {
@@ -54,8 +45,8 @@ class _QuranListScreenState extends State<QuranListScreen> {
     }).catchError((Object e) {
       Log.e('quranlist', 'chapters load failed: $e');
     });
-    // The global voice + typed search index — the same cached, off-thread build the
-    // finder uses (loadQuranSearch is memoized), rendered here for the typed bar.
+    // The global voice + typed search index — the same cached, off-thread build,
+    // memoized (loadQuranSearch), rendered here for the typed bar.
     loadQuranSearch().then((s) {
       if (mounted) setState(() => _search = s);
     }).catchError((Object e) {
@@ -64,103 +55,19 @@ class _QuranListScreenState extends State<QuranListScreen> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final voice = context.read<VoiceSearchState>();
-    if (!identical(voice, _voice)) {
-      _voice?.removeListener(_onVoice);
-      _voice = voice;
-      voice.addListener(_onVoice);
-    }
-  }
-
-  void _onSearchChanged(String q, {bool fromVoice = false}) {
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 220), () {
-      if (!mounted) return;
-      final query = q.trim();
-      _results = query.isEmpty ? const [] : (_search?.searchText(query) ?? const []);
-      String? openId;
-      if (fromVoice && query.isNotEmpty) {
-        final out = _confidence
-            .update([for (final h in _results.take(5)) (id: h.id, score: h.score)]);
-        _conf = out.confidence;
-        openId = out.openId;
-        _voiceQuery = true;
-      } else {
-        _confidence.reset();
-        _conf = 0;
-        _voiceQuery = false;
-      }
-      setState(() => _query = query);
-      if (query.isNotEmpty) {
-        Log.d('quranlist',
-            'search "$query" -> ${_results.length} hits conf=${_conf.toStringAsFixed(2)}');
-      }
-      if (openId != null && _results.isNotEmpty) {
-        final hit = _results.firstWhere((h) => h.id == openId, orElse: () => _results.first);
-        Log.d('quranlist', 'auto-open $openId page ${hit.meta.page} (trust ring full)');
-        _open(hit.meta.page);
-      }
-    });
-  }
-
-  void _onVoice() {
-    // Only the visible tab reacts to the shared voice state (see hadith screen).
-    if (!mounted || context.read<AppState>().tabIndex != Tabs.quran) return;
-    final t = _voice?.transcript ?? '';
-    if (t.isEmpty || t == _searchController.text) return;
-    _searchController.text = t;
-    _onSearchChanged(t, fromVoice: true);
-  }
-
-  // Opening the reader takes a beat (asset decode, curl setup) with no visible
-  // feedback in between — without this guard a user who taps again (thinking the
-  // first tap missed) stacks a duplicate push per extra tap, so Back has to pop
-  // through all of them. One in-flight navigation at a time.
-  bool _opening = false;
-
-  void _open(int page) {
-    if (_opening) return;
-    _opening = true;
-    // Lock the results + free the word model / rebuild the phoneme engine so the
-    // mushaf reader's follow-along runs clean (see VoiceSearchState.cancel).
-    _voice?.cancel();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => QuranScreen(initialPage: page)))
-          .then((_) {
-        if (mounted) setState(() => _opening = false);
-      });
-    });
-    // A bare GestureDetector tap changes nothing visually, so Flutter schedules no
-    // frame — and the post-frame callback above then never fires until the next
-    // unrelated input (a stray swipe) forces one, which is why tap-to-open hung
-    // for seconds. Force a frame so the push runs on the very next tick.
-    WidgetsBinding.instance.ensureVisualUpdate();
-  }
-
+  int get voiceTab => Tabs.quran;
   @override
-  void dispose() {
-    _voice?.removeListener(_onVoice);
-    _debounce?.cancel();
-    _searchController.dispose();
-    super.dispose();
-  }
+  String get logTag => 'quranlist';
+  @override
+  List<QuranTextHit> runSearch(String q) => _search?.searchText(q) ?? const [];
+  @override
+  ({String id, double score}) scoreOf(QuranTextHit hit) =>
+      (id: hit.id, score: hit.score);
+  @override
+  void openHit(QuranTextHit hit) => _open(hit.meta.page);
 
-  Future<void> _toggleMic(VoiceSearchState voice) async {
-    if (voice.recording) {
-      await voice.stop();
-      return;
-    }
-    _confidence.reset();
-    _conf = 0;
-    await voice.start();
-    if (voice.error != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(voice.error!)));
-    }
-  }
+  void _open(int page) =>
+      openRoute((_) => QuranScreen(initialPage: page));
 
   // Surah name for a 1-based surah number (chapters are stored in order); a bare
   // "Surah N" until the index has loaded.
@@ -175,23 +82,22 @@ class _QuranListScreenState extends State<QuranListScreen> {
   @override
   Widget build(BuildContext context) {
     final voice = context.watch<VoiceSearchState>();
-    final searching = _query.isNotEmpty;
     final chapters = _chapters;
-    final leadExpanded = voice.recording && _voiceQuery;
+    final leadExpanded = voice.recording && voiceQuery;
 
     final int count;
     final IndexedWidgetBuilder builder;
     if (searching) {
-      count = _results.length;
+      count = results.length;
       builder = (_, i) {
-        final hit = _results[i];
+        final hit = results[i];
         return _VerseCard(
           label: _verseLabel(hit.meta.surah, hit.meta.ayah),
           text: hit.meta.text,
           matched: hit.matchedWords,
           onTap: () => _open(hit.meta.page),
           expanded: leadExpanded && i == 0,
-          confidence: leadExpanded && i == 0 ? _conf : null,
+          confidence: leadExpanded && i == 0 ? conf : null,
         );
       };
     } else {
@@ -211,10 +117,10 @@ class _QuranListScreenState extends State<QuranListScreen> {
       level: voice.level,
       heard: '',
       hearingLabel: voice.recording ? 'Listening… tap to search' : 'Preparing…',
-      onMicTap: () => _toggleMic(voice),
+      onMicTap: toggleMic,
       micIdleLabel: 'Recite to find a verse',
-      searchController: _searchController,
-      onSearchChanged: _onSearchChanged,
+      searchController: searchController,
+      onSearchChanged: onSearchChanged,
       searchHint: 'Search the Quran',
     );
   }

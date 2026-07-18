@@ -1,9 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/asr/hadith_search.dart';
 import '../services/search/corpus_text_search.dart';
-import '../services/search/search_confidence.dart';
 import '../services/search/text_search.dart';
 import '../state/app_state.dart';
 import '../state/voice_search_state.dart';
@@ -12,13 +10,14 @@ import '../util/log.dart';
 import '../widgets/highlighted_arabic.dart';
 import '../widgets/search_list_scaffold.dart';
 import 'hadith_reader_screen.dart';
+import 'voice_search_list_mixin.dart';
 
 /// The Hadith tab, rendered through the shared [SearchListScaffold] (content list
 /// + unified footer). Idle, it browses the WHOLE corpus (Sahih Bukhari + Muslim,
-/// sorted by collection + number) — no longer an empty screen. While reciting,
-/// the footer mic runs the live phoneme finder ([HadithFinderState]) and the
-/// content flips to its ranked candidates; a confident match opens the reader.
-/// Never a dead end. Tapping any row opens that hadith's reader.
+/// sorted by collection + number). Voice + typed search run through
+/// [VoiceSearchListMixin] (FastConformer live-transcription → BM25); a confident
+/// match opens the reader. Never a dead end. Tapping any row opens that hadith's
+/// reader.
 class HadithSearchScreen extends StatefulWidget {
   const HadithSearchScreen({super.key});
 
@@ -26,23 +25,15 @@ class HadithSearchScreen extends StatefulWidget {
   State<HadithSearchScreen> createState() => _HadithSearchScreenState();
 }
 
-class _HadithSearchScreenState extends State<HadithSearchScreen> {
+class _HadithSearchScreenState extends State<HadithSearchScreen>
+    with VoiceSearchListMixin<HadithSearchScreen, TextSearchHit> {
   HadithSearch? _search;
   TextSearch? _textSearch;
-  final _searchController = TextEditingController();
-  VoiceSearchState? _voice;
-
-  Timer? _debounce;
-  String _query = '';
-  List<TextSearchHit> _results = const [];
-  final _confidence = SearchConfidence();
-  double _conf = 0; // live voice trust ring 0..1 on the leading result
-  bool _voiceQuery = false; // the current query came from voice (drives the ring)
 
   @override
   void initState() {
     super.initState();
-    // Same cached, off-thread index the finder uses (loadHadithSearch is memoized)
+    // Same cached, off-thread index the search uses (loadHadithSearch is memoized)
     // — rendered here as the idle browsable list. No double-load.
     loadHadithSearch().then((s) {
       if (mounted) setState(() => _search = s);
@@ -58,141 +49,39 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final voice = context.read<VoiceSearchState>();
-    if (!identical(voice, _voice)) {
-      _voice?.removeListener(_onVoice);
-      _voice = voice;
-      voice.addListener(_onVoice);
-    }
-  }
-
-  // Mirror the live transcript into the search field as it grows, so the BM25
-  // results narrow AS the user recites (not only on stop).
-  void _onVoice() {
-    // ONE shared VoiceSearchState notifies all three list tabs; only the visible
-    // tab reacts, else off-screen tabs run phantom searches and could auto-open
-    // the wrong reader.
-    if (!mounted || context.read<AppState>().tabIndex != Tabs.hadith) return;
-    final t = _voice?.transcript ?? '';
-    if (t.isEmpty || t == _searchController.text) return;
-    _searchController.text = t;
-    _onSearchChanged(t, fromVoice: true);
-  }
-
-  void _onSearchChanged(String q, {bool fromVoice = false}) {
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 220), () {
-      if (!mounted) return;
-      final query = q.trim();
-      _results = query.isEmpty ? const [] : (_textSearch?.search(query) ?? const []);
-      // Live voice: track how confidently the field has converged on one hadith,
-      // fill the ring, and auto-open when it's clearly sure. Typed search never
-      // auto-opens — the user is deciding.
-      String? openId;
-      if (fromVoice && query.isNotEmpty) {
-        final out = _confidence
-            .update([for (final h in _results.take(5)) (id: h.id, score: h.score)]);
-        _conf = out.confidence;
-        openId = out.openId;
-        _voiceQuery = true;
-      } else {
-        _confidence.reset();
-        _conf = 0;
-        _voiceQuery = false;
-      }
-      setState(() => _query = query);
-      if (query.isNotEmpty) {
-        final top = _results.take(3).map((h) => '${h.id}:${h.score.toStringAsFixed(2)}').join(' ');
-        Log.d('hadithlist',
-            'search "$query" -> ${_results.length} hits conf=${_conf.toStringAsFixed(2)} top=[$top]');
-      }
-      if (openId != null) {
-        final e = _search?.entryById(openId);
-        if (e != null) {
-          Log.d('hadithlist', 'auto-open $openId (trust ring full)');
-          _open(e.collection, e.number, e.text);
-        }
-      }
-    });
-  }
-
-  // See QuranListScreen._opening — same rapid-double-tap guard against stacked
-  // pushes while the reader takes a beat to open.
-  bool _opening = false;
-
-  void _open(String collection, int number, String text) {
-    if (_opening) {
-      Log.d('hadithlist', 'tap on $collection:$number ignored — already opening');
-      return;
-    }
-    Log.d('hadithlist', 'open $collection:$number');
-    _opening = true;
-    // Lock the results (stop live updates) and free the shared mic so the reader's
-    // phoneme follow-along can claim it. autoStart=true then hands straight to the
-    // streaming model — highlight the words as the user recites, no extra tap.
-    _voice?.cancel();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        Log.d('hadithlist', 'open $collection:$number aborted — unmounted before push');
-        return;
-      }
-      Navigator.of(context)
-          .push(MaterialPageRoute(
-              builder: (_) => HadithReaderScreen(
-                  collection: collection, number: number, text: text, autoStart: true)))
-          .then((_) {
-        if (mounted) setState(() => _opening = false);
-      });
-    });
-    // A bare GestureDetector tap changes nothing visually, so Flutter schedules no
-    // frame — and the post-frame callback above then never fires until the next
-    // unrelated input (a stray swipe) forces one, which is why tap-to-open hung
-    // for seconds. Force a frame so the push runs on the very next tick.
-    WidgetsBinding.instance.ensureVisualUpdate();
-  }
-
+  int get voiceTab => Tabs.hadith;
   @override
-  void dispose() {
-    _voice?.removeListener(_onVoice);
-    _debounce?.cancel();
-    _searchController.dispose();
-    super.dispose();
+  String get logTag => 'hadithlist';
+  @override
+  List<TextSearchHit> runSearch(String q) => _textSearch?.search(q) ?? const [];
+  @override
+  ({String id, double score}) scoreOf(TextSearchHit hit) =>
+      (id: hit.id, score: hit.score);
+  @override
+  void openHit(TextSearchHit hit) {
+    final e = _search?.entryById(hit.id);
+    if (e != null) _open(e.collection, e.number, e.text);
   }
 
-  // Voice search: record → live-transcribe (FastConformer, every ~2s) → the
-  // transcript flows into the search field via _onVoice, so the SAME BM25 path
-  // narrows the results as the user recites. Tap to start, tap to stop.
-  Future<void> _toggleMic(VoiceSearchState voice) async {
-    if (voice.recording) {
-      await voice.stop();
-      return;
-    }
-    _confidence.reset();
-    _conf = 0;
-    await voice.start();
-    if (voice.error != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(voice.error!)));
-    }
-  }
+  void _open(String collection, int number, String text) => openRoute((_) =>
+      HadithReaderScreen(
+          collection: collection, number: number, text: text, autoStart: true));
 
   @override
   Widget build(BuildContext context) {
     final voice = context.watch<VoiceSearchState>();
-    final searching = _query.isNotEmpty;
     final browse = _search?.allHadith;
 
     // While reciting, the leading result expands to show more of the matching text
     // and carries the trust ring that fills toward auto-open.
-    final leadExpanded = voice.recording && _voiceQuery;
+    final leadExpanded = voice.recording && voiceQuery;
 
     final int count;
     final IndexedWidgetBuilder builder;
     if (searching) {
-      count = _results.length;
+      count = results.length;
       builder = (_, i) {
-        final hit = _results[i];
+        final hit = results[i];
         final e = _search!.entryById(hit.id)!;
         return _HadithCard(
           label: e.label,
@@ -200,7 +89,7 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
           matched: hit.matchedWords,
           onTap: () => _open(e.collection, e.number, e.text),
           expanded: leadExpanded && i == 0,
-          confidence: leadExpanded && i == 0 ? _conf : null,
+          confidence: leadExpanded && i == 0 ? conf : null,
         );
       };
     } else {
@@ -224,10 +113,10 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
       level: voice.level,
       heard: '',
       hearingLabel: voice.recording ? 'Listening… tap to search' : 'Preparing…',
-      onMicTap: () => _toggleMic(voice),
+      onMicTap: toggleMic,
       micIdleLabel: 'Recite to find a hadith',
-      searchController: _searchController,
-      onSearchChanged: _onSearchChanged,
+      searchController: searchController,
+      onSearchChanged: onSearchChanged,
       searchHint: 'Search hadith',
     );
   }

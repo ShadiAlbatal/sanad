@@ -1,11 +1,9 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/duas.dart';
 import '../services/asr/dua_corpus.dart';
 import '../services/asr/dua_search.dart';
 import '../services/search/corpus_text_search.dart';
-import '../services/search/search_confidence.dart';
 import '../services/search/text_search.dart';
 import '../state/app_state.dart';
 import '../state/voice_search_state.dart';
@@ -14,13 +12,14 @@ import '../util/log.dart';
 import '../widgets/highlighted_arabic.dart';
 import '../widgets/search_list_scaffold.dart';
 import 'dua_reader_screen.dart';
+import 'voice_search_list_mixin.dart';
 
-/// The Azkar tab's root: the browsable list of du'ās & adhkār (existing 5 + Hisn
-/// al-Muslim, ~260), sourced from the bundled du'a corpus, rendered through the
-/// shared [SearchListScaffold] (content list + unified footer). Tapping a card
-/// opens its reader. The footer's mic runs the "recite to open" finder
-/// ([DuaFinderState]); this screen also listens for the finder's pick and opens
-/// that du'a's reader, already following along.
+/// The Azkar tab's root: the browsable list of du'ās & adhkār (Hisn al-Muslim,
+/// ~260) from the bundled du'a corpus, rendered through the shared
+/// [SearchListScaffold] (content list + unified footer). Voice + typed search
+/// run through [VoiceSearchListMixin] (FastConformer live-transcription →
+/// BM25); tapping a card — or a confident voice match — opens its reader,
+/// already following along.
 class DuaListScreen extends StatefulWidget {
   const DuaListScreen({super.key});
 
@@ -28,23 +27,15 @@ class DuaListScreen extends StatefulWidget {
   State<DuaListScreen> createState() => _DuaListScreenState();
 }
 
-class _DuaListScreenState extends State<DuaListScreen> {
-  VoiceSearchState? _voice;
+class _DuaListScreenState extends State<DuaListScreen>
+    with VoiceSearchListMixin<DuaListScreen, TextSearchHit> {
   DuaSearch? _search;
   TextSearch? _textSearch;
-  final _searchController = TextEditingController();
-
-  Timer? _debounce;
-  String _query = '';
-  List<TextSearchHit> _results = const [];
-  final _confidence = SearchConfidence();
-  double _conf = 0;
-  bool _voiceQuery = false;
 
   @override
   void initState() {
     super.initState();
-    // Same cached, off-thread corpus the finder uses — rendered here for browsing.
+    // Same cached, off-thread corpus the search uses — rendered here for browsing.
     loadDuaSearch().then((s) {
       if (mounted) setState(() => _search = s);
     }).catchError((Object e) {
@@ -58,6 +49,21 @@ class _DuaListScreenState extends State<DuaListScreen> {
     });
   }
 
+  @override
+  int get voiceTab => Tabs.dua;
+  @override
+  String get logTag => 'dualist';
+  @override
+  List<TextSearchHit> runSearch(String q) => _textSearch?.search(q) ?? const [];
+  @override
+  ({String id, double score}) scoreOf(TextSearchHit hit) =>
+      (id: hit.id, score: hit.score);
+  @override
+  void openHit(TextSearchHit hit) {
+    final meta = _search?.metaById(hit.id);
+    if (meta != null) _open(_duaFromMeta(meta));
+  }
+
   Dua _duaFromMeta(DuaMeta m) => Dua(
         id: m.id,
         title: m.title,
@@ -66,126 +72,28 @@ class _DuaListScreenState extends State<DuaListScreen> {
         meaning: m.meaning,
       );
 
-  void _onSearchChanged(String q, {bool fromVoice = false}) {
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 220), () {
-      if (!mounted) return;
-      final query = q.trim();
-      _results = query.isEmpty ? const [] : (_textSearch?.search(query) ?? const []);
-      String? openId;
-      if (fromVoice && query.isNotEmpty) {
-        final out = _confidence
-            .update([for (final h in _results.take(5)) (id: h.id, score: h.score)]);
-        _conf = out.confidence;
-        openId = out.openId;
-        _voiceQuery = true;
-      } else {
-        _confidence.reset();
-        _conf = 0;
-        _voiceQuery = false;
-      }
-      setState(() => _query = query);
-      if (query.isNotEmpty) {
-        Log.d('dualist',
-            'search "$query" -> ${_results.length} hits conf=${_conf.toStringAsFixed(2)}');
-      }
-      if (openId != null) {
-        final meta = _search?.metaById(openId);
-        if (meta != null) {
-          Log.d('dualist', 'auto-open $openId (trust ring full)');
-          _open(_duaFromMeta(meta));
-        }
-      }
-    });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final voice = context.read<VoiceSearchState>();
-    if (!identical(voice, _voice)) {
-      _voice?.removeListener(_onVoice);
-      _voice = voice;
-      voice.addListener(_onVoice);
-    }
-  }
-
-  void _onVoice() {
-    // Only the visible tab reacts to the shared voice state (see hadith screen).
-    if (!mounted || context.read<AppState>().tabIndex != Tabs.dua) return;
-    final t = _voice?.transcript ?? '';
-    if (t.isEmpty || t == _searchController.text) return;
-    _searchController.text = t;
-    _onSearchChanged(t, fromVoice: true);
-  }
-
-  // See QuranListScreen._opening — same rapid-double-tap guard against stacked
-  // pushes while the reader takes a beat to open.
-  bool _opening = false;
-
-  void _open(Dua dua) {
-    if (_opening) return;
-    _opening = true;
-    // Lock the results + free the mic for the reader's phoneme follow-along, then
-    // open with autoStart so highlighting begins as the user recites (see hadith).
-    _voice?.cancel();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      Navigator.of(context)
-          .push(MaterialPageRoute(
-              builder: (_) => DuaReaderScreen(dua: dua, autoStart: true)))
-          .then((_) {
-        if (mounted) setState(() => _opening = false);
-      });
-    });
-    // A bare GestureDetector tap changes nothing visually, so Flutter schedules no
-    // frame — and the post-frame callback above then never fires until the next
-    // unrelated input (a stray swipe) forces one. Force a frame so the push runs
-    // on the very next tick.
-    WidgetsBinding.instance.ensureVisualUpdate();
-  }
-
-  @override
-  void dispose() {
-    _voice?.removeListener(_onVoice);
-    _debounce?.cancel();
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _toggleMic(VoiceSearchState voice) async {
-    if (voice.recording) {
-      await voice.stop();
-      return;
-    }
-    _confidence.reset();
-    _conf = 0;
-    await voice.start();
-    if (voice.error != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(voice.error!)));
-    }
-  }
+  void _open(Dua dua) =>
+      openRoute((_) => DuaReaderScreen(dua: dua, autoStart: true));
 
   @override
   Widget build(BuildContext context) {
     final voice = context.watch<VoiceSearchState>();
-    final searching = _query.isNotEmpty;
     final metas = _search?.allDuas;
-    final leadExpanded = voice.recording && _voiceQuery;
+    final leadExpanded = voice.recording && voiceQuery;
 
     final int count;
     final IndexedWidgetBuilder builder;
     if (searching) {
-      count = _results.length;
+      count = results.length;
       builder = (_, i) {
-        final hit = _results[i];
+        final hit = results[i];
         final meta = _search!.metaById(hit.id)!;
         return _DuaCard(
           dua: _duaFromMeta(meta),
           matched: hit.matchedWords,
           onTap: () => _open(_duaFromMeta(meta)),
           expanded: leadExpanded && i == 0,
-          confidence: leadExpanded && i == 0 ? _conf : null,
+          confidence: leadExpanded && i == 0 ? conf : null,
         );
       };
     } else {
@@ -206,10 +114,10 @@ class _DuaListScreenState extends State<DuaListScreen> {
       level: voice.level,
       heard: '',
       hearingLabel: voice.recording ? 'Listening… tap to search' : 'Preparing…',
-      onMicTap: () => _toggleMic(voice),
+      onMicTap: toggleMic,
       micIdleLabel: 'Recite to find a du\'ā',
-      searchController: _searchController,
-      onSearchChanged: _onSearchChanged,
+      searchController: searchController,
+      onSearchChanged: onSearchChanged,
       searchHint: 'Search du\'ās',
     );
   }
