@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import '../data/quran_repository.dart';
 import '../models/mushaf.dart';
 import '../services/asr/quran_search.dart';
-import '../state/quran_finder_state.dart';
+import '../services/search/search_confidence.dart';
+import '../state/voice_search_state.dart';
 import '../theme/app_theme.dart';
 import '../util/log.dart';
 import '../widgets/highlighted_arabic.dart';
@@ -31,7 +32,7 @@ class QuranListScreen extends StatefulWidget {
 }
 
 class _QuranListScreenState extends State<QuranListScreen> {
-  QuranFinderState? _finder;
+  VoiceSearchState? _voice;
   QuranSearch? _search;
   List<Chapter>? _chapters;
   final _searchController = TextEditingController();
@@ -39,8 +40,9 @@ class _QuranListScreenState extends State<QuranListScreen> {
   Timer? _debounce;
   String _query = '';
   List<QuranTextHit> _results = const [];
-  // Last voice candidates, kept after the mic stops (see hadith_search_screen).
-  List<QuranCandidate> _voiceCache = const [];
+  final _confidence = SearchConfidence();
+  double _conf = 0;
+  bool _voiceQuery = false;
 
   @override
   void initState() {
@@ -63,35 +65,50 @@ class _QuranListScreenState extends State<QuranListScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final finder = context.read<QuranFinderState>();
-    if (!identical(finder, _finder)) {
-      _finder?.removeListener(_onFinder);
-      _finder = finder;
-      _finder!.addListener(_onFinder);
-      finder.preload(); // build the index off-thread on first tab open
+    final voice = context.read<VoiceSearchState>();
+    if (!identical(voice, _voice)) {
+      _voice?.removeListener(_onVoice);
+      _voice = voice;
+      voice.addListener(_onVoice);
     }
   }
 
-  void _onSearchChanged(String q) {
+  void _onSearchChanged(String q, {bool fromVoice = false}) {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 220), () {
       if (!mounted) return;
       final query = q.trim();
-      setState(() {
-        _query = query;
-        _results = query.isEmpty ? const [] : (_search?.searchText(query) ?? const []);
-      });
+      _results = query.isEmpty ? const [] : (_search?.searchText(query) ?? const []);
+      String? openId;
+      if (fromVoice && query.isNotEmpty) {
+        final out = _confidence
+            .update([for (final h in _results.take(5)) (id: h.id, score: h.score)]);
+        _conf = out.confidence;
+        openId = out.openId;
+        _voiceQuery = true;
+      } else {
+        _confidence.reset();
+        _conf = 0;
+        _voiceQuery = false;
+      }
+      setState(() => _query = query);
+      if (query.isNotEmpty) {
+        Log.d('quranlist',
+            'search "$query" -> ${_results.length} hits conf=${_conf.toStringAsFixed(2)}');
+      }
+      if (openId != null && _results.isNotEmpty) {
+        final hit = _results.firstWhere((h) => h.id == openId, orElse: () => _results.first);
+        Log.d('quranlist', 'auto-open $openId page ${hit.meta.page} (trust ring full)');
+        _open(hit.meta.page);
+      }
     });
   }
 
-  void _onFinder() {
-    final finder = _finder;
-    final pick = finder?.pick;
-    if (finder == null || pick == null) return;
-    // A pushed reader (on top) owns the pick; don't double-navigate from under it.
-    if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
-    finder.clearPick();
-    _open(pick.page);
+  void _onVoice() {
+    final t = _voice?.transcript ?? '';
+    if (t.isEmpty || t == _searchController.text) return;
+    _searchController.text = t;
+    _onSearchChanged(t, fromVoice: true);
   }
 
   // Opening the reader takes a beat (asset decode, curl setup) with no visible
@@ -103,8 +120,9 @@ class _QuranListScreenState extends State<QuranListScreen> {
   void _open(int page) {
     if (_opening) return;
     _opening = true;
-    final finder = _finder;
-    if (finder != null && finder.listening) finder.stop(); // clean mic handoff to the reader
+    // Lock the results + free the word model / rebuild the phoneme engine so the
+    // mushaf reader's follow-along runs clean (see VoiceSearchState.cancel).
+    _voice?.cancel();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       Navigator.of(context)
@@ -122,21 +140,22 @@ class _QuranListScreenState extends State<QuranListScreen> {
 
   @override
   void dispose() {
-    _finder?.removeListener(_onFinder);
+    _voice?.removeListener(_onVoice);
     _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
-  Future<void> _toggleMic(QuranFinderState finder) async {
-    if (finder.listening) {
-      await finder.stop();
+  Future<void> _toggleMic(VoiceSearchState voice) async {
+    if (voice.recording) {
+      await voice.stop();
       return;
     }
-    setState(() => _voiceCache = const []); // fresh recitation → drop the last matches
-    await finder.start();
-    if (finder.error != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(finder.error!)));
+    _confidence.reset();
+    _conf = 0;
+    await voice.start();
+    if (voice.error != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(voice.error!)));
     }
   }
 
@@ -150,31 +169,16 @@ class _QuranListScreenState extends State<QuranListScreen> {
 
   String _verseLabel(int surah, int ayah) => '${_surahName(surah)} · Ayah $ayah';
 
-  String _finderLabel(QuranFinderState finder) {
-    if (!finder.heardSomething) return 'Listening…';
-    final lead = finder.leading;
-    return lead == null ? 'Matching…' : 'Hearing: ${_verseLabel(lead.surah, lead.ayah)}?';
-  }
-
   @override
   Widget build(BuildContext context) {
-    final finder = context.watch<QuranFinderState>();
-    if (finder.listening && finder.candidates.isNotEmpty) _voiceCache = finder.candidates;
-    final showCandidates = _query.isEmpty && _voiceCache.isNotEmpty;
+    final voice = context.watch<VoiceSearchState>();
     final searching = _query.isNotEmpty;
     final chapters = _chapters;
+    final leadExpanded = voice.recording && _voiceQuery;
 
     final int count;
     final IndexedWidgetBuilder builder;
-    if (showCandidates) {
-      count = _voiceCache.length;
-      builder = (_, i) => _VerseCard(
-            label: _verseLabel(_voiceCache[i].surah, _voiceCache[i].ayah),
-            text: _voiceCache[i].text,
-            matched: finder.matchedWords(_voiceCache[i].id),
-            onTap: () => _open(_voiceCache[i].page),
-          );
-    } else if (searching) {
+    if (searching) {
       count = _results.length;
       builder = (_, i) {
         final hit = _results[i];
@@ -183,6 +187,8 @@ class _QuranListScreenState extends State<QuranListScreen> {
           text: hit.meta.text,
           matched: hit.matchedWords,
           onTap: () => _open(hit.meta.page),
+          expanded: leadExpanded && i == 0,
+          confidence: leadExpanded && i == 0 ? _conf : null,
         );
       };
     } else {
@@ -193,16 +199,16 @@ class _QuranListScreenState extends State<QuranListScreen> {
     return SearchListScaffold(
       title: 'Quran',
       subtitle: 'Recite a verse to find it, or tap a surah to read',
-      loading: !showCandidates && !searching && chapters == null,
+      loading: !searching && chapters == null,
       itemCount: count,
       itemBuilder: builder,
       emptyState: searching ? const _NoMatches() : null,
-      listening: finder.listening,
-      starting: finder.starting,
-      level: finder.level,
-      heard: finder.heard,
-      hearingLabel: _finderLabel(finder),
-      onMicTap: () => _toggleMic(finder),
+      listening: voice.recording,
+      starting: voice.busy,
+      level: voice.level,
+      heard: '',
+      hearingLabel: voice.recording ? 'Listening… tap to search' : 'Preparing…',
+      onMicTap: () => _toggleMic(voice),
       micIdleLabel: 'Recite to find a verse',
       searchController: _searchController,
       onSearchChanged: _onSearchChanged,
@@ -282,8 +288,15 @@ class _VerseCard extends StatelessWidget {
   final String text;
   final Set<String> matched;
   final VoidCallback onTap;
+  final bool expanded; // the live leading result: show more matching text
+  final double? confidence; // 0..1 trust ring (null = no ring)
   const _VerseCard(
-      {required this.label, required this.text, required this.onTap, this.matched = const {}});
+      {required this.label,
+      required this.text,
+      required this.onTap,
+      this.matched = const {},
+      this.expanded = false,
+      this.confidence});
 
   @override
   Widget build(BuildContext context) {
@@ -298,6 +311,7 @@ class _VerseCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: dark ? AppColors.nightCard : AppColors.paperEdge,
           borderRadius: BorderRadius.circular(16),
+          border: expanded ? Border.all(color: context.accent.withValues(alpha: 0.6), width: 1.4) : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -313,7 +327,19 @@ class _VerseCard extends StatelessWidget {
                         color: context.accent,
                       )),
                 ),
-                Icon(Icons.chevron_right_rounded, color: soft),
+                if (confidence != null)
+                  SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      value: confidence!.clamp(0.0, 1.0),
+                      strokeWidth: 2.5,
+                      backgroundColor: soft.withValues(alpha: 0.25),
+                      valueColor: AlwaysStoppedAnimation(context.accent),
+                    ),
+                  )
+                else
+                  Icon(Icons.chevron_right_rounded, color: soft),
               ],
             ),
             const SizedBox(height: 8),
@@ -323,6 +349,7 @@ class _VerseCard extends StatelessWidget {
                 text: text,
                 matched: matched,
                 highlight: context.accent,
+                maxLines: expanded ? 8 : 2,
                 style: const TextStyle(
                   fontFamily: 'UthmanicHafs',
                   fontSize: 21,
