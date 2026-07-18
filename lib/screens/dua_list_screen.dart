@@ -7,6 +7,7 @@ import '../services/asr/dua_search.dart';
 import '../services/search/corpus_text_search.dart';
 import '../services/search/search_confidence.dart';
 import '../services/search/text_search.dart';
+import '../state/app_state.dart';
 import '../state/voice_search_state.dart';
 import '../theme/app_theme.dart';
 import '../util/log.dart';
@@ -110,6 +111,8 @@ class _DuaListScreenState extends State<DuaListScreen> {
   }
 
   void _onVoice() {
+    // Only the visible tab reacts to the shared voice state (see hadith screen).
+    if (!mounted || context.read<AppState>().tabIndex != Tabs.dua) return;
     final t = _voice?.transcript ?? '';
     if (t.isEmpty || t == _searchController.text) return;
     _searchController.text = t;

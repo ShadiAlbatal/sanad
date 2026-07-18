@@ -72,13 +72,14 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
     final tab = app.tabIndex;
 
     // Voice search is ONE shared state across the Dua/Quran/Hadith tabs, kept
-    // alive by the IndexedStack. Leaving any of them mid-recording must stop it
-    // (the reader is a pushed route that frees the mic itself on open).
+    // alive by the IndexedStack. On any tab change, cancel it: this stops a live
+    // recording AND — via cancel's handoff — frees the ~125MB word model + rebuilds
+    // the phoneme engine if the word model was loaded, so leaving a search tab
+    // without opening a reader doesn't leave the model resident. No-op when nothing
+    // was recording/loaded.
     if (_lastTab != tab) {
       final voice = context.read<VoiceSearchState>();
-      if (voice.recording) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => voice.cancel());
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) => voice.cancel());
     }
     _lastTab = tab;
 

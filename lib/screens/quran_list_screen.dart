@@ -5,6 +5,7 @@ import '../data/quran_repository.dart';
 import '../models/mushaf.dart';
 import '../services/asr/quran_search.dart';
 import '../services/search/search_confidence.dart';
+import '../state/app_state.dart';
 import '../state/voice_search_state.dart';
 import '../theme/app_theme.dart';
 import '../util/log.dart';
@@ -105,6 +106,8 @@ class _QuranListScreenState extends State<QuranListScreen> {
   }
 
   void _onVoice() {
+    // Only the visible tab reacts to the shared voice state (see hadith screen).
+    if (!mounted || context.read<AppState>().tabIndex != Tabs.quran) return;
     final t = _voice?.transcript ?? '';
     if (t.isEmpty || t == _searchController.text) return;
     _searchController.text = t;

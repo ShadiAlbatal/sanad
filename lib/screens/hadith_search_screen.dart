@@ -5,6 +5,7 @@ import '../services/asr/hadith_search.dart';
 import '../services/search/corpus_text_search.dart';
 import '../services/search/search_confidence.dart';
 import '../services/search/text_search.dart';
+import '../state/app_state.dart';
 import '../state/voice_search_state.dart';
 import '../theme/app_theme.dart';
 import '../util/log.dart';
@@ -70,6 +71,10 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
   // Mirror the live transcript into the search field as it grows, so the BM25
   // results narrow AS the user recites (not only on stop).
   void _onVoice() {
+    // ONE shared VoiceSearchState notifies all three list tabs; only the visible
+    // tab reacts, else off-screen tabs run phantom searches and could auto-open
+    // the wrong reader.
+    if (!mounted || context.read<AppState>().tabIndex != Tabs.hadith) return;
     final t = _voice?.transcript ?? '';
     if (t.isEmpty || t == _searchController.text) return;
     _searchController.text = t;
