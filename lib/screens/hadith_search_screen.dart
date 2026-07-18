@@ -97,7 +97,11 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
   bool _opening = false;
 
   void _open(String collection, int number, String text, {bool autoStart = false}) {
-    if (_opening) return;
+    if (_opening) {
+      Log.d('hadithlist', 'tap on $collection:$number ignored — already opening');
+      return;
+    }
+    Log.d('hadithlist', 'open $collection:$number (autoStart=$autoStart)');
     _opening = true;
     // Tapping a candidate while still reciting (before the finder auto-picks) left
     // the search mic running under the pushed reader — only the auto-pick path
@@ -106,7 +110,10 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
     final finder = _finder;
     if (finder != null && finder.listening) finder.stop();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      if (!mounted) {
+        Log.d('hadithlist', 'open $collection:$number aborted — unmounted before push');
+        return;
+      }
       Navigator.of(context)
           .push(MaterialPageRoute(
               builder: (_) => HadithReaderScreen(

@@ -49,15 +49,25 @@ class HadithFinderState extends ChangeNotifier {
   String? _winner; // collection-qualified id ("bukhari:2790")
   int _winStreak = 0;
 
-  // Tunables — DEVICE-PENDING (provisional, tuned on run_20260717_023705.log;
-  // they still need broader on-device confirmation like every ASR threshold here).
-  // The confidence bar (floor/margin) lives in [HadithSearch] and is gated over
-  // the BEST-EVER peaks via [decideFindBest]; this state adds two guards on top:
-  // a query MUST reach [_minQueryLen] collapsed phonemes (~10 words) before any
-  // pick, and the same hadith must win [_confirm] consecutive probes — without
-  // them a single spurious high-margin snapshot could auto-open the wrong hadith.
+  // Tunables — DEVICE-PENDING (provisional; still need broader on-device
+  // confirmation like every ASR threshold here). The confidence bar (floor/
+  // margin) lives in [HadithSearch] and is gated over the BEST-EVER peaks via
+  // [decideFindBest]; this state adds two guards on top: a query MUST reach
+  // [_minQueryLen] collapsed phonemes before any pick, and the same hadith
+  // must win [_confirm] consecutive probes.
+  //
+  // 40 (was) made SHORT hadiths structurally unpickable, however perfectly
+  // recited — confirmed on a real device log (2026-07-18): reciting the
+  // hadith of intentions (bukhari:1, a short, famous matn) peaked at score
+  // 1.57 with a 0.71 margin over the runner-up at length 21 — comfortably
+  // clearing floor (0.9) AND margin (0.5) — but the whole phrase phonemizes
+  // to only ~29 collapsed tokens, so it could never reach the 40-token gate
+  // and was never even foldable into the best-ever map, let alone pickable.
+  // 20 sits just under where the true match's strong peak first appeared
+  // (21) while still skipping the noisy short-length ties among unrelated
+  // isnād-sharing candidates seen at lengths 6-18 in the same log.
   static const int _probeTail = 60; // trailing collapsed tokens fed to the finder
-  static const int _minQueryLen = 40; // ~10 words before a pick is allowed
+  static const int _minQueryLen = 20;
   static const int _confirm = 3; // consecutive winning probes before we commit
 
   bool get listening => _listening;
