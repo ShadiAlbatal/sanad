@@ -117,7 +117,10 @@ class VoiceSearchState extends ChangeNotifier {
   /// (no more live updates), and the shared mic is freed immediately so the
   /// reader's phoneme follow-along can claim it without waiting on a transcribe.
   Future<void> cancel() async {
-    if (!_recording && !_busy) return;
+    if (!_recording && !_busy) {
+      _handOffToFollowAlong();
+      return;
+    }
     Log.d('voicesearch', 'cancel — locking results, releasing mic for follow-along');
     _recording = false;
     _interimTimer?.cancel();
@@ -127,7 +130,20 @@ class VoiceSearchState extends ChangeNotifier {
       await _engine.mic.stop();
     } catch (_) {}
     _engine.releaseMic(_release);
+    _handOffToFollowAlong();
     notifyListeners();
+  }
+
+  // Free the ~125MB FastConformer model and rebuild a fresh phoneme recognizer so
+  // reader follow-along runs on a clean, uncontended sherpa runtime. The two
+  // models never run at once (search vs reader), so this keeps memory to one at a
+  // time and dodges the offline→online decode-0-tokens corruption seen on device.
+  // The word model reloads (~1s) on the next voice search.
+  void _handOffToFollowAlong() {
+    if (!_word.loaded) return; // word model never ran — phoneme engine is already clean
+    _word.dispose();
+    _engine.invalidateEngine();
+    Log.d('voicesearch', 'handed off — word model freed, phoneme engine rebuilt on next use');
   }
 
   void _transcribeInterim() {

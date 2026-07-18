@@ -55,6 +55,18 @@ class AsrEngine {
     }
   }
 
+  /// Dispose the phoneme recognizer so the next [ready] rebuilds a fresh one.
+  /// Needed after the FastConformer word model has run: sharing the sherpa native
+  /// runtime, a heavy offline recognition can leave the streaming recognizer
+  /// decoding 0 tokens (device-observed). Rebuilding guarantees a clean session.
+  void invalidateEngine() {
+    if (_asr == null && _creating == null) return;
+    Log.d('asr', 'phoneme engine invalidated — will rebuild on next use');
+    _asr?.dispose();
+    _asr = null;
+    _creating = null;
+  }
+
   /// Fire-and-forget warm-up so the first mic tap doesn't pay the model's
   /// cold-start cost (mirrors the old ReadingState.warmAsrEngine/_warmWatch).
   void warm() {
