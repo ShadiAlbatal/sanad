@@ -5,13 +5,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sherpa_onnx/sherpa_onnx.dart' as so;
 import '../../util/log.dart';
 
-/// SPIKE ONLY — offline word-level ASR (Muno459 FastConformer-Quran, NeMo CTC)
-/// via sherpa-onnx's OfflineRecognizer. Not wired into search yet; exists to
-/// measure on-device load time, memory, and real-voice transcript quality
-/// before committing to bundling this second (~125 MB) model. Transcribes a
-/// whole utterance at once (offline), which is exactly the transcribe-on-pause
-/// shape search would use — the streaming phoneme model stays the follow-along
-/// engine.
+/// Offline word-level ASR (Muno459 FastConformer-Quran, NeMo CTC) via sherpa-onnx
+/// OfflineRecognizer. Powers voice SEARCH: transcribes a whole recited utterance
+/// to Arabic text on pause/stop, which feeds the existing BM25 text search — far
+/// more accurate on real voice than phoneme-similarity (device-measured: ~1.1s
+/// cold load, ~60× realtime, near-perfect Qur'an + hadith narrator names). The
+/// streaming phoneme model stays the FOLLOW-ALONG engine; the two never run at
+/// once (search on the list, follow-along in the reader), so one loads while the
+/// other is idle.
 class WordAsr {
   so.OfflineRecognizer? _recognizer;
 
