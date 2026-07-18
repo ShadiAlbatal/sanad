@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import '../services/asr/asr_engine.dart';
 import '../state/app_state.dart';
 import '../state/dua_finder_state.dart';
-import '../state/hadith_finder_state.dart';
 import '../state/quran_finder_state.dart';
 import '../state/reading_state.dart';
+import '../state/voice_search_state.dart';
 import 'dua_list_screen.dart';
 import 'hadith_search_screen.dart';
 import 'home_screen.dart';
@@ -63,12 +63,7 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
     final reading = context.read<ReadingState>();
     if (reading.asrActive) reading.stopAsrListening();
     reading.clearRetainedPcm(); // don't hold raw voice audio while backgrounded
-    final finder = context.read<DuaFinderState>();
-    if (finder.listening) finder.stop();
-    final quran = context.read<QuranFinderState>();
-    if (quran.listening) quran.stop();
-    final hadith = context.read<HadithFinderState>();
-    if (hadith.listening) hadith.stop();
+    context.read<VoiceSearchState>().cancel(); // stop any voice search recording
   }
 
   @override
@@ -76,32 +71,15 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
     final app = context.watch<AppState>();
     final tab = app.tabIndex;
 
-    // The finder is provided at root and the tabs are an IndexedStack (never
-    // disposed on switch), so leaving Azkar won't auto-stop it. Release the
-    // shared mic explicitly when we navigate away from Azkar mid-listen (going
-    // to Quran and reciting already stops it via claimMic; going Home does not).
-    if (_lastTab == Tabs.dua && tab != Tabs.dua) {
-      final finder = context.read<DuaFinderState>();
-      if (finder.listening) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => finder.stop());
-      }
-    }
-    // Symmetric guard for the Quran list's voice finder: its mic lives in the
-    // screen, kept alive by the IndexedStack, so leaving the tab mid-listen must
-    // stop it (the reader is a pushed route that self-stops on pop).
-    if (_lastTab == Tabs.quran && tab != Tabs.quran) {
-      final quran = context.read<QuranFinderState>();
-      if (quran.listening) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => quran.stop());
-      }
-    }
-    // Same for the Hadith finder: its mic lives in the screen, kept alive by the
-    // IndexedStack, so leaving the tab mid-listen must stop it.
-    if (_lastTab == Tabs.hadith && tab != Tabs.hadith) {
-      final hadith = context.read<HadithFinderState>();
-      if (hadith.listening) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => hadith.stop());
-      }
+    // Voice search is ONE shared state across the Dua/Quran/Hadith tabs, kept
+    // alive by the IndexedStack. On any tab change, cancel it: this stops a live
+    // recording AND — via cancel's handoff — frees the ~125MB word model + rebuilds
+    // the phoneme engine if the word model was loaded, so leaving a search tab
+    // without opening a reader doesn't leave the model resident. No-op when nothing
+    // was recording/loaded.
+    if (_lastTab != tab) {
+      final voice = context.read<VoiceSearchState>();
+      WidgetsBinding.instance.addPostFrameCallback((_) => voice.cancel());
     }
     _lastTab = tab;
 
@@ -123,14 +101,16 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
             HadithSearchScreen(),
           ],
         ),
-        bottomNavigationBar: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Only Home shows the tab bar; the phone back button (PopScope above)
-            // returns to Home from the immersive list tabs. Each list tab (Dua,
-            // Quran, Hadith) carries its own footer via SearchListScaffold.
-            if (tab == Tabs.home)
-              NavigationBar(
+        // Only Home shows the tab bar; the phone back button (PopScope above)
+        // returns to Home from the immersive list tabs. On those tabs this MUST
+        // be null (not an empty Column): a non-null bottomNavigationBar makes the
+        // Scaffold zero the bottom viewPadding it passes to its body, which then
+        // starves the nested SearchListScaffold footer of its nav-bar inset and
+        // hides it behind the Android nav bar. Each list tab carries its own
+        // footer via SearchListScaffold.
+        bottomNavigationBar: tab != Tabs.home
+            ? null
+            : NavigationBar(
                 selectedIndex: tab,
                 onDestinationSelected: (i) => app.tabIndex = i,
                 destinations: const [
@@ -156,8 +136,6 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
                   ),
                 ],
               ),
-          ],
-        ),
       ),
     );
   }

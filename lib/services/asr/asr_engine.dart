@@ -37,6 +37,8 @@ class AsrEngine {
     if (_reliability.isEmpty) _reliability = await loadPhonemeReliability();
   }
 
+  int _gen = 0; // bumped by invalidateEngine so an in-flight create can't win
+
   /// Create the engine once (guarding a stored [Future] against concurrent
   /// double-create) and ensure the phoneme data is loaded, then return the ready
   /// engine. A failed create nulls the guard so a later call can retry.
@@ -44,15 +46,36 @@ class AsrEngine {
     await ensureData();
     final existing = _asr;
     if (existing != null) return existing;
+    final gen = _gen;
     final future = _creating ??= SherpaAsr.create();
     try {
       final created = await future;
+      if (gen != _gen) {
+        // invalidateEngine ran mid-create — this recognizer was built on the stale
+        // (possibly corrupted) runtime. Drop it and rebuild fresh.
+        created.dispose();
+        if (identical(_creating, future)) _creating = null;
+        return ready();
+      }
       _asr = created;
       return created;
     } catch (_) {
       if (identical(_creating, future)) _creating = null;
       rethrow;
     }
+  }
+
+  /// Dispose the phoneme recognizer so the next [ready] rebuilds a fresh one.
+  /// Needed after the FastConformer word model has run: sharing the sherpa native
+  /// runtime, a heavy offline recognition can leave the streaming recognizer
+  /// decoding 0 tokens (device-observed). Rebuilding guarantees a clean session.
+  void invalidateEngine() {
+    if (_asr == null && _creating == null) return;
+    Log.d('asr', 'phoneme engine invalidated — will rebuild on next use');
+    _gen++;
+    _asr?.dispose();
+    _asr = null;
+    _creating = null;
   }
 
   /// Fire-and-forget warm-up so the first mic tap doesn't pay the model's

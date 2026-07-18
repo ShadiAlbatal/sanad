@@ -1,7 +1,12 @@
+import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../data/quran_repository.dart';
+import '../services/asr/asr_engine.dart';
+import '../services/asr/file_source.dart';
+import '../services/asr/word_asr.dart';
 import '../services/page_render_diagnostic.dart';
 import '../state/reading_state.dart';
 import '../util/log.dart';
@@ -22,6 +27,57 @@ class DebugLogScreen extends StatefulWidget {
 }
 
 class _DebugLogScreenState extends State<DebugLogScreen> {
+  // SPIKE: FastConformer word-ASR evaluation (branch spike/fastconformer-search).
+  final WordAsr _word = WordAsr();
+  bool _wordBusy = false;
+  bool _recording = false;
+
+  @override
+  void dispose() {
+    _word.dispose();
+    super.dispose();
+  }
+
+  Future<void> _wordTranscribeBundled() async {
+    if (_wordBusy) return;
+    setState(() => _wordBusy = true);
+    try {
+      await _word.ensureLoaded();
+      final clip = await loadWavAsset('assets/debug_audio/alkursi_16k.wav');
+      _word.transcribe(clip.pcm);
+    } catch (e, st) {
+      Log.e('wordasr', e, st);
+    } finally {
+      if (mounted) setState(() => _wordBusy = false);
+    }
+  }
+
+  Future<void> _wordRecordAndTranscribe(AsrEngine engine) async {
+    if (_wordBusy) return;
+    setState(() => _wordBusy = true);
+    final buf = <int>[];
+    try {
+      await _word.ensureLoaded();
+      if (!await engine.mic.hasPermission()) {
+        Log.d('wordasr', 'mic permission denied');
+        return;
+      }
+      Log.d('wordasr', '=== recording 8s for FastConformer (recite now) ===');
+      setState(() => _recording = true);
+      await engine.mic.start((pcm) => buf.addAll(pcm));
+      await Future.delayed(const Duration(seconds: 8));
+      await engine.mic.stop();
+      if (mounted) setState(() => _recording = false);
+      Log.d('wordasr', 'captured ${(buf.length / 16000).toStringAsFixed(1)}s (${buf.length} samples)');
+      _word.transcribe(Int16List.fromList(buf));
+      await Log.flushFile();
+    } catch (e, st) {
+      Log.e('wordasr', e, st);
+    } finally {
+      if (mounted) setState(() { _wordBusy = false; _recording = false; });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,6 +169,24 @@ class _DebugLogScreenState extends State<DebugLogScreen> {
                               ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
                               : const Icon(Icons.fact_check_rounded, size: 16),
                           label: Text(reading.evalBusy ? 'Evaluating…' : 'Run eval (all clips)',
+                              style: const TextStyle(fontSize: 12)),
+                        ),
+                        // SPIKE: FastConformer word-ASR — measures load time + transcript.
+                        FilledButton.tonalIcon(
+                          onPressed: _wordBusy ? null : _wordTranscribeBundled,
+                          icon: _wordBusy
+                              ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(Icons.text_fields_rounded, size: 16),
+                          label: const Text('Word ASR: Kursi', style: TextStyle(fontSize: 12)),
+                        ),
+                        FilledButton.tonalIcon(
+                          onPressed: _wordBusy
+                              ? null
+                              : () => _wordRecordAndTranscribe(context.read<AsrEngine>()),
+                          icon: _recording
+                              ? const Icon(Icons.mic_rounded, size: 16, color: Colors.red)
+                              : const Icon(Icons.fiber_manual_record_rounded, size: 16),
+                          label: Text(_recording ? 'Recording 8s…' : 'Word ASR: record 8s',
                               style: const TextStyle(fontSize: 12)),
                         ),
                       ],

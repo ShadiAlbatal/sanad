@@ -1,6 +1,28 @@
 # Sanad — Handoff — START HERE
 
-## ⭐ SESSION 8 (2026-07-18) — DEVICE-BUG SWEEP + SEARCH-ARCHITECTURE VERDICT — RESUME HERE
+## ⭐ SESSION 9 (2026-07-19) — FASTCONFORMER VOICE SEARCH BUILT + MERGED — RESUME HERE
+
+**What shipped this session (branch `spike/fastconformer-search` → MERGED to `master`):** voice search is now **transcribe-to-text** (FastConformer word model → BM25) across all three tabs, replacing the phoneme-similarity finders. Device-proven: model loads ~1.1s, transcribes ~60× realtime, near-perfect Qur'an + hadith narrator-name transcripts. This replaced the phoneme-search approach after **Option C (phoneme→word→BM25) was measured and rejected** — clean 96-100% word recovery collapsed to 62-75% at the phoneme model's real ~12% PER (error compounding); code still parked on branch `feature/word-search-from-phonemes`.
+
+**Architecture (the two-model split — CLOSED decision):**
+- **Search = FastConformer** (`lib/services/asr/word_asr.dart`, sherpa OfflineRecognizer, NeMo CTC; 125MB int8 `assets/asr/word/fastconformer.int8.onnx`, now in LFS). `lib/state/voice_search_state.dart` = the shared driver: record on the shared mic → re-transcribe the growing buffer every 2s (live narrowing) → transcript flows into each list screen's search field → existing BM25 renders. ONE `VoiceSearchState` for all 3 tabs (provided in main.dart).
+- **Follow-along stays phoneme** (`sherpa_asr.dart` OnlineRecognizer, unchanged) — highlights words in the readers.
+- **The two sherpa models must NEVER run at once** (device-observed: offline recognition leaves the online one decoding 0 tokens — shared native runtime/memory). Handoff on opening a reader: `VoiceSearchState.cancel()` → `_handOffToFollowAlong()` disposes the word model (frees 125MB) + `AsrEngine.invalidateEngine()` rebuilds a fresh phoneme recognizer. This invalidate runs SYNCHRONOUSLY before the reader's `ready()` (a race fix — see below).
+- **UX:** leading result card auto-expands (8 lines) + a circular "trust ring" (`lib/services/search/search_confidence.dart`, streak + ≥1.5× margin) that AUTO-OPENS when it clearly converges; conservative so ambiguous isnād-only cases (true match often #2) don't mis-open. Results lock behind you (IndexedStack) so Back shows the rest.
+
+**Independent 2-agent review done + all 4 real bugs FIXED (commit 886e9d8):** (R1) hot mic if cancel during the ~1s model-load window → generation counter aborts a superseded start; (C1/C1b) handoff race disposing the engine the reader just grabbed → synchronous invalidate + AsrEngine generation token; (R2) one shared VoiceSearchState fired phantom searches on all 3 tabs + could auto-open the WRONG reader → `_onVoice` no-ops unless its tab is active; (F1) word model leaked resident on search→Home without opening a reader → RootScaffold cancels voice on any tab change. Confidence logic + listener lifecycle + disposal confirmed sound. 228 host tests green.
+
+**⚠️ ENDGAME CLEANUP STILL OWED (documented, NOT done — safe to defer, none blocks use):**
+- **Dead phoneme finders:** `DuaFinderState`/`QuranFinderState` (provided in `root_scaffold.dart`) + `HadithFinderState` (provided in `main.dart`) are no longer read by any live search path. `hadith_reader_screen.dart`'s `_onFinder`/`_finder` block is dead (pick never fires). `lib/widgets/hadith_mic_bar.dart` is referenced nowhere. Remove these + `lib/state/{dua,quran,hadith}_finder_state.dart` + their orphaned tests (`test/{dua_finder,hadith_finder,hadith_finder_replay,quran_finder}_test.dart`). CAUTION: removing the HadithFinderState provider requires also deleting the reader's `_onFinder` read or it crashes — do it together, then device-test a hadith reader open.
+- **Stale docstrings:** the 3 list-screen class docs + `root_scaffold.dart:19-23` still describe the old finder flow.
+- **Debug spike:** `debug_log_screen.dart` has two "Word ASR" buttons + its OWN `WordAsr` (a 2nd 125MB instance when tapped, dev-gated). Keep as a dev tool or strip before store.
+- **Triplication:** the ~60-line voice-search shell (`_onVoice`/`_onSearchChanged`+confidence/`_toggleMic`/`_open`) is copy-pasted across the 3 list screens and has ALREADY drifted (the `loading:` guard differs per screen). Factor into a shared mixin/controller.
+- **APK size:** ~200MB of models now (69MB phoneme + 125MB word). Accepted per "accuracy over size" but flag before store submission.
+- **License:** FastConformer model card self-contradicts (npl-1.0 header vs CC-BY-4.0 body) — re-check current HF page before shipping; CC-BY-4.0 would be commercially OK (better than the phoneme model's non-commercial license).
+
+**Still open from before (unchanged):** device-tune ASR thresholds; Quran backward-read false-green (piece 5); web version (spike WASM); the fawazahmed0 matn-separated dataset swap (composes as isnād/matn BM25 fields later — user rejected forced pre-classification; ONE search over everything).
+
+## SESSION 8 (2026-07-18) — DEVICE-BUG SWEEP + SEARCH-ARCHITECTURE VERDICT
 
 **Repo/deploy state:** GitHub repo created + pushed: `github.com/ShadiAlbatal/sanad` (public). `master` = shippable, 223 tests green. Git LFS tracks `*.onnx/*.gz` going forward (existing blobs NOT migrated — deliberate; `git lfs migrate import --everything --include="*.onnx,*.gz"` + force-push whenever worth it). Known cosmetic quirk: `git status` always shows the 3 large binaries as "M" (LFS filter display artifact, not real changes — ignore). Site deployed by user to Cloudflare (build cmd empty, output `public`, root `site`).
 
