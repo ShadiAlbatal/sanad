@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/asr/hadith_search.dart';
 import '../services/search/corpus_text_search.dart';
+import '../services/search/search_confidence.dart';
 import '../services/search/text_search.dart';
 import '../state/voice_search_state.dart';
 import '../theme/app_theme.dart';
@@ -33,6 +34,9 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
   Timer? _debounce;
   String _query = '';
   List<TextSearchHit> _results = const [];
+  final _confidence = SearchConfidence();
+  double _conf = 0; // live voice trust ring 0..1 on the leading result
+  bool _voiceQuery = false; // the current query came from voice (drives the ring)
 
   @override
   void initState() {
@@ -69,21 +73,42 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
     final t = _voice?.transcript ?? '';
     if (t.isEmpty || t == _searchController.text) return;
     _searchController.text = t;
-    _onSearchChanged(t);
+    _onSearchChanged(t, fromVoice: true);
   }
 
-  void _onSearchChanged(String q) {
+  void _onSearchChanged(String q, {bool fromVoice = false}) {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 220), () {
       if (!mounted) return;
       final query = q.trim();
-      setState(() {
-        _query = query;
-        _results = query.isEmpty ? const [] : (_textSearch?.search(query) ?? const []);
-      });
+      _results = query.isEmpty ? const [] : (_textSearch?.search(query) ?? const []);
+      // Live voice: track how confidently the field has converged on one hadith,
+      // fill the ring, and auto-open when it's clearly sure. Typed search never
+      // auto-opens — the user is deciding.
+      String? openId;
+      if (fromVoice && query.isNotEmpty) {
+        final out = _confidence
+            .update([for (final h in _results.take(5)) (id: h.id, score: h.score)]);
+        _conf = out.confidence;
+        openId = out.openId;
+        _voiceQuery = true;
+      } else {
+        _confidence.reset();
+        _conf = 0;
+        _voiceQuery = false;
+      }
+      setState(() => _query = query);
       if (query.isNotEmpty) {
         final top = _results.take(3).map((h) => '${h.id}:${h.score.toStringAsFixed(2)}').join(' ');
-        Log.d('hadithlist', 'search "$query" -> ${_results.length} hits, top=[$top]');
+        Log.d('hadithlist',
+            'search "$query" -> ${_results.length} hits conf=${_conf.toStringAsFixed(2)} top=[$top]');
+      }
+      if (openId != null) {
+        final e = _search?.entryById(openId);
+        if (e != null) {
+          Log.d('hadithlist', 'auto-open $openId (trust ring full)');
+          _open(e.collection, e.number, e.text);
+        }
       }
     });
   }
@@ -139,6 +164,8 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
       await voice.stop();
       return;
     }
+    _confidence.reset();
+    _conf = 0;
     await voice.start();
     if (voice.error != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(voice.error!)));
@@ -150,6 +177,10 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
     final voice = context.watch<VoiceSearchState>();
     final searching = _query.isNotEmpty;
     final browse = _search?.allHadith;
+
+    // While reciting, the leading result expands to show more of the matching text
+    // and carries the trust ring that fills toward auto-open.
+    final leadExpanded = voice.recording && _voiceQuery;
 
     final int count;
     final IndexedWidgetBuilder builder;
@@ -163,6 +194,8 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
           text: e.text,
           matched: hit.matchedWords,
           onTap: () => _open(e.collection, e.number, e.text),
+          expanded: leadExpanded && i == 0,
+          confidence: leadExpanded && i == 0 ? _conf : null,
         );
       };
     } else {
@@ -217,8 +250,15 @@ class _HadithCard extends StatelessWidget {
   final String text;
   final Set<String> matched; // typed-search matched words to highlight ('' otherwise)
   final VoidCallback onTap;
+  final bool expanded; // the live leading result: show more matching text
+  final double? confidence; // 0..1 trust ring (null = no ring)
   const _HadithCard(
-      {required this.label, required this.text, required this.onTap, this.matched = const {}});
+      {required this.label,
+      required this.text,
+      required this.onTap,
+      this.matched = const {},
+      this.expanded = false,
+      this.confidence});
 
   @override
   Widget build(BuildContext context) {
@@ -233,6 +273,7 @@ class _HadithCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: dark ? AppColors.nightCard : AppColors.paperEdge,
           borderRadius: BorderRadius.circular(16),
+          border: expanded ? Border.all(color: context.accent.withValues(alpha: 0.6), width: 1.4) : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -248,7 +289,19 @@ class _HadithCard extends StatelessWidget {
                         color: context.accent,
                       )),
                 ),
-                Icon(Icons.chevron_right_rounded, color: soft),
+                if (confidence != null)
+                  SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      value: confidence!.clamp(0.0, 1.0),
+                      strokeWidth: 2.5,
+                      backgroundColor: soft.withValues(alpha: 0.25),
+                      valueColor: AlwaysStoppedAnimation(context.accent),
+                    ),
+                  )
+                else
+                  Icon(Icons.chevron_right_rounded, color: soft),
               ],
             ),
             const SizedBox(height: 8),
@@ -258,6 +311,7 @@ class _HadithCard extends StatelessWidget {
                 text: text,
                 matched: matched,
                 highlight: context.accent,
+                maxLines: expanded ? 8 : 2,
                 style: const TextStyle(
                   fontFamily: 'UthmanicHafs',
                   fontSize: 21,
