@@ -123,14 +123,16 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
             HadithSearchScreen(),
           ],
         ),
-        bottomNavigationBar: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Only Home shows the tab bar; the phone back button (PopScope above)
-            // returns to Home from the immersive list tabs. Each list tab (Dua,
-            // Quran, Hadith) carries its own footer via SearchListScaffold.
-            if (tab == Tabs.home)
-              NavigationBar(
+        // Only Home shows the tab bar; the phone back button (PopScope above)
+        // returns to Home from the immersive list tabs. On those tabs this MUST
+        // be null (not an empty Column): a non-null bottomNavigationBar makes the
+        // Scaffold zero the bottom viewPadding it passes to its body, which then
+        // starves the nested SearchListScaffold footer of its nav-bar inset and
+        // hides it behind the Android nav bar. Each list tab carries its own
+        // footer via SearchListScaffold.
+        bottomNavigationBar: tab != Tabs.home
+            ? null
+            : NavigationBar(
                 selectedIndex: tab,
                 onDestinationSelected: (i) => app.tabIndex = i,
                 destinations: const [
@@ -156,8 +158,6 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
                   ),
                 ],
               ),
-          ],
-        ),
       ),
     );
   }
