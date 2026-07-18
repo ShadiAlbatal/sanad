@@ -122,6 +122,11 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
         if (mounted) setState(() => _opening = false);
       });
     });
+    // A bare GestureDetector tap changes nothing visually, so Flutter schedules no
+    // frame — and the post-frame callback above then never fires until the next
+    // unrelated input (a stray swipe) forces one, which is why tap-to-open hung
+    // for seconds. Force a frame so the push runs on the very next tick.
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
   @override
