@@ -28,6 +28,7 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
   HadithSearch? _search;
   TextSearch? _textSearch;
   final _searchController = TextEditingController();
+  VoiceSearchState? _voice;
 
   Timer? _debounce;
   String _query = '';
@@ -49,6 +50,26 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
     }).catchError((Object e) {
       Log.e('hadithlist', 'text index load failed: $e');
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final voice = context.read<VoiceSearchState>();
+    if (!identical(voice, _voice)) {
+      _voice?.removeListener(_onVoice);
+      _voice = voice;
+      voice.addListener(_onVoice);
+    }
+  }
+
+  // Mirror the live transcript into the search field as it grows, so the BM25
+  // results narrow AS the user recites (not only on stop).
+  void _onVoice() {
+    final t = _voice?.transcript ?? '';
+    if (t.isEmpty || t == _searchController.text) return;
+    _searchController.text = t;
+    _onSearchChanged(t);
   }
 
   void _onSearchChanged(String q) {
@@ -100,24 +121,18 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
 
   @override
   void dispose() {
+    _voice?.removeListener(_onVoice);
     _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
-  // Voice search: record → transcribe (FastConformer) → drop the transcript into
-  // the search field so the SAME BM25 path renders the results. A second tap
-  // stops + transcribes; there is no live per-chunk probing.
+  // Voice search: record → live-transcribe (FastConformer, every ~2s) → the
+  // transcript flows into the search field via _onVoice, so the SAME BM25 path
+  // narrows the results as the user recites. Tap to start, tap to stop.
   Future<void> _toggleMic(VoiceSearchState voice) async {
     if (voice.recording) {
-      final text = await voice.stopAndTranscribe();
-      if (!mounted) return;
-      if (text.isNotEmpty) {
-        _searchController.text = text;
-        _onSearchChanged(text);
-      } else {
-        Log.d('hadithlist', 'voice search returned empty transcript — nothing to search');
-      }
+      await voice.stop();
       return;
     }
     await voice.start();
