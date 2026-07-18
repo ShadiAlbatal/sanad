@@ -83,13 +83,20 @@ class HadithReadingState extends ChangeNotifier {
   /// asset (older find-only build) leaves [hasClip] false and the reader stays a
   /// plain read view.
   Future<void> loadHadith(String id) async {
+    final sw = Stopwatch()..start();
     await _engine.ensureData();
+    final tData = sw.elapsedMilliseconds;
     final search = await loadHadithSearch();
+    final tSearch = sw.elapsedMilliseconds;
     final clip = search.clipById(id);
+    final tClip = sw.elapsedMilliseconds;
     _clip = clip;
     if (clip != null) {
       _matcher = PhonemeMatchSession(clip.clip, _engine.units);
-      Log.d('hadithread', 'loaded $id (${clip.words.length} words)');
+      Log.d('hadithread', 'loaded $id (${clip.words.length} words) '
+          'timing: ensureData=${tData}ms search=${tSearch - tData}ms '
+          'clipById=${tClip - tSearch}ms matcher=${sw.elapsedMilliseconds - tClip}ms '
+          'TOTAL=${sw.elapsedMilliseconds}ms');
     } else {
       _matcher = null;
       Log.d('hadithread', 'loaded $id (no clip — follow-along unavailable)');

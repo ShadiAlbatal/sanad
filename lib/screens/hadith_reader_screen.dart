@@ -6,6 +6,7 @@ import '../state/app_state.dart';
 import '../state/hadith_finder_state.dart';
 import '../state/hadith_reading_state.dart';
 import '../theme/app_theme.dart';
+import '../util/log.dart';
 import '../widgets/hadith_reading_footer.dart';
 
 /// One hadith, read-along. Shows the matn (RTL Arabic) where each word tracks the
@@ -45,6 +46,16 @@ class HadithReaderScreen extends StatefulWidget {
 
 class _HadithReaderScreenState extends State<HadithReaderScreen> {
   HadithFinderState? _finder;
+
+  @override
+  void initState() {
+    super.initState();
+    final sw = Stopwatch()..start();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Log.d('hadithread', 'reader first frame painted in ${sw.elapsedMilliseconds}ms '
+          '(${widget.text.length} chars)');
+    });
+  }
 
   @override
   void didChangeDependencies() {
