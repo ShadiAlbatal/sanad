@@ -8,7 +8,6 @@ import 'data/quran_repository.dart';
 import 'services/analytics.dart';
 import 'services/asr/asr_engine.dart';
 import 'services/asr/word_asr.dart';
-import 'state/hadith_finder_state.dart';
 import 'state/reading_state.dart';
 import 'state/voice_search_state.dart';
 import 'util/log.dart';
@@ -75,7 +74,6 @@ class TilawaApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AppState(prefs)),
         Provider<AsrEngine>(create: (_) => AsrEngine(), dispose: (_, e) => e.dispose()),
         ChangeNotifierProvider(create: (ctx) => ReadingState(ctx.read<AsrEngine>())),
-        ChangeNotifierProvider(create: (ctx) => HadithFinderState(ctx.read<AsrEngine>())),
         Provider<WordAsr>(create: (_) => WordAsr(), dispose: (_, w) => w.dispose()),
         ChangeNotifierProvider(
             create: (ctx) => VoiceSearchState(ctx.read<AsrEngine>(), ctx.read<WordAsr>())),

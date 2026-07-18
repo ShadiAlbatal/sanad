@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../services/asr/asr_engine.dart';
 import '../services/asr/hadith_corpus.dart' show hadithCollectionName;
 import '../state/app_state.dart';
-import '../state/hadith_finder_state.dart';
 import '../state/hadith_reading_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/hadith_reading_footer.dart';
@@ -11,14 +10,10 @@ import '../widgets/hadith_reading_footer.dart';
 /// One hadith, read-along. Shows the matn (RTL Arabic) where each word tracks the
 /// reciter (current / read) exactly like the du'a reader, plus its `Bukhari #n` /
 /// `Muslim #n` reference. Its [HadithReadingState] is scoped to this screen and,
-/// while open, its follow-along OWNS the shared mic (claimed from the hadith
-/// finder) — so reciting greens the matn rather than jumping. The hadith text
-/// carries the isnād first; a reciter usually recites only the matn, so the isnād
-/// words simply won't green (expected until the matn-only data swap).
-///
-/// The finder's pick listener is retained so a voice-jump routed from the search
-/// screen still opens the matched hadith here; within the reader the mic follows
-/// along (single-owner [AsrEngine.claimMic]).
+/// while open, its follow-along OWNS the shared mic (single-owner
+/// [AsrEngine.claimMic]) — so reciting greens the matn rather than jumping. The
+/// hadith text carries the isnād first; a reciter usually recites only the matn,
+/// so the isnād words simply won't green (expected until the matn-only data swap).
 class HadithReaderScreen extends StatefulWidget {
   final String collection;
   final int number;
@@ -44,41 +39,6 @@ class HadithReaderScreen extends StatefulWidget {
 }
 
 class _HadithReaderScreenState extends State<HadithReaderScreen> {
-  HadithFinderState? _finder;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final finder = context.read<HadithFinderState>();
-    if (!identical(finder, _finder)) {
-      _finder?.removeListener(_onFinder);
-      _finder = finder;
-      _finder!.addListener(_onFinder);
-    }
-  }
-
-  void _onFinder() {
-    final finder = _finder;
-    final pick = finder?.pick;
-    if (finder == null || pick == null) return;
-    // Only the visible (top) route reacts; the search screen under us stays put.
-    if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
-    finder.clearPick();
-    if (pick.id == widget._id) return; // already showing this hadith
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (_) => HadithReaderScreen(
-              collection: pick.collection, number: pick.number, text: pick.text)));
-    });
-  }
-
-  @override
-  void dispose() {
-    _finder?.removeListener(_onFinder);
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     context.read<AppState>().setLastHadithId(widget._id);

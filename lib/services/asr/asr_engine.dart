@@ -104,8 +104,7 @@ class AsrEngine {
 /// session runs invisibly on the shared mic (timer + reset stream underneath it).
 ///
 /// Pure logic (holds no MicSource/platform channel) so the preempt / same-owner-
-/// idempotent / stale-release contract is unit-testable — mirrors why
-/// [identifyDua] was extracted from DuaFinderState.
+/// idempotent / stale-release contract is unit-testable.
 class MicOwnership {
   Future<void> Function()? _releaseActive;
   String _activeOwner = 'none'; // label of the current owner, for the handoff trace

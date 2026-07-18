@@ -2,19 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sanad/services/asr/dua_corpus.dart';
 import 'package:sanad/services/asr/dua_search.dart';
 import 'package:sanad/services/asr/phoneme_corpus.dart' show loadDuaClip;
-import 'package:sanad/state/dua_finder_state.dart';
 
-/// Two slices of the scaled du'a finder:
-///  1. The PURE pick decision ([decideDuaPick]) — the minLen + streak guards the
-///     live finder layers on top of [DuaSearch]'s floor/margin confidence bar.
-///     DuaFinderState itself builds on the shared MicSource (a platform channel)
-///     and cannot run under `flutter test`, which is why this is a pure function.
-///  2. The packaged du'a corpus actually loads, decodes its int-encoded phonemes
-///     back to the RIGHT units (the pack-time index must match Dart's blank-
-///     inclusive loadPhonemeUnits), and the READER-side phoneme strings live ASR
-///     emits retrieve their du'a top-1 & confident through the shared
-///     [PhonemeFinder] — the end-to-end guarantee the finder can identify among
-///     the whole corpus.
+/// The packaged du'a corpus actually loads, decodes its int-encoded phonemes
+/// back to the RIGHT units (the pack-time index must match Dart's blank-
+/// inclusive loadPhonemeUnits), and the READER-side phoneme strings live ASR
+/// emits retrieve their du'a top-1 & confident through the shared
+/// [PhonemeFinder] — the end-to-end guarantee reader follow-along can identify a
+/// du'a among the whole corpus.
 
 /// FindDoc madd-collapses runs of identical units at construction, and the query
 /// is collapsed the same way, so a fidelity check against the raw reader clip
@@ -25,93 +19,6 @@ List<String> _collapse(List<String> p) =>
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-
-  group('decideDuaPick (minLen + streak)', () {
-    const minLen = 12;
-    const confirm = 3;
-
-    DuaPickDecision decide(
-      int queryLen,
-      String? confident, {
-      String prevWinner = '',
-      int prevStreak = 0,
-    }) =>
-        decideDuaPick(
-          queryLen: queryLen,
-          confident: confident,
-          minQueryLen: minLen,
-          prevWinner: prevWinner,
-          prevStreak: prevStreak,
-          confirm: confirm,
-        );
-
-    test('below the min query length never picks, even with a confident du\'a', () {
-      final d = decide(minLen - 1, 'hisn-1');
-      expect(d.pick, isNull);
-      expect(d.winner, '');
-      expect(d.streak, 0);
-    });
-
-    test('no confident du\'a → no pick, streak resets', () {
-      final d = decide(30, null, prevWinner: 'hisn-1', prevStreak: 2);
-      expect(d.pick, isNull);
-      expect(d.winner, '');
-      expect(d.streak, 0);
-    });
-
-    test('confident + long enough qualifies but must confirm before a pick', () {
-      final d = decide(20, 'hisn-1');
-      expect(d.winner, 'hisn-1');
-      expect(d.streak, 1);
-      expect(d.pick, isNull);
-    });
-
-    test('the same du\'a over confirm probes → returns it', () {
-      var winner = '';
-      var streak = 0;
-      String? pick;
-      for (var i = 0; i < confirm; i++) {
-        final d = decide(20, 'hisn-1', prevWinner: winner, prevStreak: streak);
-        winner = d.winner;
-        streak = d.streak;
-        pick = d.pick;
-      }
-      expect(streak, confirm);
-      expect(pick, 'hisn-1');
-    });
-
-    test('does not pick before confirm even while qualifying every probe', () {
-      var winner = '';
-      var streak = 0;
-      for (var i = 0; i < confirm - 1; i++) {
-        final d = decide(20, 'hisn-1', prevWinner: winner, prevStreak: streak);
-        winner = d.winner;
-        streak = d.streak;
-        expect(d.pick, isNull);
-      }
-      expect(streak, confirm - 1);
-    });
-
-    test('a change of confident du\'a resets the streak', () {
-      final d = decide(20, 'hisn-2', prevWinner: 'hisn-1', prevStreak: 2);
-      expect(d.winner, 'hisn-2');
-      expect(d.streak, 1);
-      expect(d.pick, isNull);
-    });
-
-    test('a probe that drops below min length clears an existing streak', () {
-      final d = decide(minLen - 5, 'hisn-1', prevWinner: 'hisn-1', prevStreak: 2);
-      expect(d.winner, '');
-      expect(d.streak, 0);
-      expect(d.pick, isNull);
-    });
-
-    test('exactly at the min length is allowed (inclusive)', () {
-      final d = decide(minLen, 'hisn-1');
-      expect(d.winner, 'hisn-1');
-      expect(d.streak, 1);
-    });
-  });
 
   group('packaged du\'a corpus', () {
     test('loads and holds the whole corpus (existing 5 + Hisn)', () async {

@@ -189,8 +189,8 @@ class FindDecision {
   const FindDecision(this.pick, this.confident);
 }
 
-/// PURE find decision (host-testable). Mirrors [identifyDua]'s qualify test minus
-/// the cross-probe streak (a search is one shot, not a debounced stream): the top
+/// PURE find decision (host-testable). A search is one shot, not a debounced
+/// stream, so there is no cross-probe streak here: the top
 /// of ranked [results] is a confident winner only when it clears the absolute
 /// [floor] AND beats the runner-up by [margin]. A lone result qualifies on floor.
 FindDecision decideFind(List<FindResult> results, {required double floor, required double margin}) {

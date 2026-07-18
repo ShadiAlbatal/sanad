@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/asr/asr_engine.dart';
 import '../state/app_state.dart';
-import '../state/dua_finder_state.dart';
-import '../state/quran_finder_state.dart';
 import '../state/reading_state.dart';
 import '../state/voice_search_state.dart';
 import 'dua_list_screen.dart';
@@ -15,20 +12,7 @@ class RootScaffold extends StatelessWidget {
   const RootScaffold({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Provided ABOVE the Scaffold so the Dua/Quran list screens (inside the
-    // IndexedStack), which own their footers via the shared SearchListScaffold,
-    // read the ONE shared finder each — and the lifecycle guards below can stop
-    // them on tab-away/background. (The Quran READER is a pushed route driven by
-    // the app-global ReadingState, not these finders.)
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (ctx) => DuaFinderState(ctx.read<AsrEngine>())),
-        ChangeNotifierProvider(create: (ctx) => QuranFinderState(ctx.read<AsrEngine>())),
-      ],
-      child: const _RootView(),
-    );
-  }
+  Widget build(BuildContext context) => const _RootView();
 }
 
 class _RootView extends StatefulWidget {
