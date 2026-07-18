@@ -1,6 +1,16 @@
 # Sanad — Handoff — START HERE
 
-## ⭐ SESSION 9 (2026-07-19) — FASTCONFORMER VOICE SEARCH BUILT + MERGED — RESUME HERE
+## ⭐ SESSION 10 (2026-07-19) — ENDGAME CLEANUP (A1+A2 DONE) — RESUME HERE
+
+**On branch `cleanup/session9-endgame` (NOT yet merged to master), backup tag `pre-cleanup-session9` cut at master `1bd3346` (old finders also on `feature/word-search-from-phonemes` + origin — triple-safe).** Two reviewed, test-green commits:
+- **A1 `7909e89` — de-triplicate the voice-search shell.** New `lib/screens/voice_search_list_mixin.dart` (`VoiceSearchListMixin<W, H>`) owns the previously copy-pasted ~60-line shell (voice listener, debounced BM25, trust-ring confidence, auto-open, mic toggle, guarded reader push). The 3 list screens shrank to 5 hooks each (`voiceTab`/`logTag`/`runSearch`/`scoreOf`/`openHit`) + their own `build`/cards. The Quran-only `loading: !searching && chapters == null` guard is a LEGITIMATE two-data-source difference (chapters + search index are separate loads) — deliberately left per-screen, NOT force-uniformed. Behavior identical bar a uniform `top=[...]` debug log on all 3 tabs. Stale list-screen class docstrings fixed here too. 228 tests.
+- **A2 `f067ddc` — remove the dead phoneme-finder path.** Deleted `lib/state/{dua,quran,hadith}_finder_state.dart`, `lib/widgets/hadith_mic_bar.dart`, tests `test/{dua_finder,hadith_finder,hadith_finder_replay,quran_finder}_test.dart`. Removed providers (main.dart `HadithFinderState`; root_scaffold.dart Dua/Quran finders — its `MultiProvider` had no providers left, collapsed to `_RootView`) and — same commit, coupling trap — the hadith reader's dead `_onFinder` pick listener. Split `dua_search_test.dart`: dropped the orphaned `decideDuaPick` group, KEPT the live `DuaSearch`/corpus group. Fixed 3 stale doc comments (`asr_engine.dart`, `phoneme_finder.dart`, `hadith_reading_state.dart`) that named deleted symbols. **185 tests** (228 − ~43 deleted finder tests), analyze clean (lib). NOTE: the live `_finder` fields in `services/asr/*_search.dart` are the `PhonemeFinder` SEARCH ENGINE — untouched, not the deleted finder states.
+
+**⚠️ DEVICE-TEST GATE before merging A2 to master:** open a hadith reader on-device once (the coupling-trap area) + a quick smoke of voice search on all 3 tabs. Then `git checkout master && git merge cleanup/session9-endgame`. Everything reversible via the tag.
+
+**STILL OWED from the endgame list (not done):** debug-spike `WordAsr` in `debug_log_screen.dart` (keep as dev tool or strip before store — the two "Word ASR" buttons load a 2nd 125MB instance); APK size flag (~200MB). **License re-check DROPPED per user (model is free-intended).** Then the functional open items (device-tune thresholds, Quran backward-read false-green piece 5, fawazahmed0 matn dataset swap, web/WASM spike).
+
+## ⭐ SESSION 9 (2026-07-19) — FASTCONFORMER VOICE SEARCH BUILT + MERGED
 
 **What shipped this session (branch `spike/fastconformer-search` → MERGED to `master`):** voice search is now **transcribe-to-text** (FastConformer word model → BM25) across all three tabs, replacing the phoneme-similarity finders. Device-proven: model loads ~1.1s, transcribes ~60× realtime, near-perfect Qur'an + hadith narrator-name transcripts. This replaced the phoneme-search approach after **Option C (phoneme→word→BM25) was measured and rejected** — clean 96-100% word recovery collapsed to 62-75% at the phoneme model's real ~12% PER (error compounding); code still parked on branch `feature/word-search-from-phonemes`.
 
