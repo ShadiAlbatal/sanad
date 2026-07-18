@@ -35,13 +35,19 @@ class VoiceSearchState extends ChangeNotifier {
   /// Start capturing. First call also loads the ~125MB word model (~1s), during
   /// which [busy] is true; recording begins once it's ready.
   Future<void> start() async {
-    if (_recording || _busy) return;
+    if (_recording || _busy) {
+      Log.d('voicesearch', 'start ignored (recording=$_recording busy=$_busy)');
+      return;
+    }
+    Log.d('voicesearch', 'START requested');
     _error = null;
     _busy = true;
     _level = 0;
     notifyListeners();
     try {
-      if (!await _engine.mic.hasPermission()) {
+      final granted = await _engine.mic.hasPermission();
+      Log.d('voicesearch', 'mic permission granted=$granted');
+      if (!granted) {
         _error = 'Microphone permission denied';
         return;
       }
@@ -50,6 +56,7 @@ class VoiceSearchState extends ChangeNotifier {
       _buf.clear();
       await _engine.mic.start(_onPcm);
       _recording = true;
+      Log.d('voicesearch', 'recording started');
     } catch (e, st) {
       Log.e('voicesearch', e, st);
       _error = e.toString();
@@ -74,9 +81,13 @@ class VoiceSearchState extends ChangeNotifier {
     try {
       await _engine.mic.stop();
       _engine.releaseMic(_release);
+      Log.d('voicesearch', 'stopped — captured '
+          '${(_buf.length / 16000).toStringAsFixed(1)}s (${_buf.length} samples)');
       if (_buf.isNotEmpty) {
         text = _word.transcribe(Int16List.fromList(_buf));
       }
+      Log.d('voicesearch', 'transcript -> "$text"');
+      Log.flushFile();
     } catch (e, st) {
       Log.e('voicesearch', e, st);
       _error = e.toString();
@@ -89,6 +100,7 @@ class VoiceSearchState extends ChangeNotifier {
 
   Future<void> _release() async {
     if (_recording) {
+      Log.d('voicesearch', 'preempted — recording dropped (mic claimed by another owner)');
       _recording = false;
       try {
         await _engine.mic.stop();
@@ -105,6 +117,8 @@ class VoiceSearchState extends ChangeNotifier {
     }
     final rms = pcm.isEmpty ? 0.0 : math.sqrt(sumsq / pcm.length);
     _level = ((rms - 120) / 1600).clamp(0.0, 1.0);
+    Log.t('voicesearch', 'buf=${_buf.length} (${(_buf.length / 16000).toStringAsFixed(2)}s) '
+        'rms=${rms.toStringAsFixed(0)}');
     notifyListeners();
   }
 }

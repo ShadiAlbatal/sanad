@@ -60,6 +60,10 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
         _query = query;
         _results = query.isEmpty ? const [] : (_textSearch?.search(query) ?? const []);
       });
+      if (query.isNotEmpty) {
+        final top = _results.take(3).map((h) => '${h.id}:${h.score.toStringAsFixed(2)}').join(' ');
+        Log.d('hadithlist', 'search "$query" -> ${_results.length} hits, top=[$top]');
+      }
     });
   }
 
@@ -111,6 +115,8 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
       if (text.isNotEmpty) {
         _searchController.text = text;
         _onSearchChanged(text);
+      } else {
+        Log.d('hadithlist', 'voice search returned empty transcript — nothing to search');
       }
       return;
     }
