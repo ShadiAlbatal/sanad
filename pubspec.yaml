@@ -70,6 +70,7 @@ flutter:
     - assets/fonts/
     - assets/asr/
     - assets/asr/phoneme/
+    - assets/asr/word/
     - assets/asr/quran_phonemes/
     - assets/asr/dua_phonemes/
     - assets/asr/dua/
