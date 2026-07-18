@@ -112,6 +112,24 @@ class VoiceSearchState extends ChangeNotifier {
     }
   }
 
+  /// Stop recording and release the mic WITHOUT a final transcription — used when
+  /// the user taps a result to open its reader: the shown results are locked in
+  /// (no more live updates), and the shared mic is freed immediately so the
+  /// reader's phoneme follow-along can claim it without waiting on a transcribe.
+  Future<void> cancel() async {
+    if (!_recording && !_busy) return;
+    Log.d('voicesearch', 'cancel — locking results, releasing mic for follow-along');
+    _recording = false;
+    _interimTimer?.cancel();
+    _busy = false;
+    _level = 0;
+    try {
+      await _engine.mic.stop();
+    } catch (_) {}
+    _engine.releaseMic(_release);
+    notifyListeners();
+  }
+
   void _transcribeInterim() {
     if (_transcribing || !_recording || _buf.isEmpty) return;
     _transcribing = true;

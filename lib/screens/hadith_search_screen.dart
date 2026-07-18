@@ -92,13 +92,17 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
   // pushes while the reader takes a beat to open.
   bool _opening = false;
 
-  void _open(String collection, int number, String text, {bool autoStart = false}) {
+  void _open(String collection, int number, String text) {
     if (_opening) {
       Log.d('hadithlist', 'tap on $collection:$number ignored — already opening');
       return;
     }
-    Log.d('hadithlist', 'open $collection:$number (autoStart=$autoStart)');
+    Log.d('hadithlist', 'open $collection:$number');
     _opening = true;
+    // Lock the results (stop live updates) and free the shared mic so the reader's
+    // phoneme follow-along can claim it. autoStart=true then hands straight to the
+    // streaming model — highlight the words as the user recites, no extra tap.
+    _voice?.cancel();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
         Log.d('hadithlist', 'open $collection:$number aborted — unmounted before push');
@@ -107,7 +111,7 @@ class _HadithSearchScreenState extends State<HadithSearchScreen> {
       Navigator.of(context)
           .push(MaterialPageRoute(
               builder: (_) => HadithReaderScreen(
-                  collection: collection, number: number, text: text, autoStart: autoStart)))
+                  collection: collection, number: number, text: text, autoStart: true)))
           .then((_) {
         if (mounted) setState(() => _opening = false);
       });
