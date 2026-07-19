@@ -6,6 +6,31 @@ import '../services/asr/asr_engine.dart';
 import '../services/asr/word_asr.dart';
 import '../util/log.dart';
 
+/// A poor-man's commit horizon over the offline re-decodes. The word model
+/// re-transcribes the WHOLE growing buffer every interim, so the tail can wobble
+/// between passes (a later pass revises an earlier guess) — which makes the
+/// search ranking, and the confidence ring, flicker even while the user recites
+/// correctly. Fix: commit a word only once two CONSECUTIVE decodes agree on it
+/// at the same position, and never revise a committed word. Feeding only the
+/// committed prefix into search gives a stable, monotonically-growing query.
+///
+/// Extends [committed] forward with words on which [prev] and [cur] agree,
+/// starting at the current committed length (already-committed words are never
+/// re-examined). Pure + host-testable. The cost is a ~1-interim lag on the last
+/// word or two (they wait for confirmation) — the exact wobble we want gone.
+List<String> commitStablePrefix(List<String> committed, List<String> prev, List<String> cur) {
+  final out = List<String>.of(committed);
+  var i = out.length;
+  while (i < cur.length && i < prev.length && cur[i] == prev[i]) {
+    out.add(cur[i]);
+    i++;
+  }
+  return out;
+}
+
+List<String> _words(String s) =>
+    s.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+
 /// Voice SEARCH driver: record a recitation on the shared mic and transcribe it
 /// to Arabic text with the offline [WordAsr]. The text is exposed as [transcript]
 /// (notified on change); a list screen mirrors it into its search field so the
@@ -33,6 +58,10 @@ class VoiceSearchState extends ChangeNotifier {
   String? _error;
   String _transcript = '';
   final List<int> _buf = [];
+  // Commit-horizon state: the last interim's word list, and the words committed
+  // so far (agreed across two consecutive interims). See [commitStablePrefix].
+  List<String> _prevWords = const [];
+  List<String> _committed = const [];
   Timer? _interimTimer;
   // Bumped by stop/cancel/preempt. start() captures it and re-checks after every
   // await, so a cancel during the (~1s) model-load window aborts the start instead
@@ -58,6 +87,8 @@ class VoiceSearchState extends ChangeNotifier {
     _busy = true;
     _level = 0;
     _transcript = '';
+    _prevWords = const [];
+    _committed = const [];
     notifyListeners();
     try {
       final granted = await _engine.mic.hasPermission();
@@ -173,8 +204,19 @@ class VoiceSearchState extends ChangeNotifier {
     try {
       final snapshot = Int16List.fromList(_buf);
       final text = _word.transcribe(snapshot);
-      if (text.isNotEmpty && text != _transcript) {
-        _transcript = text;
+      final words = _words(text);
+      // Commit horizon: grow the committed prefix by the words this interim and
+      // the previous one agree on, then drive search off the COMMITTED prefix so
+      // the ranking/ring don't wobble on the still-settling tail. Before anything
+      // has committed (the first interim), show the raw text so results still
+      // appear immediately instead of waiting a full extra interim.
+      _committed = commitStablePrefix(_committed, _prevWords, words);
+      _prevWords = words;
+      final shown = _committed.isEmpty ? text : _committed.join(' ');
+      if (shown.isNotEmpty && shown != _transcript) {
+        _transcript = shown;
+        Log.d('voicesearch', 'interim: ${words.length} words, '
+            '${_committed.length} committed -> "$shown"');
         notifyListeners();
       }
     } catch (e, st) {
