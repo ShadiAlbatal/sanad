@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/asr/hadith_search.dart';
 import '../services/search/corpus_text_search.dart';
+import '../services/search/search_history.dart';
 import '../services/search/text_search.dart';
 import '../state/app_state.dart';
 import '../state/voice_search_state.dart';
@@ -29,6 +30,7 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
     with VoiceSearchListMixin<HadithSearchScreen, TextSearchHit> {
   HadithSearch? _search;
   TextSearch? _textSearch;
+  List<Map<String, dynamic>> _history = const [];
 
   @override
   void initState() {
@@ -46,6 +48,20 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
     }).catchError((Object e) {
       Log.e('hadithlist', 'text index load failed: $e');
     });
+    _history = decodeHistory(context.read<AppState>().prefs.hadithHistory);
+  }
+
+  void _recordHistory(String collection, int number, String label, String text) {
+    final prefs = context.read<AppState>().prefs;
+    final updated = pushHistory(prefs.hadithHistory, {
+      'key': '$collection:$number',
+      'label': label,
+      'collection': collection,
+      'number': number,
+      'text': text,
+    });
+    prefs.setHadithHistory(updated);
+    setState(() => _history = decodeHistory(updated));
   }
 
   @override
@@ -60,12 +76,17 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
   @override
   void openHit(TextSearchHit hit) {
     final e = _search?.entryById(hit.id);
-    if (e != null) _open(e.collection, e.number, e.text);
+    if (e != null) _open(e.collection, e.number, e.label, e.text, autoStart: true);
   }
 
-  void _open(String collection, int number, String text) => openRoute((_) =>
-      HadithReaderScreen(
-          collection: collection, number: number, text: text, autoStart: true));
+  // autoStart (mic on, follow-along begins immediately) ONLY for a confident
+  // voice-search open — the user was already reciting. A tap from browse or
+  // typed search leaves the mic off; the reader still offers a manual mic tap.
+  void _open(String collection, int number, String label, String text, {bool autoStart = false}) {
+    _recordHistory(collection, number, label, text);
+    openRoute((_) => HadithReaderScreen(
+        collection: collection, number: number, text: text, autoStart: autoStart));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,9 +108,9 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
           label: e.label,
           text: e.text,
           matched: hit.matchedWords,
-          onTap: () => _open(e.collection, e.number, e.text),
+          onTap: () => _open(e.collection, e.number, e.label, e.text),
           expanded: leadExpanded && i == 0,
-          confidence: leadExpanded && i == 0 ? conf : null,
+          confidence: voiceQuery && i < rings.length ? rings[i] : null,
         );
       };
     } else {
@@ -97,9 +118,13 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
       builder = (_, i) => _HadithCard(
             label: browse![i].label,
             text: browse[i].text,
-            onTap: () => _open(browse[i].collection, browse[i].number, browse[i].text),
+            onTap: () =>
+                _open(browse[i].collection, browse[i].number, browse[i].label, browse[i].text),
           );
     }
+    final countLabel = searching
+        ? '$count result${count == 1 ? '' : 's'}'
+        : (browse != null ? '$count hadith' : null);
 
     return SearchListScaffold(
       title: 'Hadith',
@@ -107,6 +132,16 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
       loading: browse == null,
       itemCount: count,
       itemBuilder: builder,
+      scrollController: scrollController,
+      countLabel: countLabel,
+      aboveList: !searching && _history.isNotEmpty
+          ? HistoryRow(
+              entries: _history,
+              labelOf: (e) => e['label'] as String,
+              onTap: (e) => _open(e['collection'] as String, e['number'] as int,
+                  e['label'] as String, e['text'] as String),
+            )
+          : null,
       emptyState: searching ? const _NoMatches() : null,
       listening: voice.recording,
       starting: voice.busy,
@@ -118,6 +153,7 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
       searchController: searchController,
       onSearchChanged: onSearchChanged,
       searchHint: 'Search hadith',
+      onClear: clearSearch,
     );
   }
 }

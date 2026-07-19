@@ -22,9 +22,11 @@ import '../util/log.dart';
 mixin VoiceSearchListMixin<W extends StatefulWidget, H> on State<W> {
   VoiceSearchState? _voice;
   final searchController = TextEditingController();
+  final scrollController = ScrollController();
   final _confidence = SearchConfidence();
   Timer? _debounce;
   bool _opening = false;
+  int? _lastKnownTab;
 
   /// Current trimmed query (typed or the live transcript); empty = browsing.
   String query = '';
@@ -32,6 +34,12 @@ mixin VoiceSearchListMixin<W extends StatefulWidget, H> on State<W> {
 
   /// Trust-ring fill 0..1 on the leading result while reciting (0 when typed).
   double conf = 0;
+
+  /// Decorative ring values for the top few results while reciting — index 0 is
+  /// the real trust value ([conf]); the rest are a plain relative-score ratio
+  /// (a rank hint, not a confirmed match) so the UI can show the field
+  /// converging instead of an all-or-nothing #1. Empty outside a voice query.
+  List<double> rings = const [];
 
   /// The current query arrived from voice — drives the ring + leading-card expand.
   bool voiceQuery = false;
@@ -68,6 +76,13 @@ mixin VoiceSearchListMixin<W extends StatefulWidget, H> on State<W> {
       _voice = v;
       v.addListener(_onVoice);
     }
+    // Leaving this tab resets its search — returning later starts fresh instead
+    // of showing a stale query from a previous visit.
+    final tab = context.watch<AppState>().tabIndex;
+    if (_lastKnownTab != null && _lastKnownTab == voiceTab && tab != voiceTab) {
+      clearSearch();
+    }
+    _lastKnownTab = tab;
   }
 
   // Mirror the live transcript into the search field as it grows, so the BM25
@@ -91,15 +106,17 @@ mixin VoiceSearchListMixin<W extends StatefulWidget, H> on State<W> {
       // auto-opens — the user is deciding.
       String? openId;
       if (fromVoice && trimmed.isNotEmpty) {
-        final out = _confidence
-            .update([for (final h in results.take(5)) scoreOf(h)]);
+        final ranked = [for (final h in results.take(5)) scoreOf(h)];
+        final out = _confidence.update(ranked);
         conf = out.confidence;
         openId = out.openId;
         voiceQuery = true;
+        rings = _confidence.topRings(ranked, conf);
       } else {
         _confidence.reset();
         conf = 0;
         voiceQuery = false;
+        rings = const [];
       }
       setState(() => query = trimmed);
       if (trimmed.isNotEmpty) {
@@ -128,12 +145,39 @@ mixin VoiceSearchListMixin<W extends StatefulWidget, H> on State<W> {
       await v.stop();
       return;
     }
+    _debounce?.cancel();
     _confidence.reset();
     conf = 0;
+    rings = const [];
+    voiceQuery = false;
+    // Clear the field for the new recording, but deliberately leave `results`
+    // alone — the OLD candidates stay on screen (no blank flash) until the new
+    // recitation's own results replace them via _onVoice. Reset the scroll so
+    // the new leading match isn't hidden below wherever the user had scrolled
+    // to on the previous search.
+    searchController.clear();
+    if (scrollController.hasClients) scrollController.jumpTo(0);
     await v.start();
     if (v.error != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(v.error!)));
     }
+  }
+
+  /// Full reset: clears the field, the results, and the confidence ring. Used
+  /// by the field's X button and when this tab is left (see
+  /// [didChangeDependencies]).
+  void clearSearch() {
+    _debounce?.cancel();
+    searchController.clear();
+    _confidence.reset();
+    if (!mounted) return;
+    setState(() {
+      query = '';
+      results = const [];
+      conf = 0;
+      rings = const [];
+      voiceQuery = false;
+    });
   }
 
   /// The guarded reader push shared by every tap-to-open and auto-open: one
@@ -168,6 +212,7 @@ mixin VoiceSearchListMixin<W extends StatefulWidget, H> on State<W> {
     _voice?.removeListener(_onVoice);
     _debounce?.cancel();
     searchController.dispose();
+    scrollController.dispose();
     super.dispose();
   }
 }

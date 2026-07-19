@@ -4,6 +4,7 @@ import '../data/duas.dart';
 import '../services/asr/dua_corpus.dart';
 import '../services/asr/dua_search.dart';
 import '../services/search/corpus_text_search.dart';
+import '../services/search/search_history.dart';
 import '../services/search/text_search.dart';
 import '../state/app_state.dart';
 import '../state/voice_search_state.dart';
@@ -31,6 +32,7 @@ class _DuaListScreenState extends State<DuaListScreen>
     with VoiceSearchListMixin<DuaListScreen, TextSearchHit> {
   DuaSearch? _search;
   TextSearch? _textSearch;
+  List<Map<String, dynamic>> _history = const [];
 
   @override
   void initState() {
@@ -47,6 +49,14 @@ class _DuaListScreenState extends State<DuaListScreen>
     }).catchError((Object e) {
       Log.e('dualist', 'text index load failed: $e');
     });
+    _history = decodeHistory(context.read<AppState>().prefs.duaHistory);
+  }
+
+  void _recordHistory(Dua dua) {
+    final prefs = context.read<AppState>().prefs;
+    final updated = pushHistory(prefs.duaHistory, {'key': dua.id, 'title': dua.title});
+    prefs.setDuaHistory(updated);
+    setState(() => _history = decodeHistory(updated));
   }
 
   @override
@@ -61,7 +71,7 @@ class _DuaListScreenState extends State<DuaListScreen>
   @override
   void openHit(TextSearchHit hit) {
     final meta = _search?.metaById(hit.id);
-    if (meta != null) _open(_duaFromMeta(meta));
+    if (meta != null) _open(_duaFromMeta(meta), autoStart: true);
   }
 
   Dua _duaFromMeta(DuaMeta m) => Dua(
@@ -72,8 +82,13 @@ class _DuaListScreenState extends State<DuaListScreen>
         meaning: m.meaning,
       );
 
-  void _open(Dua dua) =>
-      openRoute((_) => DuaReaderScreen(dua: dua, autoStart: true));
+  // autoStart (mic on, follow-along begins immediately) ONLY for a confident
+  // voice-search open — the user was already reciting. A tap from browse or
+  // typed search leaves the mic off; the reader still offers a manual mic tap.
+  void _open(Dua dua, {bool autoStart = false}) {
+    _recordHistory(dua);
+    openRoute((_) => DuaReaderScreen(dua: dua, autoStart: autoStart));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +108,7 @@ class _DuaListScreenState extends State<DuaListScreen>
           matched: hit.matchedWords,
           onTap: () => _open(_duaFromMeta(meta)),
           expanded: leadExpanded && i == 0,
-          confidence: leadExpanded && i == 0 ? conf : null,
+          confidence: voiceQuery && i < rings.length ? rings[i] : null,
         );
       };
     } else {
@@ -101,6 +116,9 @@ class _DuaListScreenState extends State<DuaListScreen>
       builder = (_, i) => _DuaCard(
           dua: _duaFromMeta(metas![i]), onTap: () => _open(_duaFromMeta(metas[i])));
     }
+    final countLabel = searching
+        ? '$count result${count == 1 ? '' : 's'}'
+        : (metas != null ? '$count duas' : null);
 
     return SearchListScaffold(
       title: 'Duas & Adhkār',
@@ -108,6 +126,18 @@ class _DuaListScreenState extends State<DuaListScreen>
       loading: metas == null,
       itemCount: count,
       itemBuilder: builder,
+      scrollController: scrollController,
+      countLabel: countLabel,
+      aboveList: !searching && _history.isNotEmpty
+          ? HistoryRow(
+              entries: _history,
+              labelOf: (e) => e['title'] as String,
+              onTap: (e) {
+                final meta = _search?.metaById(e['key'] as String);
+                if (meta != null) _open(_duaFromMeta(meta));
+              },
+            )
+          : null,
       emptyState: searching ? const _NoMatches() : null,
       listening: voice.recording,
       starting: voice.busy,
@@ -119,6 +149,7 @@ class _DuaListScreenState extends State<DuaListScreen>
       searchController: searchController,
       onSearchChanged: onSearchChanged,
       searchHint: 'Search du\'ās',
+      onClear: clearSearch,
     );
   }
 }

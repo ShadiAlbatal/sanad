@@ -13,7 +13,13 @@ import '../widgets/surah_list_sheet.dart';
 
 class QuranScreen extends StatefulWidget {
   final int? initialPage;
-  const QuranScreen({super.key, this.initialPage});
+
+  /// When opened from voice search the user is already reciting, so begin the
+  /// follow-along the moment the page is ready (mirrors the Dua/Hadith readers)
+  /// — claims the shared mic from the search and re-anchors on the live audio
+  /// without a second tap.
+  final bool autoStart;
+  const QuranScreen({super.key, this.initialPage, this.autoStart = false});
 
   @override
   State<QuranScreen> createState() => _QuranScreenState();
@@ -61,7 +67,12 @@ class _QuranScreenState extends State<QuranScreen> {
     Log.d('reader', 'preload done, open page $_page');
     if (mounted) {
       setState(() => _basmala = repo.basmalaSync ?? const []);
-      _registerPage(_page);
+      _registerPage(_page); // sets the surah context startAsrListening reads below
+      if (widget.autoStart) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _reading.startAsrListening();
+        });
+      }
     }
   }
 

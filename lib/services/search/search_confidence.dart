@@ -33,12 +33,44 @@ class SearchConfidence {
     } else if (clear) {
       _leaderId = top.id;
       _streak = 1;
+    } else if (top.id == _leaderId) {
+      // The SAME id is still #1 but this probe's lead narrowed below the clear
+      // ratio — most often a single noisy re-transcription (the live transcript
+      // is a WHOLE re-decode every ~2s, not incremental, so one word can wobble
+      // between passes even while the reciter is reading correctly). Decay
+      // instead of a hard reset so one noisy probe doesn't erase an otherwise-
+      // converging streak; a genuinely ambiguous field still decays to 0 within
+      // a couple of probes, same as before.
+      _streak = (_streak - 1).clamp(0, _needStreak - 1);
     } else {
-      _streak = 0; // no clear leader — the field is still ambiguous
+      // The leader itself changed identity — no partial credit carries over.
+      _leaderId = null;
+      _streak = 0;
     }
     final confidence = (_streak / _needStreak).clamp(0.0, 1.0);
     final openId = _streak >= _needStreak ? _leaderId : null;
     return (confidence: confidence, openId: openId);
+  }
+
+  /// Decorative ring values for the top [topN] candidates (default 3), for a UI
+  /// that wants to show the field converging rather than an all-or-nothing #1.
+  /// Index 0 (the current leader, if it matches [leaderId]) uses the REAL
+  /// trust value from [update] — call this with the SAME [ranked] list you just
+  /// passed to [update], right after. The rest are a plain score ratio against
+  /// the top score (0..1) — a rank indicator, not a confirmed-match trust value;
+  /// a caller should render them visibly lighter/muted than index 0.
+  List<double> topRings(List<({String id, double score})> ranked, double leaderConfidence,
+      {int topN = 3}) {
+    if (ranked.isEmpty) return const [];
+    final topScore = ranked.first.score;
+    if (topScore <= 0) return List.filled(ranked.length.clamp(0, topN), 0);
+    final n = ranked.length < topN ? ranked.length : topN;
+    return [
+      for (var i = 0; i < n; i++)
+        i == 0 && ranked[i].id == _leaderId
+            ? leaderConfidence
+            : (ranked[i].score / topScore).clamp(0.0, 1.0),
+    ];
   }
 
   void reset() {

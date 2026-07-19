@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../data/quran_repository.dart';
 import '../models/mushaf.dart';
 import '../services/asr/quran_search.dart';
+import '../services/search/search_history.dart';
 import '../state/app_state.dart';
 import '../state/voice_search_state.dart';
 import '../theme/app_theme.dart';
@@ -35,6 +36,7 @@ class _QuranListScreenState extends State<QuranListScreen>
     with VoiceSearchListMixin<QuranListScreen, QuranTextHit> {
   QuranSearch? _search;
   List<Chapter>? _chapters;
+  List<Map<String, dynamic>> _history = const [];
 
   @override
   void initState() {
@@ -52,6 +54,14 @@ class _QuranListScreenState extends State<QuranListScreen>
     }).catchError((Object e) {
       Log.e('quranlist', 'search index load failed: $e');
     });
+    _history = decodeHistory(context.read<AppState>().prefs.quranHistory);
+  }
+
+  void _recordHistory(int page, String label) {
+    final prefs = context.read<AppState>().prefs;
+    final updated = pushHistory(prefs.quranHistory, {'key': '$page', 'page': page, 'label': label});
+    prefs.setQuranHistory(updated);
+    setState(() => _history = decodeHistory(updated));
   }
 
   @override
@@ -64,10 +74,17 @@ class _QuranListScreenState extends State<QuranListScreen>
   ({String id, double score}) scoreOf(QuranTextHit hit) =>
       (id: hit.id, score: hit.score);
   @override
-  void openHit(QuranTextHit hit) => _open(hit.meta.page);
+  void openHit(QuranTextHit hit) => _open(
+      hit.meta.page, _verseLabel(hit.meta.surah, hit.meta.ayah),
+      autoStart: true);
 
-  void _open(int page) =>
-      openRoute((_) => QuranScreen(initialPage: page));
+  // autoStart (mic on, follow-along begins immediately) ONLY for a confident
+  // voice-search open — the user was already reciting. A tap from browse or
+  // typed search leaves the mic off; the reader still offers a manual mic tap.
+  void _open(int page, String label, {bool autoStart = false}) {
+    _recordHistory(page, label);
+    openRoute((_) => QuranScreen(initialPage: page, autoStart: autoStart));
+  }
 
   // Surah name for a 1-based surah number (chapters are stored in order); a bare
   // "Surah N" until the index has loaded.
@@ -91,19 +108,25 @@ class _QuranListScreenState extends State<QuranListScreen>
       count = results.length;
       builder = (_, i) {
         final hit = results[i];
+        final label = _verseLabel(hit.meta.surah, hit.meta.ayah);
         return _VerseCard(
-          label: _verseLabel(hit.meta.surah, hit.meta.ayah),
+          label: label,
           text: hit.meta.text,
           matched: hit.matchedWords,
-          onTap: () => _open(hit.meta.page),
+          onTap: () => _open(hit.meta.page, label),
           expanded: leadExpanded && i == 0,
-          confidence: leadExpanded && i == 0 ? conf : null,
+          confidence: voiceQuery && i < rings.length ? rings[i] : null,
         );
       };
     } else {
       count = chapters?.length ?? 0;
-      builder = (_, i) => _SurahCard(chapter: chapters![i], onTap: () => _open(chapters[i].startPage));
+      builder = (_, i) => _SurahCard(
+          chapter: chapters![i],
+          onTap: () => _open(chapters[i].startPage, chapters[i].nameSimple));
     }
+    final countLabel = searching
+        ? '$count result${count == 1 ? '' : 's'}'
+        : (chapters != null ? '$count surahs' : null);
 
     return SearchListScaffold(
       title: 'Quran',
@@ -111,6 +134,15 @@ class _QuranListScreenState extends State<QuranListScreen>
       loading: !searching && chapters == null,
       itemCount: count,
       itemBuilder: builder,
+      scrollController: scrollController,
+      countLabel: countLabel,
+      aboveList: !searching && _history.isNotEmpty
+          ? HistoryRow(
+              entries: _history,
+              labelOf: (e) => e['label'] as String,
+              onTap: (e) => _open(e['page'] as int, e['label'] as String),
+            )
+          : null,
       emptyState: searching ? const _NoMatches() : null,
       listening: voice.recording,
       starting: voice.busy,
@@ -122,6 +154,7 @@ class _QuranListScreenState extends State<QuranListScreen>
       searchController: searchController,
       onSearchChanged: onSearchChanged,
       searchHint: 'Search the Quran',
+      onClear: clearSearch,
     );
   }
 }

@@ -250,6 +250,11 @@ class DuaReadingState extends ChangeNotifier {
     // run the finish/review/analytics block a second time for one session.
     _active = false;
     await _engine.mic.stop();
+    // The reader can be popped (Provider disposes this state) while the above
+    // await is in flight — bail before touching ChangeNotifier state, mirrors
+    // the ready() guard in startListening. Without this, notifyListeners() below
+    // throws "used after being disposed".
+    if (_disposed) return;
     _liveMic = false; // the final flush apply below must not buzz a skip
     final asr = _engine.asrOrNull, matcher = _matcher;
     if (asr != null && matcher != null) {

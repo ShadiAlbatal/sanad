@@ -29,6 +29,9 @@ class SearchListScaffold extends StatelessWidget {
   final int itemCount;
   final IndexedWidgetBuilder itemBuilder;
   final Widget? emptyState; // shown when !loading && itemCount == 0
+  final ScrollController? scrollController; // caller resets this on a new recording
+  final String? countLabel; // e.g. "14 results" / "259 duas" — shown under the subtitle
+  final Widget? aboveList; // e.g. a "Recent" history row — shown only while idle/browsing
 
   // Footer — mic (live)
   final bool listening;
@@ -45,6 +48,7 @@ class SearchListScaffold extends StatelessWidget {
   final TextEditingController? searchController;
   final ValueChanged<String>? onSearchChanged;
   final String searchHint;
+  final VoidCallback? onClear; // the field's X button — clears text AND results
 
   const SearchListScaffold({
     super.key,
@@ -54,6 +58,9 @@ class SearchListScaffold extends StatelessWidget {
     required this.itemCount,
     required this.itemBuilder,
     this.emptyState,
+    this.scrollController,
+    this.countLabel,
+    this.aboveList,
     required this.listening,
     required this.starting,
     required this.level,
@@ -66,6 +73,7 @@ class SearchListScaffold extends StatelessWidget {
     this.searchController,
     this.onSearchChanged,
     this.searchHint = 'Search',
+    this.onClear,
   });
 
   @override
@@ -80,6 +88,7 @@ class SearchListScaffold extends StatelessWidget {
       content = emptyState!;
     } else {
       content = ListView.builder(
+        controller: scrollController,
         padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
         itemCount: itemCount,
         itemBuilder: itemBuilder,
@@ -99,9 +108,19 @@ class SearchListScaffold extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-              child: Text(subtitle,
-                  style: TextStyle(color: soft, fontSize: 13.5)),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Text(subtitle,
+                          style: TextStyle(color: soft, fontSize: 13.5))),
+                  if (countLabel != null)
+                    Text(countLabel!,
+                        style: TextStyle(
+                            color: soft, fontSize: 12.5, fontWeight: FontWeight.w600)),
+                ],
+              ),
             ),
+            ?aboveList,
             Expanded(child: content),
           ],
         ),
@@ -119,6 +138,7 @@ class SearchListScaffold extends StatelessWidget {
         searchController: searchController,
         onSearchChanged: onSearchChanged,
         searchHint: searchHint,
+        onClear: onClear,
       ),
     );
   }
@@ -139,6 +159,7 @@ class _Footer extends StatelessWidget {
   final TextEditingController? searchController;
   final ValueChanged<String>? onSearchChanged;
   final String searchHint;
+  final VoidCallback? onClear;
 
   const _Footer({
     required this.listening,
@@ -153,6 +174,7 @@ class _Footer extends StatelessWidget {
     required this.searchController,
     required this.onSearchChanged,
     required this.searchHint,
+    required this.onClear,
   });
 
   @override
@@ -198,6 +220,7 @@ class _Footer extends StatelessWidget {
                   controller: searchController,
                   onChanged: onSearchChanged,
                   hint: searchHint,
+                  onClear: onClear,
                 ),
               ),
               const SizedBox(width: 10),
@@ -217,13 +240,45 @@ class _Footer extends StatelessWidget {
   }
 }
 
-/// The footer's text search bar. Wired shell only: [onChanged] fires but nothing
-/// consumes it yet (typed search is piece 2).
-class _SearchField extends StatelessWidget {
+/// The footer's text search bar. RTL (queries — typed or from voice — are
+/// Arabic), with an X that appears once there's text to clear (typed or voice).
+class _SearchField extends StatefulWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
   final String hint;
-  const _SearchField({required this.controller, required this.onChanged, required this.hint});
+  final VoidCallback? onClear;
+  const _SearchField(
+      {required this.controller, required this.onChanged, required this.hint, this.onClear});
+
+  @override
+  State<_SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends State<_SearchField> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller?.addListener(_onTextChanged);
+  }
+
+  @override
+  void didUpdateWidget(_SearchField old) {
+    super.didUpdateWidget(old);
+    if (old.controller != widget.controller) {
+      old.controller?.removeListener(_onTextChanged);
+      widget.controller?.addListener(_onTextChanged);
+    }
+  }
+
+  // Rebuild just to show/hide the clear button as text is typed or cleared
+  // programmatically (e.g. a new recording clearing the field).
+  void _onTextChanged() => setState(() {});
+
+  @override
+  void dispose() {
+    widget.controller?.removeListener(_onTextChanged);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -231,24 +286,79 @@ class _SearchField extends StatelessWidget {
     final fill = dark ? AppColors.night : AppColors.paper;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
     final ink = dark ? AppColors.nightInk : AppColors.ink;
+    final hasText = widget.controller?.text.isNotEmpty ?? false;
 
     return TextField(
-      controller: controller,
-      onChanged: onChanged,
+      controller: widget.controller,
+      onChanged: widget.onChanged,
       textInputAction: TextInputAction.search,
+      textDirection: TextDirection.rtl,
       style: TextStyle(color: ink, fontSize: 15),
       decoration: InputDecoration(
         isDense: true,
         filled: true,
         fillColor: fill,
-        hintText: hint,
+        hintText: widget.hint,
         hintStyle: TextStyle(color: soft, fontSize: 15),
-        prefixIcon: Icon(Icons.search_rounded, size: 20, color: soft),
-        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+        suffixIcon: hasText
+            ? IconButton(
+                icon: Icon(Icons.close_rounded, size: 18, color: soft),
+                tooltip: 'Clear',
+                onPressed: widget.onClear,
+              )
+            : null,
+        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
         ),
+      ),
+    );
+  }
+}
+
+/// A horizontal "Recent" row of quick-retrieve chips shown above the list
+/// while idle/browsing — tap one to reopen it without re-reciting or
+/// re-typing. Shared across the three list tabs; only the entry shape and
+/// what a tap does differ, supplied by the caller.
+class HistoryRow extends StatelessWidget {
+  final List<Map<String, dynamic>> entries;
+  final String Function(Map<String, dynamic> entry) labelOf;
+  final void Function(Map<String, dynamic> entry) onTap;
+  const HistoryRow({super.key, required this.entries, required this.labelOf, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final chipColor = dark ? AppColors.nightCard : AppColors.paperEdge;
+    final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
+
+    return SizedBox(
+      height: 40,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+        itemCount: entries.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, i) {
+          final e = entries[i];
+          return GestureDetector(
+            onTap: () => onTap(e),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: chipColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(labelOf(e),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(fontSize: 13, color: soft, fontWeight: FontWeight.w600)),
+            ),
+          );
+        },
       ),
     );
   }

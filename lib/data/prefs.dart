@@ -8,6 +8,9 @@ class Prefs {
   static const _kAccent = 'accent'; // AccentChoice name
   static const _kShareEssential = 'share_essential';
   static const _kSharePerformance = 'share_performance';
+  static const _kDuaHistory = 'dua_history';
+  static const _kHadithHistory = 'hadith_history';
+  static const _kQuranHistory = 'quran_history';
 
   final SharedPreferences _sp;
   Prefs(this._sp);
@@ -34,4 +37,15 @@ class Prefs {
 
   bool get sharePerformance => _sp.getBool(_kSharePerformance) ?? false;
   Future<void> setSharePerformance(bool v) => _sp.setBool(_kSharePerformance, v);
+
+  // Recently-opened items per tab (quick-retrieve), each a JSON-encoded map —
+  // see services/search/search_history.dart for the push/decode helpers.
+  List<String> get duaHistory => _sp.getStringList(_kDuaHistory) ?? const [];
+  Future<void> setDuaHistory(List<String> v) => _sp.setStringList(_kDuaHistory, v);
+
+  List<String> get hadithHistory => _sp.getStringList(_kHadithHistory) ?? const [];
+  Future<void> setHadithHistory(List<String> v) => _sp.setStringList(_kHadithHistory, v);
+
+  List<String> get quranHistory => _sp.getStringList(_kQuranHistory) ?? const [];
+  Future<void> setQuranHistory(List<String> v) => _sp.setStringList(_kQuranHistory, v);
 }
