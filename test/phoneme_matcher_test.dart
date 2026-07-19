@@ -79,6 +79,40 @@ void main() {
   test('matcher tracks a perfect recitation of Al-Fatiha (1)', () => checkTracking(1));
   test('matcher tracks a perfect recitation of Al-Ikhlas (112)', () => checkTracking(112));
 
+  // Hard-stall recovery on a FLAT clip (hadith/du'ā — one span, no āyah windows),
+  // the device-confirmed "stuck, won't move" freeze. A flat clip of distinct
+  // words: recite a clean prefix to anchor + advance, then the aligned stream
+  // STOPS growing (one word the model can't align) while the reader keeps going.
+  // The frontier must step past the wall instead of freezing forever.
+  test('recovers from a hard stall on a flat clip instead of freezing forever', () {
+    // 20 single-phoneme "words", each a distinct unit — a flat clip like a hadith
+    // matn (ayahBoundaries empty → one span).
+    const units = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+      'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't'];
+    final clip = PhonemeClip(
+      wordCount: units.length,
+      phonemes: List.of(units),
+      phonemeToWord: [for (var i = 0; i < units.length; i++) i],
+      ayahBoundaries: const [],
+    );
+    final matcher = PhonemeMatchSession(clip, units);
+
+    // Recite the first 6 words cleanly to anchor and advance.
+    var out = matcher.apply(units.sublist(0, 6));
+    expect(matcher.anchored, isTrue, reason: 'anchors on the clean prefix');
+    final stalledAt = out.cursor;
+
+    // The wall: the recognized stream never grows past word 6 (word 6 never
+    // aligns), but the reader keeps reciting — feed the same prefix repeatedly.
+    var maxCursor = stalledAt;
+    for (var i = 0; i < 30; i++) {
+      out = matcher.apply(units.sublist(0, 6));
+      if (out.cursor > maxCursor) maxCursor = out.cursor;
+    }
+    expect(maxCursor, greaterThan(stalledAt),
+        reason: 'frontier must recover past a walling word, not freeze');
+  });
+
   // Ayah-boundary freeze on a REPEATED phrase — ported verbatim from the RN
   // reference (ZikirAi src/lib/matcher/__tests__/ayahBoundaryFreeze.test.ts).
   // This replays a REAL captured token stream (not the corpus fed to itself), so

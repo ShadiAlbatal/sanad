@@ -292,6 +292,28 @@ class PhonemeMatchSession {
     if (_stuckChunks >= _freezeChunks && _reached + 1 != _lastSkipAttempt) {
       _lastSkipAttempt = _reached + 1;
       events.add(PhonemeEvent(PhonemeEventType.skipAttempt, _reached + 1));
+      // Recovery from a hard stall. A word the model can't confidently align — a
+      // rare/elongated word, a mispronunciation, or a matn/reference divergence —
+      // otherwise walls the frontier for the REST of the recitation: the "stuck,
+      // won't move whatever I do" freeze (device-confirmed on long hadith clips,
+      // 100-189 words, which are ONE flat span with no ayah window to reset on).
+      // After ~0.64s stuck WHILE speaking, step the frontier one word past the
+      // wall; it renders as skipped (not green). Self-healing: if that word is in
+      // fact being recited, its monotonic _wordBestFrac keeps rising and _maj
+      // flips it back to green retroactively — so a false skip corrects itself,
+      // while a genuine gap just lets follow-along move on. Bounded by the span
+      // end and re-armed only after another _freezeChunks of stall, so it steps
+      // ~1 word / 0.64s of stuck speech, never a runaway skip.
+      //
+      // Gated to FLAT clips (one span — hadith & du'ā). Qur'an clips carry real
+      // āyah boundaries and their own device-tuned window/rescue machinery for
+      // repeated-phrase stalls (the RN-parity path); stepping the frontier there
+      // fights that logic, so leave Qur'an untouched.
+      if (_boundaries.length <= 1 && _reached < vEnd) {
+        _reached++;
+        _stuckChunks = 0;
+        Log.d('recite', 'SKIP-ADVANCE past w$_reached (stuck $_freezeChunks+ chunks, speaking)');
+      }
     }
 
     // Word states.
