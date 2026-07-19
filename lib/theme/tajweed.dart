@@ -8,27 +8,37 @@ class TajweedSpan {
 }
 
 /// Canonical quran.com / KFGQPC tajweed rule → colour map.
-/// Same hues the printed tajweed mushaf uses; a few greys are lightened for
-/// the dark theme and darkened for the light (paper) theme.
+/// Keys match the `class=` names actually emitted in assets/mushaf/*.json's
+/// "tj" field (verified against 50 pages) — NOT the older
+/// qalqalah/idgham_with_ghunnah/madda_obligatory spellings, which never
+/// matched anything and silently rendered as plain ink. Colour values for
+/// madda_normal, madda_obligatory_*, qalaqah, ghunnah, idgham_ghunnah,
+/// idgham_shafawi and iqlab were sampled directly from Tarteel screenshots
+/// (page 232 Hud 11:89, page 582/585/588 Juz 30) — laam_shamsiyah/ham_wasl/
+/// slnt confirmed as plain/unhighlighted, matching the existing muted grey.
+/// ikhafa, idgham_wo_ghunnah, madda_necessary remain best-effort: sampled
+/// examples were either ambiguous (ikhafa showed no colour on the one clean
+/// example checked) or the crop missed the target word.
 class Tajweed {
   static const _base = <String, Color>{
     'ham_wasl': Color(0xFFAAAAAA),
     'laam_shamsiyah': Color(0xFFAAAAAA),
     'slnt': Color(0xFFAAAAAA),
-    'madda_normal': Color(0xFF537FFF),
-    'madda_permissible': Color(0xFF4050FF),
+    'madda_normal': Color(0xFF1C8FC0),
+    'madda_permissible': Color(0xFF1E9ED1),
     'madda_necessary': Color(0xFF000EAD),
-    'madda_obligatory': Color(0xFF2144C1),
-    'qalqalah': Color(0xFFDD0008),
-    'ikhafa': Color(0xFF9400A8),
-    'ikhafa_shafawi': Color(0xFFD500B7),
-    'idgham_shafawi': Color(0xFF58B800),
-    'iqlab': Color(0xFF26BFFD),
-    'idgham_with_ghunnah': Color(0xFF169777),
+    'madda_obligatory_mottasel': Color(0xFF0F86C0),
+    'madda_obligatory_monfasel': Color(0xFF0F86C0),
+    'qalaqah': Color(0xFF29B6E8),
+    'ikhafa': Color(0xFFB01E96),
+    'ikhafa_shafawi': Color(0xFFE91E8C),
+    'idgham_shafawi': Color(0xFF1C8FC0),
+    'iqlab': Color(0xFF1C8FC0),
+    'idgham_ghunnah': Color(0xFFE91E8C),
     'idgham_wo_ghunnah': Color(0xFF169200),
     'idgham_mutajanisayn': Color(0xFFA1A1A1),
     'idgham_mutaqaribayn': Color(0xFFA1A1A1),
-    'ghunnah': Color(0xFFFF7E1E),
+    'ghunnah': Color(0xFF12BD71),
   };
 
   // On light paper the pale greys/blues need to sit a little darker.
@@ -38,8 +48,12 @@ class Tajweed {
     'slnt': Color(0xFF8A8A8A),
     'idgham_mutajanisayn': Color(0xFF8A8A8A),
     'idgham_mutaqaribayn': Color(0xFF8A8A8A),
-    'madda_normal': Color(0xFF2D5BFF),
-    'iqlab': Color(0xFF109FDB),
+    'madda_normal': Color(0xFF106D96),
+    'madda_obligatory_mottasel': Color(0xFF0A5E8A),
+    'madda_obligatory_monfasel': Color(0xFF0A5E8A),
+    'idgham_shafawi': Color(0xFF106D96),
+    'iqlab': Color(0xFF106D96),
+    'ghunnah': Color(0xFF0D9A5B),
   };
 
   static Color? colorFor(String? rule, bool dark) {
