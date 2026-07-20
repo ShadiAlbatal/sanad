@@ -1,6 +1,8 @@
 # Sanad — Handoff — START HERE
 
-## ⭐ SESSION 11 (2026-07-20) — BACK TO THE CORE APP + REVIEW-BUG FIXES — RESUME HERE
+## ⭐ SESSION 11 (2026-07-20) — CORE APP: BACKWARD-BUG VERDICT + REVIEW FIXES + VOICE TASBĪḤ COUNTER — RESUME HERE
+
+**One-line state:** `master` pushed to origin at `002c7d8`; 207 host tests, analyze clean; all session-9/10/11 work is HOST-tested only → the DEVICE-TEST GATE at the bottom of this block is the single owed thing. Backward false-green is a proven, deferred known-limitation (do NOT re-attempt in the matcher).
 
 **Context:** user parked ALL the graphics/game work (dhikr garden, mushaf-qcf2 rendering, `claude/game-*` worktrees — untouched on their own branches/worktrees) to return to the core recite-follow-along app on `master`. Ran a bottleneck review; this session acted on it. `master` health at start: 197 host tests, analyze clean. The two commits after the session-10 handoff (`952e590` commit-horizon, `e5fc6e9` tajweed colors) mean review item "confidence-ring flicker" was ALREADY root-fixed before this session.
 
