@@ -9,6 +9,7 @@ abstract class Tabs {
   static const home = 1;
   static const quran = 2;
   static const hadith = 3;
+  static const counter = 4;
 }
 
 enum AccentChoice { auto, iris, emerald, coral, ocean }

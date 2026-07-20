@@ -99,11 +99,10 @@ class HomeScreen extends StatelessWidget {
               )),
           const SizedBox(height: 12),
           _QuickTile(
-            icon: Icons.touch_app_rounded,
+            icon: Icons.fingerprint_rounded,
             label: 'Counter',
-            subtitle: 'Tasbih & adhkār',
-            onTap: () => Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => const AdzkarScreen(pushed: true))),
+            subtitle: 'Tasbih — tap or recite',
+            onTap: () => app.tabIndex = Tabs.counter,
           ),
           const SizedBox(height: 22),
           _SuggestionCard(

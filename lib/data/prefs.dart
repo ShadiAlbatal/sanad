@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Prefs {
@@ -11,6 +12,7 @@ class Prefs {
   static const _kDuaHistory = 'dua_history';
   static const _kHadithHistory = 'hadith_history';
   static const _kQuranHistory = 'quran_history';
+  static const _kDhikrCounts = 'dhikr_counts';
 
   final SharedPreferences _sp;
   Prefs(this._sp);
@@ -48,4 +50,15 @@ class Prefs {
 
   List<String> get quranHistory => _sp.getStringList(_kQuranHistory) ?? const [];
   Future<void> setQuranHistory(List<String> v) => _sp.setStringList(_kQuranHistory, v);
+
+  // Persistent tasbīḥ tallies: dhikr id → lifetime count (never auto-reset).
+  Map<String, int> get dhikrCounts {
+    final s = _sp.getString(_kDhikrCounts);
+    if (s == null || s.isEmpty) return const {};
+    final m = json.decode(s) as Map<String, dynamic>;
+    return {for (final e in m.entries) e.key: (e.value as num).toInt()};
+  }
+
+  Future<void> setDhikrCounts(Map<String, int> v) =>
+      _sp.setString(_kDhikrCounts, json.encode(v));
 }

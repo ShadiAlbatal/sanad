@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../state/app_state.dart';
+import '../state/dhikr_counter_state.dart';
 import '../state/reading_state.dart';
 import '../state/voice_search_state.dart';
+import 'counter_screen.dart';
 import 'dua_list_screen.dart';
 import 'hadith_search_screen.dart';
 import 'home_screen.dart';
@@ -48,6 +50,7 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
     if (reading.asrActive) reading.stopAsrListening();
     reading.clearRetainedPcm(); // don't hold raw voice audio while backgrounded
     context.read<VoiceSearchState>().cancel(); // stop any voice search recording
+    context.read<DhikrCounterState>().cancel(); // stop the tasbih counter mic
   }
 
   @override
@@ -63,7 +66,11 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
     // was recording/loaded.
     if (_lastTab != tab) {
       final voice = context.read<VoiceSearchState>();
-      WidgetsBinding.instance.addPostFrameCallback((_) => voice.cancel());
+      final counter = context.read<DhikrCounterState>();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        voice.cancel();
+        counter.cancel(); // free the counter mic + word model when leaving its tab
+      });
     }
     _lastTab = tab;
 
@@ -83,6 +90,7 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
             HomeScreen(),
             QuranListScreen(),
             HadithSearchScreen(),
+            CounterScreen(),
           ],
         ),
         // Only Home shows the tab bar; the phone back button (PopScope above)
@@ -117,6 +125,11 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
                     icon: Icon(Icons.format_quote_outlined),
                     selectedIcon: Icon(Icons.format_quote_rounded),
                     label: 'Hadith',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.fingerprint_rounded),
+                    selectedIcon: Icon(Icons.fingerprint_rounded),
+                    label: 'Counter',
                   ),
                 ],
               ),
