@@ -27,6 +27,10 @@ mixin VoiceSearchListMixin<W extends StatefulWidget, H> on State<W> {
   Timer? _debounce;
   bool _opening = false;
   int? _lastKnownTab;
+  // The last value actually handed to onSearchChanged from voice — separate
+  // from searchController.text (which now shows the fresher [heard], see
+  // _onVoice) so a repeat [transcript] doesn't get re-searched.
+  String _lastVoiceQuery = '';
 
   /// Current trimmed query (typed or the live transcript); empty = browsing.
   String query = '';
@@ -85,13 +89,19 @@ mixin VoiceSearchListMixin<W extends StatefulWidget, H> on State<W> {
     _lastKnownTab = tab;
   }
 
-  // Mirror the live transcript into the search field as it grows, so the BM25
-  // results narrow AS the user recites (not only on stop).
+  // Show the freshest live decode ([heard]) in the field unconditionally, so
+  // the user always sees it's still listening — but drive the actual BM25
+  // query off [transcript], the commit-horizon-stabilized value, so the
+  // ranking/ring don't wobble on a still-settling tail.
   void _onVoice() {
     if (!mounted || context.read<AppState>().tabIndex != voiceTab) return;
+    final heard = _voice?.heard ?? '';
+    if (heard.isNotEmpty && heard != searchController.text) {
+      searchController.text = heard;
+    }
     final t = _voice?.transcript ?? '';
-    if (t.isEmpty || t == searchController.text) return;
-    searchController.text = t;
+    if (t.isEmpty || t == _lastVoiceQuery) return;
+    _lastVoiceQuery = t;
     onSearchChanged(t, fromVoice: true);
   }
 
@@ -150,12 +160,13 @@ mixin VoiceSearchListMixin<W extends StatefulWidget, H> on State<W> {
     conf = 0;
     rings = const [];
     voiceQuery = false;
-    // Clear the field for the new recording, but deliberately leave `results`
-    // alone — the OLD candidates stay on screen (no blank flash) until the new
-    // recitation's own results replace them via _onVoice. Reset the scroll so
-    // the new leading match isn't hidden below wherever the user had scrolled
-    // to on the previous search.
+    _lastVoiceQuery = '';
+    // Clear the field AND the old results for the new recording — leaving the
+    // previous recitation's candidates on screen read as stale/wrong once a
+    // new one starts. Reset the scroll so the new leading match isn't hidden
+    // below wherever the user had scrolled to on the previous search.
     searchController.clear();
+    if (mounted) setState(() => results = const []);
     if (scrollController.hasClients) scrollController.jumpTo(0);
     await v.start();
     if (v.error != null && mounted) {
@@ -170,6 +181,7 @@ mixin VoiceSearchListMixin<W extends StatefulWidget, H> on State<W> {
     _debounce?.cancel();
     searchController.clear();
     _confidence.reset();
+    _lastVoiceQuery = '';
     if (!mounted) return;
     setState(() {
       query = '';

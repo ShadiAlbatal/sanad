@@ -41,10 +41,11 @@ List<String> _words(String s) =>
     s.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
 
 /// Voice SEARCH driver: record a recitation on the shared mic and transcribe it
-/// to Arabic text with the offline [WordAsr]. The text is exposed as [transcript]
-/// (notified on change); a list screen mirrors it into its search field so the
-/// EXISTING BM25 typed-search path renders ranked, highlighted results — voice
-/// and typed search converge on one engine.
+/// to Arabic text with the offline [WordAsr]. [transcript] (commit-horizon
+/// gated, see [commitStablePrefix]) drives the actual BM25 query — stable but
+/// can lag; [heard] is the raw latest decode, unconditionally, for a list
+/// screen to show as live "what did it hear" feedback that never goes dark
+/// mid-recitation even when the stable query is holding still.
 ///
 /// LIVE: because transcription runs ~60× realtime, the whole growing buffer is
 /// re-transcribed every [_interimEvery] while recording, so results narrow AS
@@ -66,6 +67,15 @@ class VoiceSearchState extends ChangeNotifier {
   double _level = 0;
   String? _error;
   String _transcript = '';
+  // The freshest whole-buffer re-decode, unconditionally — separate from
+  // [_transcript] (the commit-horizon-gated value search is driven off). A
+  // long/isnad-style recitation can eventually make even a genuine re-decode
+  // disagree with the frozen committed prefix (see [commitStablePrefix]'s
+  // never-un-commit contract) — display would otherwise go dark for the rest
+  // of the session even though the model is still hearing fine. [heard] is
+  // purely user-facing feedback and never feeds search, so it can safely
+  // always show the latest pass.
+  String _heard = '';
   final List<int> _buf = [];
   // Commit-horizon state: the last interim's word list, and the words committed
   // so far (agreed across two consecutive interims). See [commitStablePrefix].
@@ -81,7 +91,8 @@ class VoiceSearchState extends ChangeNotifier {
   bool get busy => _busy;
   double get level => _level; // 0..1 mic level for the footer meter
   String? get error => _error;
-  String get transcript => _transcript; // latest interim or final text
+  String get transcript => _transcript; // stable, search-facing text
+  String get heard => _heard; // freshest live decode, display-only, never freezes
 
   /// Start capturing. First call also loads the ~125MB word model (~1s), during
   /// which [busy] is true; recording begins once it's ready.
@@ -96,6 +107,7 @@ class VoiceSearchState extends ChangeNotifier {
     _busy = true;
     _level = 0;
     _transcript = '';
+    _heard = '';
     _prevWords = const [];
     _committed = const [];
     notifyListeners();
@@ -160,7 +172,10 @@ class VoiceSearchState extends ChangeNotifier {
           '${(_buf.length / 16000).toStringAsFixed(1)}s (${_buf.length} samples)');
       if (_buf.isNotEmpty) {
         final text = _word.transcribe(Int16List.fromList(_buf));
-        if (text.isNotEmpty) _transcript = text;
+        if (text.isNotEmpty) {
+          _transcript = text;
+          _heard = text;
+        }
       }
       Log.d('voicesearch', 'final transcript -> "$_transcript"');
       Log.flushFile();
@@ -194,6 +209,7 @@ class VoiceSearchState extends ChangeNotifier {
     // (already-cleared) searchController.text, so a stale non-empty transcript
     // reads as "new" and fires a bogus search on whatever tab is now active.
     _transcript = '';
+    _heard = '';
     _prevWords = const [];
     _committed = const [];
     // Invalidate SYNCHRONOUSLY — before any await — so the phoneme engine is
@@ -235,26 +251,23 @@ class VoiceSearchState extends ChangeNotifier {
       // appear immediately instead of waiting a full extra interim.
       _committed = commitStablePrefix(_committed, _prevWords, words);
       _prevWords = words;
-      // Show the fresh decode whenever it still EXTENDS the committed floor
-      // (same prefix check commitStablePrefix itself uses) — not just before
-      // the first commit. Otherwise, once anything commits, `shown` is capped
-      // to the committed prefix forever: on hadith/dua recitations (out of the
-      // word model's Quran-heavy comfort zone) later whole-buffer re-decodes
-      // often keep re-guessing an early word slightly differently (tashkeel,
-      // a resegmented syllable) — a single stray mismatch permanently freezes
-      // BOTH the live "heard" text and the search query mid-recitation, even
-      // though the mic and model are still running fine (only recoverable by
-      // tapping stop, which re-transcribes the whole buffer fresh). Falling
-      // back to the committed floor only when the decode has genuinely
-      // diverged keeps the original desync protection (f5f106d) intact.
-      final extendsCommitted = words.length >= _committed.length &&
-          Iterable.generate(_committed.length)
-              .every((i) => words[i] == _committed[i]);
-      final shown = extendsCommitted ? text : _committed.join(' ');
+      final shown = _committed.isEmpty ? text : _committed.join(' ');
+      var changed = false;
       if (shown.isNotEmpty && shown != _transcript) {
         _transcript = shown;
+        changed = true;
+      }
+      // [heard] tracks the raw decode UNCONDITIONALLY, even on the (long/
+      // isnad-style recitation) interims where the committed floor holds and
+      // [_transcript] doesn't move — so the live "what did it hear" feedback
+      // never goes dark just because the stable search query is lagging.
+      if (text.isNotEmpty && text != _heard) {
+        _heard = text;
+        changed = true;
+      }
+      if (changed) {
         Log.d('voicesearch', 'interim: ${words.length} words, '
-            '${_committed.length} committed -> "$shown"');
+            '${_committed.length} committed -> "$shown" (heard "$text")');
         notifyListeners();
       }
     } catch (e, st) {
