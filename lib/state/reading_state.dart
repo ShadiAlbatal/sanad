@@ -262,7 +262,10 @@ class ReadingState extends ChangeNotifier {
     if (_versePage.isEmpty) _versePage = await loadVersePages();
     final clip = await loadSurahClip(surah);
     _clip = clip;
-    _matcher = PhonemeMatchSession(clip.clip, _engine.units);
+    // allowBackward: false — sidestep re-reads instead of tracking them
+    // backward (device-test candidate for the shipped follow-anywhere
+    // design; see the comparison in phoneme_matcher_backward_comparison_test.dart).
+    _matcher = PhonemeMatchSession(clip.clip, _engine.units, allowBackward: false);
     _asrCurrentLocation = null; // no marker until the matcher actually locks on
     _asrCurrentLocations = const {};
     _markerCursor = 0;
