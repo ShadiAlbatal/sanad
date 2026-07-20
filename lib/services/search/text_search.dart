@@ -79,8 +79,19 @@ class TextSearch {
 
   /// Rank docs against a raw query string. Empty query (or one with no indexed
   /// terms) yields no hits, so the caller falls back to the full browse list.
+  ///
+  /// Plain BM25 is bag-of-words: it can't tell "A said B said C" from "C said B
+  /// said A", so an isnād chain recited in order scores no differently from a
+  /// DIFFERENT doc sharing the same handful of narrator names in a different
+  /// order — and BM25's length normalization then favors whichever doc is
+  /// shorter, not whichever one actually matches. A live recitation IS
+  /// sequential, though, so re-rank the top BM25 candidates by how much of the
+  /// query they match as an in-order (not necessarily contiguous) run — a doc
+  /// that reproduces the query's word order gets boosted well above one that
+  /// merely contains the same words scrambled.
   List<TextSearchHit> search(String query, {int top = 100}) {
-    final terms = searchWords(query).toSet();
+    final orderedTerms = searchWords(query);
+    final terms = orderedTerms.toSet();
     if (terms.isEmpty) return const [];
     final n = _ids.length;
     final scores = <int, double>{};
@@ -99,23 +110,57 @@ class TextSearch {
     }
     if (scores.isEmpty) return const [];
 
-    final ranked = scores.keys.toList()
+    final preRanked = scores.keys.toList()
       ..sort((a, b) {
         final c = scores[b]!.compareTo(scores[a]!);
         return c != 0 ? c : _ids[a].compareTo(_ids[b]);
       });
-    final kk = ranked.length < top ? ranked.length : top;
-    final hits = <TextSearchHit>[];
+    final kk = preRanked.length < top ? preRanked.length : top;
+
+    // Only the pre-ranked top-K need the (cheap but O(doc length)) sequence
+    // check — the true match for a sequential query is always somewhere in
+    // here since it shares the same terms, just possibly out-ranked by a
+    // shorter, differently-ordered doc.
+    final boosted = <int, double>{};
     for (var i = 0; i < kk; i++) {
-      final d = ranked[i];
+      final d = preRanked[i];
+      final seqFrac = _orderedMatchFraction(orderedTerms, _docWords[d]);
+      boosted[d] = scores[d]! * (1 + 2.0 * seqFrac * seqFrac);
+    }
+    final ranked = boosted.keys.toList()
+      ..sort((a, b) {
+        final c = boosted[b]!.compareTo(boosted[a]!);
+        return c != 0 ? c : _ids[a].compareTo(_ids[b]);
+      });
+
+    final hits = <TextSearchHit>[];
+    for (final d in ranked) {
       final terms = matched[d]!;
       final words = _docWords[d];
       final positions = <int>[];
       for (var w = 0; w < words.length; w++) {
         if (terms.contains(words[w])) positions.add(w);
       }
-      hits.add(TextSearchHit(_ids[d], scores[d]!, positions, terms));
+      hits.add(TextSearchHit(_ids[d], boosted[d]!, positions, terms));
     }
     return hits;
+  }
+
+  /// Greedy longest run of [orderedQueryTerms] found at strictly increasing
+  /// positions in [docWords], as a fraction of the query length — a cheap
+  /// stand-in for "does this doc reproduce the query's word order". Repeated
+  /// query terms (duplicate narrator names) are matched at most once each per
+  /// occurrence, same as a real subsequence match would.
+  double _orderedMatchFraction(List<String> orderedQueryTerms, List<String> docWords) {
+    if (orderedQueryTerms.isEmpty) return 0;
+    var from = 0;
+    var run = 0;
+    for (final term in orderedQueryTerms) {
+      final p = docWords.indexOf(term, from);
+      if (p == -1) continue; // skip a term the doc doesn't have after `from`
+      run++;
+      from = p + 1;
+    }
+    return run / orderedQueryTerms.length;
   }
 }

@@ -54,6 +54,37 @@ void main() {
     expect(search.search('رب العالمين الرحمن').first.id, 'x');
   });
 
+  test('an in-order isnād match beats a shorter doc with the same names scrambled', () {
+    // Both docs share the exact same narrator names as the query; the SHORT
+    // one repeats them out of order (and, being short, would win on plain
+    // BM25's length normalization alone); the LONG one reproduces the query's
+    // exact word order as its opening, then continues with the actual matn —
+    // the real Bukhari #1 shape. The in-order match must win despite being
+    // the longer, lower raw-term-density doc.
+    const isnad = [
+      TextSearchDoc('scrambled-short',
+          'الزبير عبد الله بن الحميدي حدثنا سفيان قال حدثنا الأعمش عن سالم'),
+      TextSearchDoc('ordered-long',
+          'حدثنا الحميدي عبد الله بن الزبير قال حدثنا سفيان قال حدثنا يحيى بن سعيد '
+          'الأنصاري قال أخبرني محمد بن إبراهيم التيمي أنه سمع علقمة بن وقاص الليثي '
+          'يقول سمعت عمر بن الخطاب رضي الله عنه يقول سمعت رسول الله صلى الله عليه '
+          'وسلم يقول إنما الأعمال بالنيات'),
+    ];
+    final search = TextSearch(isnad);
+    expect(search.search('حدثنا الحميدي عبد الله بن الزبير').first.id, 'ordered-long');
+  });
+
+  test('same-order match wins even against a doc with higher raw term overlap', () {
+    // 'denser' repeats every query term twice (higher BM25 term-frequency
+    // score) but scrambled; 'ordered' matches only once each, in order.
+    const docs = [
+      TextSearchDoc('denser', 'زبير زبير بن بن الله الله عبد عبد حميدي حميدي'),
+      TextSearchDoc('ordered', 'حميدي عبد الله بن زبير'),
+    ];
+    final search = TextSearch(docs);
+    expect(search.search('حميدي عبد الله بن زبير').first.id, 'ordered');
+  });
+
   test('empty / unknown query yields no hits (caller falls back to browse)', () {
     final search = TextSearch(docs);
     expect(search.search(''), isEmpty);
