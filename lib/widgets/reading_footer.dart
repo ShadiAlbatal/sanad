@@ -35,34 +35,40 @@ class ReadingFooter extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (showMic && reading.hidden) ...[
-            _RevealRow(reading: reading, fg: fg, dark: dark),
-            const SizedBox(height: 8),
-          ],
           if (showMic && reading.asrActive) ...[
             HeardTicker(heard: reading.asrHeard),
             const SizedBox(height: 4),
           ],
           Row(
             children: [
-              _PillButton(
-                icon: Icons.auto_stories_rounded,
-                label: 'Mistakes',
-                fg: fg,
-                dark: dark,
-                onTap: () => showMistakesSheet(context),
-              ),
-              const SizedBox(width: 10),
-              _PillButton(
+              // Mistakes only means anything once a recitation pass is over —
+              // hide it while actively reciting instead of always reserving
+              // its slot, which also makes room for the reveal chevrons below
+              // to live in THIS row instead of a whole extra row above.
+              if (!(showMic && reading.asrActive)) ...[
+                _IconPill(
+                  icon: Icons.auto_stories_rounded,
+                  semanticLabel: 'Mistakes',
+                  fg: fg,
+                  dark: dark,
+                  onTap: () => showMistakesSheet(context),
+                ),
+                const SizedBox(width: 10),
+              ],
+              _IconPill(
                 icon: reading.hidden
                     ? Icons.visibility_off_rounded
                     : Icons.visibility_rounded,
-                label: reading.hidden ? 'Reveal' : 'Hide',
+                semanticLabel: reading.hidden ? 'Reveal' : 'Hide',
                 fg: reading.hidden ? Colors.white : fg,
                 dark: dark,
                 active: reading.hidden,
                 onTap: reading.toggleHidden,
               ),
+              if (showMic && reading.hidden) ...[
+                const SizedBox(width: 8),
+                Flexible(child: _RevealRow(reading: reading, fg: fg, dark: dark)),
+              ],
               if (showMic && reading.asrActive) ...[
                 Expanded(
                   child: Padding(
@@ -108,7 +114,10 @@ class ReadingFooter extends StatelessWidget {
 }
 
 /// Step-reveal row for hidden mode: hide/reveal by word (single chevron) or by
-/// āyah (double chevron), forward and back, without reciting.
+/// āyah (double chevron), forward and back, without reciting. Now lives
+/// inline in the main footer row (not a row of its own above it), so it
+/// scales itself down rather than force the row to overflow on narrower
+/// phones or when the hearing indicator also wants room.
 class _RevealRow extends StatelessWidget {
   final ReadingState reading;
   final Color fg;
@@ -117,8 +126,10 @@ class _RevealRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         // RTL: reading runs right→left, so the LEFT-pointing chevrons reveal
         // FORWARD (next word/āyah) and the RIGHT-pointing ones step back.
@@ -154,20 +165,21 @@ class _RevealRow extends StatelessWidget {
           onTap: () => reading.revealBack(ayah: true),
         ),
       ],
+      ),
     );
   }
 }
 
-class _PillButton extends StatelessWidget {
+class _IconPill extends StatelessWidget {
   final IconData icon;
-  final String label;
+  final String semanticLabel;
   final Color fg;
   final bool dark;
   final bool active;
   final VoidCallback onTap;
-  const _PillButton({
+  const _IconPill({
     required this.icon,
-    required this.label,
+    required this.semanticLabel,
     required this.fg,
     required this.dark,
     required this.onTap,
@@ -179,24 +191,20 @@ class _PillButton extends StatelessWidget {
     final bg = active
         ? context.accent
         : (dark ? Colors.white : Colors.black).withValues(alpha: 0.06);
-    return Material(
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: Material(
       color: bg,
       borderRadius: BorderRadius.circular(22),
       child: InkWell(
         borderRadius: BorderRadius.circular(22),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-          child: Row(
-            children: [
-              Icon(icon, size: 18, color: fg),
-              const SizedBox(width: 7),
-              Text(label,
-                  style: TextStyle(
-                      color: fg, fontSize: 13, fontWeight: FontWeight.w600)),
-            ],
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+          child: ExcludeSemantics(child: Icon(icon, size: 18, color: fg)),
         ),
+      ),
       ),
     );
   }
