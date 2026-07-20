@@ -51,6 +51,7 @@ class PhonemeMatchSession {
   final PhonemeLocalizer _localizer;
   final double _threshold;
   final double _adv;
+  final bool _allowBackward;
 
   // Tuning (verbatim from the RN engine).
   static const _tail = 24;
@@ -82,7 +83,16 @@ class PhonemeMatchSession {
   final Set<int> _skippedEmitted = {};
   late List<WordState> _current;
 
-  PhonemeMatchSession(PhonemeClip clip, List<String> units, {double? threshold, double? advanceNeed})
+  /// [allowBackward] (default true, unchanged shipped behavior) gates the
+  /// FOLLOW-ANYWHERE backward re-anchor: the reciter jumping back to re-read
+  /// is detected and the anchor retreats to track them. Set false for the
+  /// WORD-TRACK-style "sidestep" contract instead — re-read audio has no
+  /// earlier reference to align to (the forward window never includes
+  /// already-passed words), so it falls out as harmless insertions and the
+  /// marker simply stays put, at the cost of not tracking backward at all.
+  /// See the comparison in `test/phoneme_matcher_backward_comparison_test.dart`.
+  PhonemeMatchSession(PhonemeClip clip, List<String> units,
+      {double? threshold, double? advanceNeed, bool allowBackward = true})
       : _n = clip.wordCount,
         _phonemeToWord = clip.phonemeToWord,
         _ref = clip.phonemes.map(_collapse).toList(),
@@ -90,6 +100,7 @@ class PhonemeMatchSession {
         _wordPhonemes = List.generate(clip.wordCount, (_) => <int>[]),
         _threshold = threshold ?? kPhonemeThreshold,
         _adv = advanceNeed ?? 0.65,
+        _allowBackward = allowBackward,
         _localizer = PhonemeLocalizer(clip.phonemes.map(_collapse).toList(),
             (r) => clip.phonemeToWord[r], threshold: threshold ?? kPhonemeThreshold) {
     for (var i = 0; i < _phonemeToWord.length; i++) {
@@ -134,7 +145,16 @@ class PhonemeMatchSession {
     final vStart = _ayahStart(_curAyah);
     final vEnd = _ayahEnd(_curAyah);
     final fwdEdge = math.min(vEnd, _reached + 1 + _grace);
-    final reachLo = _anchor < 0 ? 0 : math.max(_ayahStart(_curAyah), _anchor);
+    // FOLLOW-ANYWHERE (allowBackward): the window spans from the anchor
+    // itself, so already-passed words stay reachable and a re-read can pull
+    // the anchor backward (below). SIDESTEP (!allowBackward): the window
+    // starts just past the frontier — already-committed words are never
+    // reachable again, so re-read audio has nothing to align to there.
+    final reachLo = _anchor < 0
+        ? 0
+        : _allowBackward
+            ? math.max(_ayahStart(_curAyah), _anchor)
+            : math.max(_ayahStart(_curAyah), _reached + 1);
     final reachHi = _anchor < 0 ? _n - 1 : fwdEdge;
     var accepted = false;
 
@@ -180,9 +200,11 @@ class PhonemeMatchSession {
       }
     }
 
-    // Backward re-anchor probe.
+    // Backward re-anchor probe — sidestep mode never retreats the anchor, so
+    // this whole detector is off; a re-read's audio already can't reach
+    // anything behind reachLo (bound to _reached+1 above) either way.
     final lr = _lastReloc;
-    if (_anchor >= 0 && lr != null && lr.word >= 0 && lr.word < reachLo && lr.score >= _scoreFloor) {
+    if (_allowBackward && _anchor >= 0 && lr != null && lr.word >= 0 && lr.word < reachLo && lr.score >= _scoreFloor) {
       final region = (lr.word / _backRegionSize).floor();
       if (region == _backRegion) {
         _backStable++;
