@@ -41,4 +41,23 @@ void main() {
     committed = commitStablePrefix(committed, w('a b c'), w('a')); // model produced fewer
     expect(committed, w('a b c'));
   });
+
+  test('a decode that revises an earlier word does not desync the appended tail', () {
+    var committed = commitStablePrefix(const [], w('a b c'), w('a b c'));
+    expect(committed, w('a b c'));
+    // BOTH decodes now agree on a REVISED word 2 (c→Z) plus a new tail word (d).
+    // Appending by index would yield "a b c d" — a sequence no decode produced,
+    // dropping the corrected Z. The committed prefix must hold instead.
+    committed = commitStablePrefix(committed, w('a b Z d'), w('a b Z d'));
+    expect(committed, w('a b c'));
+  });
+
+  test('a decode that inserts an earlier word does not desync the appended tail', () {
+    var committed = commitStablePrefix(const [], w('a b c'), w('a b c'));
+    expect(committed, w('a b c'));
+    // A word X is inserted at position 1; appending by index would duplicate/scramble
+    // ("a b c c"). Hold the committed prefix — it's no longer a prefix of the decode.
+    committed = commitStablePrefix(committed, w('a X b c d'), w('a X b c d'));
+    expect(committed, w('a b c'));
+  });
 }

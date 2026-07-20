@@ -19,6 +19,15 @@ import '../util/log.dart';
 /// re-examined). Pure + host-testable. The cost is a ~1-interim lag on the last
 /// word or two (they wait for confirmation) — the exact wobble we want gone.
 List<String> commitStablePrefix(List<String> committed, List<String> prev, List<String> cur) {
+  // A re-decode reads the WHOLE growing buffer, so CTC can revise/insert/delete an
+  // EARLIER word, not just wobble the tail. If the latest decode no longer begins
+  // with the committed prefix, HOLD it — appending cur[i] by index onto a stale
+  // prefix would feed search a word sequence the recognizer never produced. The
+  // committed prefix stays a literal prefix of the current decode; growth resumes
+  // once a decode agrees with it again (never un-commits — the stability contract).
+  for (var k = 0; k < committed.length; k++) {
+    if (k >= cur.length || cur[k] != committed[k]) return committed;
+  }
   final out = List<String>.of(committed);
   var i = out.length;
   while (i < cur.length && i < prev.length && cur[i] == prev[i]) {
@@ -101,6 +110,11 @@ class VoiceSearchState extends ChangeNotifier {
       await _word.ensureLoaded();
       if (gen != _gen) {
         Log.d('voicesearch', 'start aborted — cancelled during model load');
+        // The cancel that bumped _gen ran _handOffToFollowAlong while the model
+        // was still loading (loaded==false), so it couldn't free it. Now that the
+        // load finished, hand off here — UNLESS a newer start has taken over
+        // (_busy/_recording set by it), which still wants the model resident.
+        if (!_busy && !_recording) _handOffToFollowAlong();
         return;
       }
       await _engine.claimMic(_release, owner: 'voice-search');

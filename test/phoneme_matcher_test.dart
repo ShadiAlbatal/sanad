@@ -62,6 +62,16 @@ void main() {
   test('corpus→mushaf mapping is complete for Hud (11, muqaṭṭaʿāt+text)', () => checkMapping(11));
   test('corpus→mushaf mapping is complete for At-Tahrim (66, long merges)', () => checkMapping(66));
 
+  // Full-corpus sweep: every corpus word of every surah (all 114, incl. the 29
+  // muqaṭṭaʿāt openers الٓمٓ/الٓر/كٓهيعٓصٓ… that the letter-aligner handles by
+  // fallback) must map to at least one well-formed, in-surah "s:a:w" glyph — no
+  // empties, no malformed or cross-surah locations in the SHIPPED align assets.
+  test('corpus→mushaf mapping is sane for ALL 114 surahs', () async {
+    for (var s = 1; s <= 114; s++) {
+      await checkMapping(s);
+    }
+  });
+
   // A merged corpus word covers several mushaf glyphs; the "current" highlight
   // must be ALL of them (RN approach — the whole phrase lights together), so the
   // marker never hangs on the first glyph of a merged phrase.

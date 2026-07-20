@@ -268,6 +268,7 @@ class ReadingState extends ChangeNotifier {
     _markerCursor = 0;
     _lastAsrPage = -1;
     _asrRead = const {};
+    _asrSkipped = const {}; // else a prior session's red skipped-word washes linger
     _resetReacqState();
   }
 
