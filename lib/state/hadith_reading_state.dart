@@ -88,7 +88,7 @@ class HadithReadingState extends ChangeNotifier {
     final clip = search.clipById(id);
     _clip = clip;
     if (clip != null) {
-      _matcher = PhonemeMatchSession(clip.clip, _engine.units);
+      _matcher = PhonemeMatchSession(clip.clip, _engine.units, logTag: 'hadithread');
       Log.d('hadithread', 'loaded $id (${clip.words.length} words)');
     } else {
       _matcher = null;
@@ -229,8 +229,12 @@ class HadithReadingState extends ChangeNotifier {
       _markerCursor = advanceMarker(_markerCursor, out.cursor);
       _currentWord = _markerCursor.clamp(0, clip.words.length - 1);
     }
+    final m = _matcher;
     Log.t('hadithread', 'cursor=${out.cursor} cur=$_currentWord read=${_readWords.length} '
-        'skip=${_skippedWords.length} anchored=$anchored rms=${_lastRms.toStringAsFixed(0)}');
+        'skip=${_skippedWords.length} anchored=$anchored'
+        '${m == null ? '' : ' head=${m.head} reach=${m.reached} '
+            'loc=${m.lastLocWord}/${m.lastLocScore.toStringAsFixed(0)}'} '
+        'rms=${_lastRms.toStringAsFixed(0)}');
     notifyListeners();
   }
 

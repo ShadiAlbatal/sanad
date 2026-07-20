@@ -116,7 +116,7 @@ class DuaReadingState extends ChangeNotifier {
     final clip = await loadDuaClip(id);
     _clip = clip;
     _duaId = id;
-    _matcher = PhonemeMatchSession(clip.clip, _engine.units);
+    _matcher = PhonemeMatchSession(clip.clip, _engine.units, logTag: 'duaread');
     _resetFollow();
     _revealed.clear();
     Log.d('dua', 'loaded $id (${clip.words.length} words)');
@@ -350,8 +350,12 @@ class DuaReadingState extends ChangeNotifier {
       _revealed.addAll(skipped);
       if (_currentWord != null) _revealed.add(_currentWord!);
     }
+    final m = _matcher;
     Log.t('duaread', 'cursor=${out.cursor} cur=$_currentWord read=${_readWords.length} '
-        'skip=${_skippedWords.length} anchored=$anchored rms=${_lastRms.toStringAsFixed(0)}');
+        'skip=${_skippedWords.length} anchored=$anchored'
+        '${m == null ? '' : ' head=${m.head} reach=${m.reached} '
+            'loc=${m.lastLocWord}/${m.lastLocScore.toStringAsFixed(0)}'} '
+        'rms=${_lastRms.toStringAsFixed(0)}');
     var newSkip = false;
     for (final e in out.events) {
       if (e.type == PhonemeEventType.skipped) newSkip = true;

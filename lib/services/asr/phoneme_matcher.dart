@@ -52,6 +52,7 @@ class PhonemeMatchSession {
   final double _threshold;
   final double _adv;
   final bool _allowBackward;
+  final String _logTag;
 
   // Tuning (verbatim from the RN engine).
   static const _tail = 24;
@@ -91,8 +92,12 @@ class PhonemeMatchSession {
   /// already-passed words), so it falls out as harmless insertions and the
   /// marker simply stays put, at the cost of not tracking backward at all.
   /// See the comparison in `test/phoneme_matcher_backward_comparison_test.dart`.
+  /// [logTag] attributes this session's internal ANCHOR/SKIP/atomic-trace
+  /// logs to the right reader — previously hardcoded to 'recite', so a du'a
+  /// or hadith session's own matcher internals showed up mislabeled under
+  /// the Qur'an tab's log tag instead of 'duaread'/'hadithread'.
   PhonemeMatchSession(PhonemeClip clip, List<String> units,
-      {double? threshold, double? advanceNeed, bool allowBackward = true})
+      {double? threshold, double? advanceNeed, bool allowBackward = true, String logTag = 'recite'})
       : _n = clip.wordCount,
         _phonemeToWord = clip.phonemeToWord,
         _ref = clip.phonemes.map(_collapse).toList(),
@@ -101,6 +106,7 @@ class PhonemeMatchSession {
         _threshold = threshold ?? kPhonemeThreshold,
         _adv = advanceNeed ?? 0.65,
         _allowBackward = allowBackward,
+        _logTag = logTag,
         _localizer = PhonemeLocalizer(clip.phonemes.map(_collapse).toList(),
             (r) => clip.phonemeToWord[r], threshold: threshold ?? kPhonemeThreshold) {
     for (var i = 0; i < _phonemeToWord.length; i++) {
@@ -157,10 +163,20 @@ class PhonemeMatchSession {
             : math.max(_ayahStart(_curAyah), _reached + 1);
     final reachHi = _anchor < 0 ? _n - 1 : fwdEdge;
     var accepted = false;
+    // Atomic trace state — every branch below fills in what it did (or didn't)
+    // so the end-of-call log line reconstructs the FULL decision, not just the
+    // outcome. -1/false = that path never ran this call.
+    var tLocWord = -1;
+    var tLocScore = double.nan;
+    var tShortRescued = false;
+    var tUseWord = -1;
+    var tUseScore = double.nan;
 
     if (tail.length >= 6) {
       final loc = _localizer.localizeScored(tail);
       _lastReloc = loc;
+      tLocWord = loc.word;
+      tLocScore = loc.score;
       var use = loc;
       // Repeated-phrase rescue: the long tail can be "won" by a longer, older,
       // now-out-of-window match while newer in-window audio is also present. A
@@ -170,8 +186,11 @@ class PhonemeMatchSession {
         final shortLoc = _localizer.localizeScored(tail.sublist(tail.length - _shortTail));
         if (shortLoc.word >= reachLo && shortLoc.word <= reachHi && shortLoc.score >= _scoreFloor) {
           use = shortLoc;
+          tShortRescued = true;
         }
       }
+      tUseWord = use.word;
+      tUseScore = use.score;
       if (use.word >= reachLo && use.word <= reachHi && use.score >= _scoreFloor) {
         accepted = true;
         final wLo = math.max(reachLo, use.word - 3);
@@ -237,7 +256,7 @@ class PhonemeMatchSession {
               _anchor = wi;
               _backRegion = -1;
               _backStable = 0;
-              Log.d('recite', 'ANCHOR back -> w$wi (re-read earlier)');
+              Log.d(_logTag, 'ANCHOR back -> w$wi (re-read earlier)');
               break;
             }
           }
@@ -254,7 +273,7 @@ class PhonemeMatchSession {
         if (_majAdv(i) && _majAdv(i + 1)) {
           _anchor = i;
           _reached = i - 1;
-          Log.d('recite', 'ANCHOR lock @w$i (ayah $_curAyah)');
+          Log.d(_logTag, 'ANCHOR lock @w$i (ayah $_curAyah)');
           break;
         }
       }
@@ -277,7 +296,7 @@ class PhonemeMatchSession {
     }
     if (_reached >= vEnd && _curAyah + 1 < _boundaries.length) {
       _curAyah = _curAyah + 1;
-      Log.d('recite', 'verse slide -> ayah $_curAyah (frontier complete)');
+      Log.d(_logTag, 'verse slide -> ayah $_curAyah (frontier complete)');
     }
 
     // Marker position (smoothed).
@@ -334,7 +353,7 @@ class PhonemeMatchSession {
       if (_boundaries.length <= 1 && _reached < vEnd) {
         _reached++;
         _stuckChunks = 0;
-        Log.d('recite', 'SKIP-ADVANCE past w$_reached (stuck $_freezeChunks+ chunks, speaking)');
+        Log.d(_logTag, 'SKIP-ADVANCE past w$_reached (stuck $_freezeChunks+ chunks, speaking)');
       }
     }
 
@@ -357,10 +376,26 @@ class PhonemeMatchSession {
         events.add(PhonemeEvent(PhonemeEventType.skipped, wi));
         // Diagnostic: was it the model (frac~0 → no phonemes emitted for this
         // word) or the matcher/threshold (frac decent but under the green bar)?
-        Log.d('recite', 'SKIP w$wi frac=${_wordBestFrac[wi].toStringAsFixed(2)} '
+        Log.d(_logTag, 'SKIP w$wi frac=${_wordBestFrac[wi].toStringAsFixed(2)} '
             'need=${math.max(_greenNeed(wi), _adv).toStringAsFixed(2)} phonemes=${_wordPhonemes[wi].length}');
       }
     }
+
+    // Atomic trace: the FULL decision this call made, not just the outcome —
+    // built to actually see WHY a session never anchors (was the localizer
+    // never finding anything near the frontier, or finding it but under the
+    // score floor, or in-window but under the green bar?) instead of
+    // inferring it from silence in the logs. One line per apply() call.
+    final frontierFrac = _reached + 1 < _n ? _wordBestFrac[_reached + 1].toStringAsFixed(2) : '-';
+    final next2Frac = _reached + 2 < _n ? _wordBestFrac[_reached + 2].toStringAsFixed(2) : '-';
+    Log.t(_logTag,
+        'ATOM tail=${tail.length} loc=$tLocWord/${tLocScore.isNaN ? '-' : tLocScore.toStringAsFixed(1)} '
+        '${tShortRescued ? 'RESCUED->' : ''}use=$tUseWord/${tUseScore.isNaN ? '-' : tUseScore.toStringAsFixed(1)} '
+        'floor=$_scoreFloor win=[$reachLo,$reachHi] accepted=$accepted '
+        'anchor=$_anchor reached=$_reached head=$_head ay=$_curAyah '
+        'frac[r+1,r+2]=$frontierFrac,$next2Frac backStable=$_backStable/$_backStableNeed '
+        'stuck=$_stuckChunks/$_freezeChunks allowBack=$_allowBackward');
+
     return events;
   }
 
