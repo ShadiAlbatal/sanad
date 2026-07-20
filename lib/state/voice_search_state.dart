@@ -187,6 +187,15 @@ class VoiceSearchState extends ChangeNotifier {
     _interimTimer?.cancel();
     _busy = false;
     _level = 0;
+    // Clear so a later notifyListeners (below, after the mic.stop() await —
+    // which can take a second or more) doesn't hand a NEXT tab's fresh
+    // _onVoice listener this session's leftover words: VoiceSearchState is
+    // ONE shared instance, and the mixin only compares against its own
+    // (already-cleared) searchController.text, so a stale non-empty transcript
+    // reads as "new" and fires a bogus search on whatever tab is now active.
+    _transcript = '';
+    _prevWords = const [];
+    _committed = const [];
     // Invalidate SYNCHRONOUSLY — before any await — so the phoneme engine is
     // rebuilt before the reader we're about to open calls AsrEngine.ready(). If
     // this ran after `await mic.stop()`, the reader's warm ready() could grab the
@@ -226,7 +235,22 @@ class VoiceSearchState extends ChangeNotifier {
       // appear immediately instead of waiting a full extra interim.
       _committed = commitStablePrefix(_committed, _prevWords, words);
       _prevWords = words;
-      final shown = _committed.isEmpty ? text : _committed.join(' ');
+      // Show the fresh decode whenever it still EXTENDS the committed floor
+      // (same prefix check commitStablePrefix itself uses) — not just before
+      // the first commit. Otherwise, once anything commits, `shown` is capped
+      // to the committed prefix forever: on hadith/dua recitations (out of the
+      // word model's Quran-heavy comfort zone) later whole-buffer re-decodes
+      // often keep re-guessing an early word slightly differently (tashkeel,
+      // a resegmented syllable) — a single stray mismatch permanently freezes
+      // BOTH the live "heard" text and the search query mid-recitation, even
+      // though the mic and model are still running fine (only recoverable by
+      // tapping stop, which re-transcribes the whole buffer fresh). Falling
+      // back to the committed floor only when the decode has genuinely
+      // diverged keeps the original desync protection (f5f106d) intact.
+      final extendsCommitted = words.length >= _committed.length &&
+          Iterable.generate(_committed.length)
+              .every((i) => words[i] == _committed[i]);
+      final shown = extendsCommitted ? text : _committed.join(' ');
       if (shown.isNotEmpty && shown != _transcript) {
         _transcript = shown;
         Log.d('voicesearch', 'interim: ${words.length} words, '
