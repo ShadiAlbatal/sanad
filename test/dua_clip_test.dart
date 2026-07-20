@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sanad/data/duas.dart';
 import 'package:sanad/services/asr/phoneme_corpus.dart';
+import 'package:sanad/services/asr/phoneme_matcher.dart';
 
 /// Data-foundation checks for the du'a corpus (pure Dart, no model/device):
 ///  - every du'a in the content list loads its phoneme clip;
@@ -55,6 +56,33 @@ void main() {
         expect(ph, isNotEmpty, reason: 'no empty phoneme unit');
         expect(vocab.contains(ph), isTrue, reason: 'OOV phoneme "$ph" in ${d.id}');
       }
+    });
+  }
+
+  // Device logs (2026-07-20) showed dua-aslamtu-nafsi's follow-along never
+  // anchoring — cursor crept via best-match but no two consecutive words
+  // ever crossed the green threshold, despite a real recitation the whole
+  // session. Isolate whether that's the matcher/data (reproducible with a
+  // PERFECT self-fed input, like the Quran smoke tests in
+  // phoneme_matcher_test.dart) or real-audio recognition noise this can't
+  // catch: if it anchors and greens end-to-end here, the matcher is sound
+  // and the device failure was in the ASR pass, not this logic.
+  for (final d in duas) {
+    test('matcher anchors + tracks a perfect recitation of ${d.id}', () async {
+      final units = await loadPhonemeUnits();
+      final dc = await loadDuaClip(d.id);
+      final matcher = PhonemeMatchSession(dc.clip, units);
+      final ref = dc.clip.phonemes;
+      MatchOutput? out;
+      for (var end = 3; end < ref.length; end += 3) {
+        out = matcher.apply(ref.sublist(0, end));
+      }
+      out = matcher.apply(ref);
+      final n = dc.clip.wordCount;
+      final greens = out.states.where((s) => s == WordState.correct).length;
+      expect(matcher.anchored, isTrue, reason: '${d.id}: must anchor on a clean recitation');
+      expect(greens, n, reason: '${d.id}: every word must green on a perfect recitation');
+      expect(out.cursor, n - 1);
     });
   }
 }
