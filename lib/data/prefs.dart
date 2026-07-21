@@ -12,6 +12,9 @@ class Prefs {
   static const _kDuaHistory = 'dua_history';
   static const _kHadithHistory = 'hadith_history';
   static const _kQuranHistory = 'quran_history';
+  static const _kDuaBookmarks = 'dua_bookmarks';
+  static const _kHadithBookmarks = 'hadith_bookmarks';
+  static const _kQuranBookmarks = 'quran_bookmarks';
   static const _kDhikrCounts = 'dhikr_counts';
 
   final SharedPreferences _sp;
@@ -50,6 +53,16 @@ class Prefs {
 
   List<String> get quranHistory => _sp.getStringList(_kQuranHistory) ?? const [];
   Future<void> setQuranHistory(List<String> v) => _sp.setStringList(_kQuranHistory, v);
+
+  // User-chosen bookmarks per tab — see services/search/bookmarks.dart.
+  List<String> get duaBookmarks => _sp.getStringList(_kDuaBookmarks) ?? const [];
+  Future<void> setDuaBookmarks(List<String> v) => _sp.setStringList(_kDuaBookmarks, v);
+
+  List<String> get hadithBookmarks => _sp.getStringList(_kHadithBookmarks) ?? const [];
+  Future<void> setHadithBookmarks(List<String> v) => _sp.setStringList(_kHadithBookmarks, v);
+
+  List<String> get quranBookmarks => _sp.getStringList(_kQuranBookmarks) ?? const [];
+  Future<void> setQuranBookmarks(List<String> v) => _sp.setStringList(_kQuranBookmarks, v);
 
   // Persistent tasbīḥ tallies: dhikr id → lifetime count (never auto-reset).
   Map<String, int> get dhikrCounts {

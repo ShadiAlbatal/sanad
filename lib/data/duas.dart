@@ -63,4 +63,13 @@ const List<Dua> duas = <Dua>[
     meaning:
         'O Allah, by Your knowledge of the unseen and Your power over creation, keep me alive as long as You know life is good for me, and take me when You know death is better for me. O Allah, I ask You for awe of You in private and in public. I ask You for the word of truth in contentment and anger. I ask You for moderation in poverty and in wealth. I ask You for blessings that never cease and the delight of an eye that never ends. I ask You for contentment after Your decree, a cool life after death, the delight of gazing upon Your Face, and the longing to meet You, without harmful adversity or misleading trial. O Allah, adorn us with the beauty of faith and make us guides who are rightly guided.',
   ),
+  Dua(
+    id: 'dua-rabbi-aini',
+    title: "Rabbi A'inni wa la Tu'in 'Alayya",
+    source: 'Sunan Abi Dawud 1510',
+    arabic:
+        'رَبِّ أَعِنِّي وَلَا تُعِنْ عَلَيَّ وَانْصُرْنِي وَلَا تَنْصُرْ عَلَيَّ وَامْكُرْ لِي وَلَا تَمْكُرْ عَلَيَّ وَاهْدِنِي وَيَسِّرْ هُدَايَ إِلَيَّ وَانْصُرْنِي عَلَى مَنْ بَغَى عَلَيَّ اللَّهُمَّ اجْعَلْنِي لَكَ شَاكِرًا لَكَ ذَاكِرًا لَكَ رَاهِبًا لَكَ مِطْوَاعًا إِلَيْكَ مُخْبِتًا أَوْ مُنِيبًا رَبِّ تَقَبَّلْ تَوْبَتِي وَاغْسِلْ حَوْبَتِي وَأَجِبْ دَعْوَتِي وَثَبِّتْ حُجَّتِي وَاهْدِ قَلْبِي وَسَدِّدْ لِسَانِي وَاسْلُلْ سَخِيمَةَ قَلْبِي',
+    meaning:
+        "My Lord, help me and let none prevail against me. Aid me and let none be aided against me. Plan for me and let no scheme succeed against me. Guide me and make my guidance easy for me. Help me against whoever wrongs me. O Allah, make me thankful to You, mindful of You, humble before You, devoted to You, penitent and turning to You. My Lord, accept my repentance, wash away my sin, answer my call, make firm my proof, guide my heart, make truthful my tongue, and draw out all rancor from my heart.",
+  ),
 ];

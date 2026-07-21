@@ -13,8 +13,8 @@ import 'package:sanad/services/asr/phoneme_matcher.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('content list has the 5 validated duas', () {
-    expect(duas.length, 5);
+  test('content list has the 6 validated duas', () {
+    expect(duas.length, 6);
     expect(duas.first.id, 'dua-after-adhan');
   });
 
