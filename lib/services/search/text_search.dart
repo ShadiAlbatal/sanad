@@ -117,14 +117,13 @@ class TextSearch {
       });
     final kk = preRanked.length < top ? preRanked.length : top;
 
-    // Only the pre-ranked top-K need the (cheap but O(doc length)) sequence
-    // check — the true match for a sequential query is always somewhere in
-    // here since it shares the same terms, just possibly out-ranked by a
-    // shorter, differently-ordered doc.
+    // Only the pre-ranked top-K need the sequence check — the true match for a
+    // sequential query is always somewhere in here since it shares the same
+    // terms, just possibly out-ranked by a shorter, differently-ordered doc.
     final boosted = <int, double>{};
     for (var i = 0; i < kk; i++) {
       final d = preRanked[i];
-      final seqFrac = _orderedMatchFraction(orderedTerms, _docWords[d]);
+      final seqFrac = _orderedMatchFraction(orderedTerms, terms, _docWords[d]);
       boosted[d] = scores[d]! * (1 + 2.0 * seqFrac * seqFrac);
     }
     final ranked = boosted.keys.toList()
@@ -146,21 +145,35 @@ class TextSearch {
     return hits;
   }
 
-  /// Greedy longest run of [orderedQueryTerms] found at strictly increasing
-  /// positions in [docWords], as a fraction of the query length — a cheap
-  /// stand-in for "does this doc reproduce the query's word order". Repeated
-  /// query terms (duplicate narrator names) are matched at most once each per
-  /// occurrence, same as a real subsequence match would.
-  double _orderedMatchFraction(List<String> orderedQueryTerms, List<String> docWords) {
-    if (orderedQueryTerms.isEmpty) return 0;
-    var from = 0;
-    var run = 0;
-    for (final term in orderedQueryTerms) {
-      final p = docWords.indexOf(term, from);
-      if (p == -1) continue; // skip a term the doc doesn't have after `from`
-      run++;
-      from = p + 1;
+  /// Longest run of [orderedQueryTerms] found at strictly increasing positions
+  /// in [docWords] — a longest common subsequence — as a fraction of the query
+  /// length: "does this doc reproduce the query's word order". Repeated query
+  /// terms (duplicate narrator names) each consume a distinct doc occurrence.
+  ///
+  /// Must be a true LCS, not a leftmost-greedy scan. An isnād query repeats
+  /// عن/حدثنا, and if such a term's FIRST occurrence in the doc sits late, a
+  /// greedy cursor advances past everything after it and reports near-zero
+  /// order for the very doc that matches best — on the real hadith corpus that
+  /// demoted the correct matn from rank 1 to rank 40.
+  ///
+  /// O(query × doc terms): doc words absent from [queryTerms] can't extend any
+  /// subsequence, so they leave the row unchanged and are skipped.
+  double _orderedMatchFraction(
+      List<String> orderedQueryTerms, Set<String> queryTerms, List<String> docWords) {
+    final q = orderedQueryTerms.length;
+    if (q == 0) return 0;
+    final row = List<int>.filled(q + 1, 0);
+    for (final w in docWords) {
+      if (!queryTerms.contains(w)) continue;
+      var diag = 0; // previous row at i-1, before this row overwrites it
+      for (var i = 1; i <= q; i++) {
+        final up = row[i];
+        row[i] = orderedQueryTerms[i - 1] == w
+            ? diag + 1
+            : (up >= row[i - 1] ? up : row[i - 1]);
+        diag = up;
+      }
     }
-    return run / orderedQueryTerms.length;
+    return row[q] / q;
   }
 }

@@ -85,6 +85,22 @@ void main() {
     expect(search.search('حميدي عبد الله بن زبير').first.id, 'ordered');
   });
 
+  test('a repeated query term occurring late does not sink the in-order doc', () {
+    // The isnād shape that broke a leftmost-greedy scan: the query opens with
+    // عن, but in the CORRECT doc عن first appears in the middle — a greedy
+    // cursor consumes it there and then finds nothing after it, reporting 2/6
+    // in-order for a doc that actually reproduces 5 of the 6 query words in
+    // sequence. 'scrambled' is shorter, repeats عن (higher BM25) and holds
+    // every query term out of order, so it wins unless the correct doc gets
+    // the in-order boost it has earned.
+    const corpus = [
+      TextSearchDoc('scrambled', 'قتادة عن معاذ حدثنا المثنى عن'),
+      TextSearchDoc('in-order', 'المثنى حدثنا معاذ عن قتادة قال سمعت رسول الله يقول'),
+    ];
+    final search = TextSearch(corpus);
+    expect(search.search('عن المثنى حدثنا معاذ عن قتادة').first.id, 'in-order');
+  });
+
   test('empty / unknown query yields no hits (caller falls back to browse)', () {
     final search = TextSearch(docs);
     expect(search.search(''), isEmpty);
