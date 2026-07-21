@@ -77,9 +77,12 @@ class _QuranListScreenState extends State<QuranListScreen>
   // as a separate field for _open.
   void _toggleBookmark(String key, int page, String label) {
     final prefs = context.read<AppState>().prefs;
+    final before = prefs.quranBookmarks.length;
     final updated =
         toggleBookmark(prefs.quranBookmarks, {'key': key, 'page': page, 'label': label});
     prefs.setQuranBookmarks(updated);
+    Log.d(logTag,
+        'bookmark ${updated.length > before ? '+' : '-'}$key -> ${updated.length} saved');
     setState(() => _bookmarks = decodeHistory(updated));
   }
 
@@ -163,7 +166,10 @@ class _QuranListScreenState extends State<QuranListScreen>
       history: _history,
       bookmarks: _bookmarks,
       labelOf: (e) => e['label'] as String,
-      onOpenEntry: (e) => _open(e['page'] as int, e['label'] as String),
+      onOpenEntry: (e) {
+        Log.d(logTag, 'menu open ${e['key']} (page ${e['page']})');
+        _open(e['page'] as int, e['label'] as String);
+      },
       onRemoveBookmark: (e) =>
           _toggleBookmark(e['key'] as String, e['page'] as int, e['label'] as String),
       emptyState: searching ? const _NoMatches() : null,

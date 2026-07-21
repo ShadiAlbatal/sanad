@@ -70,8 +70,12 @@ class _DuaListScreenState extends State<DuaListScreen>
   // entry already carries key+label; the card path just builds the same entry.
   void _toggleBookmarkEntry(Map<String, dynamic> entry) {
     final prefs = context.read<AppState>().prefs;
+    final before = prefs.duaBookmarks.length;
     final updated = toggleBookmark(prefs.duaBookmarks, entry);
     prefs.setDuaBookmarks(updated);
+    Log.d(logTag,
+        'bookmark ${updated.length > before ? '+' : '-'}${entry['key']} '
+        '-> ${updated.length} saved');
     setState(() => _bookmarks = decodeHistory(updated));
   }
 
@@ -163,6 +167,7 @@ class _DuaListScreenState extends State<DuaListScreen>
       labelOf: (e) => (e['label'] ?? e['title']) as String,
       onOpenEntry: (e) {
         final meta = _search?.metaById(e['key'] as String);
+        Log.d(logTag, 'menu open ${e['key']}${meta == null ? ' MISSING from corpus' : ''}');
         if (meta != null) _open(_duaFromMeta(meta));
       },
       onRemoveBookmark: _toggleBookmarkEntry,

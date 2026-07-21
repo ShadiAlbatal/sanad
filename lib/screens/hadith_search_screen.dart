@@ -76,8 +76,12 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
 
   void _toggleBookmark(Map<String, dynamic> entry) {
     final prefs = context.read<AppState>().prefs;
+    final before = prefs.hadithBookmarks.length;
     final updated = toggleBookmark(prefs.hadithBookmarks, entry);
     prefs.setHadithBookmarks(updated);
+    Log.d(logTag,
+        'bookmark ${updated.length > before ? '+' : '-'}${entry['key']} '
+        '-> ${updated.length} saved');
     setState(() => _bookmarks = decodeHistory(updated));
   }
 
@@ -159,8 +163,11 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
       history: _history,
       bookmarks: _bookmarks,
       labelOf: (e) => e['label'] as String,
-      onOpenEntry: (e) => _open(e['collection'] as String, e['number'] as int,
-                  e['label'] as String, e['text'] as String),
+      onOpenEntry: (e) {
+        Log.d(logTag, 'menu open ${e['key']}');
+        _open(e['collection'] as String, e['number'] as int, e['label'] as String,
+            e['text'] as String);
+      },
       onRemoveBookmark: _toggleBookmark,
       emptyState: searching ? const _NoMatches() : null,
       listening: voice.recording,
