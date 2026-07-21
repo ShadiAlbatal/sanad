@@ -165,8 +165,19 @@ mixin VoiceSearchListMixin<W extends StatefulWidget, H> on State<W> {
     // previous recitation's candidates on screen read as stale/wrong once a
     // new one starts. Reset the scroll so the new leading match isn't hidden
     // below wherever the user had scrolled to on the previous search.
+    //
+    // [query] must go with them: it alone drives [searching], so keeping it
+    // renders "No matches — clear the search" plus "0 results" over a field
+    // the user just watched empty (so there's no X button to obey that message
+    // with) — until the first interim decode lands, and permanently if the
+    // recording yields no transcript at all (mic denied, or silence).
     searchController.clear();
-    if (mounted) setState(() => results = const []);
+    if (mounted) {
+      setState(() {
+        query = '';
+        results = const [];
+      });
+    }
     if (scrollController.hasClients) scrollController.jumpTo(0);
     await v.start();
     if (v.error != null && mounted) {
