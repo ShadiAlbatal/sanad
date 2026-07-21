@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../data/duas.dart';
 import '../services/asr/dua_corpus.dart';
 import '../services/asr/dua_search.dart';
+import '../services/search/bookmarks.dart';
 import '../services/search/corpus_text_search.dart';
 import '../services/search/search_history.dart';
 import '../services/search/text_search.dart';
@@ -10,6 +11,7 @@ import '../state/app_state.dart';
 import '../state/voice_search_state.dart';
 import '../theme/app_theme.dart';
 import '../util/log.dart';
+import '../widgets/bookmark_star.dart';
 import '../widgets/highlighted_arabic.dart';
 import '../widgets/search_list_scaffold.dart';
 import 'dua_reader_screen.dart';
@@ -33,6 +35,7 @@ class _DuaListScreenState extends State<DuaListScreen>
   DuaSearch? _search;
   TextSearch? _textSearch;
   List<Map<String, dynamic>> _history = const [];
+  List<Map<String, dynamic>> _bookmarks = const [];
 
   @override
   void initState() {
@@ -49,15 +52,31 @@ class _DuaListScreenState extends State<DuaListScreen>
     }).catchError((Object e) {
       Log.e('dualist', 'text index load failed: $e');
     });
-    _history = decodeHistory(context.read<AppState>().prefs.duaHistory);
+    final prefs = context.read<AppState>().prefs;
+    _history = decodeHistory(prefs.duaHistory);
+    _bookmarks = decodeHistory(prefs.duaBookmarks);
   }
 
   void _recordHistory(Dua dua) {
     final prefs = context.read<AppState>().prefs;
-    final updated = pushHistory(prefs.duaHistory, {'key': dua.id, 'title': dua.title});
+    final updated = pushHistory(prefs.duaHistory, {'key': dua.id, 'label': dua.title});
     prefs.setDuaHistory(updated);
     setState(() => _history = decodeHistory(updated));
   }
+
+  bool _isBookmarked(String id) => _bookmarks.any((e) => e['key'] == id);
+
+  // Entry-based so removal from the sheet needs no corpus lookup — the stored
+  // entry already carries key+label; the card path just builds the same entry.
+  void _toggleBookmarkEntry(Map<String, dynamic> entry) {
+    final prefs = context.read<AppState>().prefs;
+    final updated = toggleBookmark(prefs.duaBookmarks, entry);
+    prefs.setDuaBookmarks(updated);
+    setState(() => _bookmarks = decodeHistory(updated));
+  }
+
+  void _toggleBookmark(Dua dua) =>
+      _toggleBookmarkEntry({'key': dua.id, 'label': dua.title});
 
   @override
   int get voiceTab => Tabs.dua;
@@ -103,18 +122,28 @@ class _DuaListScreenState extends State<DuaListScreen>
       builder = (_, i) {
         final hit = results[i];
         final meta = _search!.metaById(hit.id)!;
+        final dua = _duaFromMeta(meta);
         return _DuaCard(
-          dua: _duaFromMeta(meta),
+          dua: dua,
           matched: hit.matchedWords,
-          onTap: () => _open(_duaFromMeta(meta)),
+          onTap: () => _open(dua),
           expanded: leadExpanded && i == 0,
           confidence: voiceQuery && i < rings.length ? rings[i] : null,
+          bookmarked: _isBookmarked(dua.id),
+          onToggleBookmark: () => _toggleBookmark(dua),
         );
       };
     } else {
       count = metas?.length ?? 0;
-      builder = (_, i) => _DuaCard(
-          dua: _duaFromMeta(metas![i]), onTap: () => _open(_duaFromMeta(metas[i])));
+      builder = (_, i) {
+        final dua = _duaFromMeta(metas![i]);
+        return _DuaCard(
+          dua: dua,
+          onTap: () => _open(dua),
+          bookmarked: _isBookmarked(dua.id),
+          onToggleBookmark: () => _toggleBookmark(dua),
+        );
+      };
     }
     final countLabel = searching
         ? '$count result${count == 1 ? '' : 's'}'
@@ -122,22 +151,21 @@ class _DuaListScreenState extends State<DuaListScreen>
 
     return SearchListScaffold(
       title: 'Duas & Adhkār',
-      subtitle: 'Recite to open, or tap a du\'ā — words light up as you read',
       loading: metas == null,
       itemCount: count,
       itemBuilder: builder,
       scrollController: scrollController,
       countLabel: countLabel,
-      aboveList: !searching && _history.isNotEmpty
-          ? HistoryRow(
-              entries: _history,
-              labelOf: (e) => e['title'] as String,
-              onTap: (e) {
-                final meta = _search?.metaById(e['key'] as String);
-                if (meta != null) _open(_duaFromMeta(meta));
-              },
-            )
-          : null,
+      history: _history,
+      bookmarks: _bookmarks,
+      // label-first; ?? title keeps du'ā history persisted before the field
+      // was unified on 'label' still rendering.
+      labelOf: (e) => (e['label'] ?? e['title']) as String,
+      onOpenEntry: (e) {
+        final meta = _search?.metaById(e['key'] as String);
+        if (meta != null) _open(_duaFromMeta(meta));
+      },
+      onRemoveBookmark: _toggleBookmarkEntry,
       emptyState: searching ? const _NoMatches() : null,
       listening: voice.recording,
       starting: voice.busy,
@@ -177,12 +205,16 @@ class _DuaCard extends StatelessWidget {
   final VoidCallback onTap;
   final bool expanded; // the live leading result: show more matching text
   final double? confidence; // 0..1 trust ring (null = no ring)
+  final bool bookmarked;
+  final VoidCallback? onToggleBookmark;
   const _DuaCard(
       {required this.dua,
       required this.onTap,
       this.matched = const {},
       this.expanded = false,
-      this.confidence});
+      this.confidence,
+      this.bookmarked = false,
+      this.onToggleBookmark});
 
   @override
   Widget build(BuildContext context) {
@@ -209,6 +241,8 @@ class _DuaCard extends StatelessWidget {
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
+                if (onToggleBookmark != null)
+                  BookmarkStar(bookmarked: bookmarked, onToggle: onToggleBookmark!),
                 if (confidence != null)
                   SizedBox(
                     width: 18,

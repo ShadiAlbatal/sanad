@@ -21,7 +21,6 @@ void main() {
       theme: ThemeData(colorScheme: const ColorScheme.light(primary: Color(0xFF9B22C3))),
       home: SearchListScaffold(
         title: 'Title',
-        subtitle: 'Subtitle',
         loading: loading,
         itemCount: itemCount,
         itemBuilder: (_, i) => SizedBox(height: 40, child: Text('row $i')),

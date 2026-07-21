@@ -22,7 +22,6 @@ import 'mic_toggle_button.dart';
 /// piece — callers pass a stub for now.
 class SearchListScaffold extends StatelessWidget {
   final String title;
-  final String subtitle;
 
   // Content
   final bool loading; // show a centered spinner instead of the list
@@ -30,8 +29,16 @@ class SearchListScaffold extends StatelessWidget {
   final IndexedWidgetBuilder itemBuilder;
   final Widget? emptyState; // shown when !loading && itemCount == 0
   final ScrollController? scrollController; // caller resets this on a new recording
-  final String? countLabel; // e.g. "14 results" / "259 duas" — shown under the subtitle
-  final Widget? aboveList; // e.g. a "Recent" history row — shown only while idle/browsing
+  final String? countLabel; // e.g. "14 results" / "259 duas" — shown beside the title
+
+  // The header's overflow menu (History / Bookmarks) — identical shape on
+  // every tab, only the entries + what a tap does differ. Null hides the menu
+  // (e.g. while a screen's history/bookmarks haven't loaded yet).
+  final List<Map<String, dynamic>>? history;
+  final List<Map<String, dynamic>>? bookmarks;
+  final String Function(Map<String, dynamic> entry)? labelOf;
+  final void Function(Map<String, dynamic> entry)? onOpenEntry;
+  final void Function(Map<String, dynamic> entry)? onRemoveBookmark;
 
   // Footer — mic (live)
   final bool listening;
@@ -53,14 +60,17 @@ class SearchListScaffold extends StatelessWidget {
   const SearchListScaffold({
     super.key,
     required this.title,
-    required this.subtitle,
     this.loading = false,
     required this.itemCount,
     required this.itemBuilder,
     this.emptyState,
     this.scrollController,
     this.countLabel,
-    this.aboveList,
+    this.history,
+    this.bookmarks,
+    this.labelOf,
+    this.onOpenEntry,
+    this.onRemoveBookmark,
     required this.listening,
     required this.starting,
     required this.level,
@@ -102,25 +112,30 @@ class SearchListScaffold extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 2),
-              child: Text(title,
-                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+              padding: const EdgeInsets.fromLTRB(20, 18, 12, 10),
               child: Row(
                 children: [
                   Expanded(
-                      child: Text(subtitle,
-                          style: TextStyle(color: soft, fontSize: 13.5))),
-                  if (countLabel != null)
+                    child: Text(title,
+                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
+                  ),
+                  if (countLabel != null) ...[
                     Text(countLabel!,
                         style: TextStyle(
                             color: soft, fontSize: 12.5, fontWeight: FontWeight.w600)),
+                    const SizedBox(width: 4),
+                  ],
+                  if (history != null && bookmarks != null && labelOf != null && onOpenEntry != null)
+                    _HeaderMenu(
+                      history: history!,
+                      bookmarks: bookmarks!,
+                      labelOf: labelOf!,
+                      onOpenEntry: onOpenEntry!,
+                      onRemoveBookmark: onRemoveBookmark,
+                    ),
                 ],
               ),
             ),
-            ?aboveList,
             Expanded(child: content),
           ],
         ),
@@ -317,49 +332,134 @@ class _SearchFieldState extends State<_SearchField> {
   }
 }
 
-/// A horizontal "Recent" row of quick-retrieve chips shown above the list
-/// while idle/browsing — tap one to reopen it without re-reciting or
-/// re-typing. Shared across the three list tabs; only the entry shape and
-/// what a tap does differ, supplied by the caller.
-class HistoryRow extends StatelessWidget {
-  final List<Map<String, dynamic>> entries;
+/// The header's overflow menu — identical on every list tab: a 3-dot button
+/// that opens "History" and "Bookmarks", each showing that tab's own entries
+/// in a bottom sheet. Replaces the old always-visible inline "Recent" row —
+/// same underlying per-tab prefs, just tucked behind a tap instead of always
+/// taking header space.
+class _HeaderMenu extends StatelessWidget {
+  final List<Map<String, dynamic>> history;
+  final List<Map<String, dynamic>> bookmarks;
   final String Function(Map<String, dynamic> entry) labelOf;
-  final void Function(Map<String, dynamic> entry) onTap;
-  const HistoryRow({super.key, required this.entries, required this.labelOf, required this.onTap});
+  final void Function(Map<String, dynamic> entry) onOpenEntry;
+  final void Function(Map<String, dynamic> entry)? onRemoveBookmark;
+  const _HeaderMenu({
+    required this.history,
+    required this.bookmarks,
+    required this.labelOf,
+    required this.onOpenEntry,
+    required this.onRemoveBookmark,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final chipColor = dark ? AppColors.nightCard : AppColors.paperEdge;
-    final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
-
-    return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-        itemCount: entries.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, i) {
-          final e = entries[i];
-          return GestureDetector(
-            onTap: () => onTap(e),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: chipColor,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(labelOf(e),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textDirection: TextDirection.rtl,
-                  style: TextStyle(fontSize: 13, color: soft, fontWeight: FontWeight.w600)),
-            ),
-          );
-        },
-      ),
+    return PopupMenuButton<_HeaderMenuAction>(
+      icon: const Icon(Icons.more_vert_rounded),
+      tooltip: 'History & bookmarks',
+      onSelected: (a) {
+        switch (a) {
+          case _HeaderMenuAction.history:
+            _showEntrySheet(context,
+                title: 'History', entries: history, labelOf: labelOf, onTap: onOpenEntry);
+          case _HeaderMenuAction.bookmarks:
+            _showEntrySheet(context,
+                title: 'Bookmarks',
+                entries: bookmarks,
+                labelOf: labelOf,
+                onTap: onOpenEntry,
+                onRemove: onRemoveBookmark);
+        }
+      },
+      itemBuilder: (context) => const [
+        PopupMenuItem(
+          value: _HeaderMenuAction.history,
+          child: Row(children: [
+            Icon(Icons.history_rounded, size: 20),
+            SizedBox(width: 12),
+            Text('History'),
+          ]),
+        ),
+        PopupMenuItem(
+          value: _HeaderMenuAction.bookmarks,
+          child: Row(children: [
+            Icon(Icons.bookmark_rounded, size: 20),
+            SizedBox(width: 12),
+            Text('Bookmarks'),
+          ]),
+        ),
+      ],
     );
   }
+}
+
+enum _HeaderMenuAction { history, bookmarks }
+
+void _showEntrySheet(
+  BuildContext context, {
+  required String title,
+  required List<Map<String, dynamic>> entries,
+  required String Function(Map<String, dynamic> entry) labelOf,
+  required void Function(Map<String, dynamic> entry) onTap,
+  void Function(Map<String, dynamic> entry)? onRemove,
+}) {
+  showModalBottomSheet(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetContext) {
+      final dark = Theme.of(sheetContext).brightness == Brightness.dark;
+      final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text(title,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            ),
+            if (entries.isEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                child: Text(
+                    title == 'History' ? 'Nothing opened yet' : 'Nothing bookmarked yet',
+                    style: TextStyle(color: soft, fontSize: 14)),
+              )
+            else
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.only(bottom: 12),
+                  itemCount: entries.length,
+                  itemBuilder: (context, i) {
+                    final e = entries[i];
+                    return ListTile(
+                      title: Text(labelOf(e),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis),
+                      trailing: onRemove == null
+                          ? null
+                          : IconButton(
+                              icon: const Icon(Icons.close_rounded, size: 20),
+                              tooltip: 'Remove bookmark',
+                              // Closes the sheet rather than trying to patch it in
+                              // place — re-open the menu to see the updated list.
+                              onPressed: () {
+                                onRemove(e);
+                                Navigator.of(sheetContext).pop();
+                              },
+                            ),
+                      onTap: () {
+                        Navigator.of(sheetContext).pop();
+                        onTap(e);
+                      },
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+      );
+    },
+  );
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/asr/hadith_search.dart';
+import '../services/search/bookmarks.dart';
 import '../services/search/corpus_text_search.dart';
 import '../services/search/search_history.dart';
 import '../services/search/text_search.dart';
@@ -8,6 +9,7 @@ import '../state/app_state.dart';
 import '../state/voice_search_state.dart';
 import '../theme/app_theme.dart';
 import '../util/log.dart';
+import '../widgets/bookmark_star.dart';
 import '../widgets/highlighted_arabic.dart';
 import '../widgets/search_list_scaffold.dart';
 import 'hadith_reader_screen.dart';
@@ -31,6 +33,7 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
   HadithSearch? _search;
   TextSearch? _textSearch;
   List<Map<String, dynamic>> _history = const [];
+  List<Map<String, dynamic>> _bookmarks = const [];
 
   @override
   void initState() {
@@ -48,20 +51,34 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
     }).catchError((Object e) {
       Log.e('hadithlist', 'text index load failed: $e');
     });
-    _history = decodeHistory(context.read<AppState>().prefs.hadithHistory);
+    final prefs = context.read<AppState>().prefs;
+    _history = decodeHistory(prefs.hadithHistory);
+    _bookmarks = decodeHistory(prefs.hadithBookmarks);
   }
+
+  Map<String, dynamic> _entry(String collection, int number, String label, String text) => {
+        'key': '$collection:$number',
+        'label': label,
+        'collection': collection,
+        'number': number,
+        'text': text,
+      };
 
   void _recordHistory(String collection, int number, String label, String text) {
     final prefs = context.read<AppState>().prefs;
-    final updated = pushHistory(prefs.hadithHistory, {
-      'key': '$collection:$number',
-      'label': label,
-      'collection': collection,
-      'number': number,
-      'text': text,
-    });
+    final updated = pushHistory(prefs.hadithHistory, _entry(collection, number, label, text));
     prefs.setHadithHistory(updated);
     setState(() => _history = decodeHistory(updated));
+  }
+
+  bool _isBookmarked(String collection, int number) =>
+      _bookmarks.any((e) => e['key'] == '$collection:$number');
+
+  void _toggleBookmark(Map<String, dynamic> entry) {
+    final prefs = context.read<AppState>().prefs;
+    final updated = toggleBookmark(prefs.hadithBookmarks, entry);
+    prefs.setHadithBookmarks(updated);
+    setState(() => _bookmarks = decodeHistory(updated));
   }
 
   @override
@@ -111,6 +128,9 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
           onTap: () => _open(e.collection, e.number, e.label, e.text),
           expanded: leadExpanded && i == 0,
           confidence: voiceQuery && i < rings.length ? rings[i] : null,
+          bookmarked: _isBookmarked(e.collection, e.number),
+          onToggleBookmark: () =>
+              _toggleBookmark(_entry(e.collection, e.number, e.label, e.text)),
         );
       };
     } else {
@@ -120,6 +140,9 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
             text: browse[i].text,
             onTap: () =>
                 _open(browse[i].collection, browse[i].number, browse[i].label, browse[i].text),
+            bookmarked: _isBookmarked(browse[i].collection, browse[i].number),
+            onToggleBookmark: () => _toggleBookmark(_entry(
+                browse[i].collection, browse[i].number, browse[i].label, browse[i].text)),
           );
     }
     final countLabel = searching
@@ -128,20 +151,17 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
 
     return SearchListScaffold(
       title: 'Hadith',
-      subtitle: 'Recite a hadith to find it, or tap one to read',
       loading: browse == null,
       itemCount: count,
       itemBuilder: builder,
       scrollController: scrollController,
       countLabel: countLabel,
-      aboveList: !searching && _history.isNotEmpty
-          ? HistoryRow(
-              entries: _history,
-              labelOf: (e) => e['label'] as String,
-              onTap: (e) => _open(e['collection'] as String, e['number'] as int,
+      history: _history,
+      bookmarks: _bookmarks,
+      labelOf: (e) => e['label'] as String,
+      onOpenEntry: (e) => _open(e['collection'] as String, e['number'] as int,
                   e['label'] as String, e['text'] as String),
-            )
-          : null,
+      onRemoveBookmark: _toggleBookmark,
       emptyState: searching ? const _NoMatches() : null,
       listening: voice.recording,
       starting: voice.busy,
@@ -182,13 +202,17 @@ class _HadithCard extends StatelessWidget {
   final VoidCallback onTap;
   final bool expanded; // the live leading result: show more matching text
   final double? confidence; // 0..1 trust ring (null = no ring)
+  final bool bookmarked;
+  final VoidCallback? onToggleBookmark;
   const _HadithCard(
       {required this.label,
       required this.text,
       required this.onTap,
       this.matched = const {},
       this.expanded = false,
-      this.confidence});
+      this.confidence,
+      this.bookmarked = false,
+      this.onToggleBookmark});
 
   @override
   Widget build(BuildContext context) {
@@ -219,6 +243,8 @@ class _HadithCard extends StatelessWidget {
                         color: context.accent,
                       )),
                 ),
+                if (onToggleBookmark != null)
+                  BookmarkStar(bookmarked: bookmarked, onToggle: onToggleBookmark!),
                 if (confidence != null)
                   SizedBox(
                     width: 18,

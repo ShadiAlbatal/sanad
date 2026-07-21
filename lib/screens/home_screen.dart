@@ -90,21 +90,6 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 14),
           ],
           const SizedBox(height: 8),
-          Text('Explore',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.4,
-                color: soft,
-              )),
-          const SizedBox(height: 12),
-          _QuickTile(
-            icon: Icons.fingerprint_rounded,
-            label: 'Counter',
-            subtitle: 'Tasbih — tap or recite',
-            onTap: () => app.tabIndex = Tabs.counter,
-          ),
-          const SizedBox(height: 22),
           _SuggestionCard(
             suggestion: suggestion,
             onTap: () => Navigator.of(context).push(MaterialPageRoute(
@@ -397,54 +382,6 @@ class _HadithContinueCard extends StatelessWidget {
       id: id, eyebrow: 'Continue reading', loader: _load, onOpen: _open);
 }
 
-class _QuickTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String subtitle;
-  final VoidCallback onTap;
-  const _QuickTile({
-    required this.icon,
-    required this.label,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-        decoration: BoxDecoration(
-          color: dark ? AppColors.nightCard : AppColors.paperEdge,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: context.accent, size: 26),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label,
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-                  const SizedBox(height: 2),
-                  Text(subtitle, style: TextStyle(color: soft, fontSize: 12)),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: soft),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _SuggestionCard extends StatelessWidget {
   final AdhkarSuggestion suggestion;
   final VoidCallback onTap;
@@ -476,7 +413,7 @@ class _SuggestionCard extends StatelessWidget {
                       style: const TextStyle(
                           fontWeight: FontWeight.w700, fontSize: 14.5)),
                   const SizedBox(height: 2),
-                  Text('Open the counter',
+                  Text('Open the adhkar',
                       style: TextStyle(color: soft, fontSize: 12.5)),
                 ],
               ),

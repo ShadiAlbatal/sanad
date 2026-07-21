@@ -3,11 +3,13 @@ import 'package:provider/provider.dart';
 import '../data/quran_repository.dart';
 import '../models/mushaf.dart';
 import '../services/asr/quran_search.dart';
+import '../services/search/bookmarks.dart';
 import '../services/search/search_history.dart';
 import '../state/app_state.dart';
 import '../state/voice_search_state.dart';
 import '../theme/app_theme.dart';
 import '../util/log.dart';
+import '../widgets/bookmark_star.dart';
 import '../widgets/highlighted_arabic.dart';
 import '../widgets/search_list_scaffold.dart';
 import 'quran_screen.dart';
@@ -37,6 +39,7 @@ class _QuranListScreenState extends State<QuranListScreen>
   QuranSearch? _search;
   List<Chapter>? _chapters;
   List<Map<String, dynamic>> _history = const [];
+  List<Map<String, dynamic>> _bookmarks = const [];
 
   @override
   void initState() {
@@ -54,7 +57,9 @@ class _QuranListScreenState extends State<QuranListScreen>
     }).catchError((Object e) {
       Log.e('quranlist', 'search index load failed: $e');
     });
-    _history = decodeHistory(context.read<AppState>().prefs.quranHistory);
+    final prefs = context.read<AppState>().prefs;
+    _history = decodeHistory(prefs.quranHistory);
+    _bookmarks = decodeHistory(prefs.quranBookmarks);
   }
 
   void _recordHistory(int page, String label) {
@@ -62,6 +67,20 @@ class _QuranListScreenState extends State<QuranListScreen>
     final updated = pushHistory(prefs.quranHistory, {'key': '$page', 'page': page, 'label': label});
     prefs.setQuranHistory(updated);
     setState(() => _history = decodeHistory(updated));
+  }
+
+  bool _isBookmarked(String key) => _bookmarks.any((e) => e['key'] == key);
+
+  // key is identity ('surah:3' / 'ayah:2:255'), NOT the page — several surahs
+  // share a mushaf start page (112/113/114 all open page 604), so a page key
+  // would make them one bookmark that clobbers the others. page rides along
+  // as a separate field for _open.
+  void _toggleBookmark(String key, int page, String label) {
+    final prefs = context.read<AppState>().prefs;
+    final updated =
+        toggleBookmark(prefs.quranBookmarks, {'key': key, 'page': page, 'label': label});
+    prefs.setQuranBookmarks(updated);
+    setState(() => _bookmarks = decodeHistory(updated));
   }
 
   @override
@@ -109,6 +128,7 @@ class _QuranListScreenState extends State<QuranListScreen>
       builder = (_, i) {
         final hit = results[i];
         final label = _verseLabel(hit.meta.surah, hit.meta.ayah);
+        final key = 'ayah:${hit.meta.surah}:${hit.meta.ayah}';
         return _VerseCard(
           label: label,
           text: hit.meta.text,
@@ -116,13 +136,18 @@ class _QuranListScreenState extends State<QuranListScreen>
           onTap: () => _open(hit.meta.page, label),
           expanded: leadExpanded && i == 0,
           confidence: voiceQuery && i < rings.length ? rings[i] : null,
+          bookmarked: _isBookmarked(key),
+          onToggleBookmark: () => _toggleBookmark(key, hit.meta.page, label),
         );
       };
     } else {
       count = chapters?.length ?? 0;
       builder = (_, i) => _SurahCard(
           chapter: chapters![i],
-          onTap: () => _open(chapters[i].startPage, chapters[i].nameSimple));
+          onTap: () => _open(chapters[i].startPage, chapters[i].nameSimple),
+          bookmarked: _isBookmarked('surah:${chapters[i].id}'),
+          onToggleBookmark: () => _toggleBookmark(
+              'surah:${chapters[i].id}', chapters[i].startPage, chapters[i].nameSimple));
     }
     final countLabel = searching
         ? '$count result${count == 1 ? '' : 's'}'
@@ -130,19 +155,17 @@ class _QuranListScreenState extends State<QuranListScreen>
 
     return SearchListScaffold(
       title: 'Quran',
-      subtitle: 'Recite a verse to find it, or tap a surah to read',
       loading: !searching && chapters == null,
       itemCount: count,
       itemBuilder: builder,
       scrollController: scrollController,
       countLabel: countLabel,
-      aboveList: !searching && _history.isNotEmpty
-          ? HistoryRow(
-              entries: _history,
-              labelOf: (e) => e['label'] as String,
-              onTap: (e) => _open(e['page'] as int, e['label'] as String),
-            )
-          : null,
+      history: _history,
+      bookmarks: _bookmarks,
+      labelOf: (e) => e['label'] as String,
+      onOpenEntry: (e) => _open(e['page'] as int, e['label'] as String),
+      onRemoveBookmark: (e) =>
+          _toggleBookmark(e['key'] as String, e['page'] as int, e['label'] as String),
       emptyState: searching ? const _NoMatches() : null,
       listening: voice.recording,
       starting: voice.busy,
@@ -181,7 +204,10 @@ class _NoMatches extends StatelessWidget {
 class _SurahCard extends StatelessWidget {
   final Chapter chapter;
   final VoidCallback onTap;
-  const _SurahCard({required this.chapter, required this.onTap});
+  final bool bookmarked;
+  final VoidCallback? onToggleBookmark;
+  const _SurahCard(
+      {required this.chapter, required this.onTap, this.bookmarked = false, this.onToggleBookmark});
 
   @override
   Widget build(BuildContext context) {
@@ -213,6 +239,8 @@ class _SurahCard extends StatelessWidget {
                 ],
               ),
             ),
+            if (onToggleBookmark != null)
+              BookmarkStar(bookmarked: bookmarked, onToggle: onToggleBookmark!),
             Text(chapter.nameArabic,
                 style: const TextStyle(fontFamily: 'UthmanicHafs', fontSize: 22)),
           ],
@@ -232,13 +260,17 @@ class _VerseCard extends StatelessWidget {
   final VoidCallback onTap;
   final bool expanded; // the live leading result: show more matching text
   final double? confidence; // 0..1 trust ring (null = no ring)
+  final bool bookmarked;
+  final VoidCallback? onToggleBookmark;
   const _VerseCard(
       {required this.label,
       required this.text,
       required this.onTap,
       this.matched = const {},
       this.expanded = false,
-      this.confidence});
+      this.confidence,
+      this.bookmarked = false,
+      this.onToggleBookmark});
 
   @override
   Widget build(BuildContext context) {
@@ -269,6 +301,8 @@ class _VerseCard extends StatelessWidget {
                         color: context.accent,
                       )),
                 ),
+                if (onToggleBookmark != null)
+                  BookmarkStar(bookmarked: bookmarked, onToggle: onToggleBookmark!),
                 if (confidence != null)
                   SizedBox(
                     width: 18,

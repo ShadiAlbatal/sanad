@@ -144,7 +144,6 @@ class _HarnessState extends State<_Harness> {
 
     return SearchListScaffold(
       title: 'T',
-      subtitle: 'S',
       itemCount: count,
       itemBuilder: builder,
       emptyState: searching ? const Center(child: Text('No matches')) : null,
