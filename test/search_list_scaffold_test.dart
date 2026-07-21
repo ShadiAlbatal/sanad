@@ -4,6 +4,7 @@ import 'package:sanad/widgets/heard_ticker.dart';
 import 'package:sanad/widgets/hearing_indicator.dart';
 import 'package:sanad/widgets/mic_toggle_button.dart';
 import 'package:sanad/widgets/search_list_scaffold.dart';
+import 'package:sanad/l10n/app_localizations.dart';
 
 /// Pins the shared shell every content tab renders through: a lazy content list +
 /// a footer that ALWAYS carries the mic control and the search bar, and shows the
@@ -18,6 +19,9 @@ void main() {
     VoidCallback? onMicTap,
   }) {
     return MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
       theme: ThemeData(colorScheme: const ColorScheme.light(primary: Color(0xFF9B22C3))),
       home: SearchListScaffold(
         title: 'Title',

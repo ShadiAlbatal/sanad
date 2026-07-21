@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sanad/widgets/bookmark_star.dart';
 import 'package:sanad/widgets/search_list_scaffold.dart';
+import 'package:sanad/l10n/app_localizations.dart';
 
 /// The header overflow menu is the ONLY route to history and bookmarks now that
 /// the inline HistoryRow is gone, and it is gated behind a four-way non-null
@@ -20,6 +21,9 @@ void main() {
     bool withMenu = true,
   }) =>
       MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
         home: SearchListScaffold(
           title: 'T',
           itemCount: 1,
@@ -60,6 +64,9 @@ void main() {
     // rendering the menu would dereference a null labelOf the moment a sheet
     // opens. Hiding it is the intended (if silent) degradation.
     await tester.pumpWidget(MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: SearchListScaffold(
         title: 'T',
         itemCount: 1,
@@ -139,6 +146,9 @@ void main() {
   testWidgets('BookmarkStar shows its state and reports taps', (tester) async {
     var taps = 0;
     await tester.pumpWidget(MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: Scaffold(
         body: Column(children: [
           BookmarkStar(bookmarked: false, onToggle: () => taps++),

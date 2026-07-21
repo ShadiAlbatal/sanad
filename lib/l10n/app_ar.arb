@@ -1,13 +1,11 @@
 {
   "@@locale": "ar",
-
   "appName": "سَنَد",
   "tabHome": "الرئيسية",
   "tabQuran": "القرآن",
   "tabDuas": "الأدعية",
   "tabHadith": "الحديث",
   "tabCounter": "التسبيح",
-
   "settings": "الإعدادات",
   "profile": "الملف الشخصي",
   "dataPrivacy": "البيانات والخصوصية",
@@ -15,7 +13,6 @@
   "surahIndex": "فهرس السور",
   "duasAndAdhkar": "الأدعية والأذكار",
   "adhkar": "الأذكار",
-
   "searchQuran": "ابحث في القرآن",
   "searchHadith": "ابحث في الحديث",
   "searchDuas": "ابحث في الأدعية",
@@ -33,8 +30,13 @@
   "nothingOpenedYet": "لم تفتح شيئًا بعد",
   "nothingBookmarkedYet": "لا توجد محفوظات بعد",
   "resultCount": "{count, plural, =0{لا نتائج} =1{نتيجة واحدة} =2{نتيجتان} few{{count} نتائج} many{{count} نتيجة} other{{count} نتيجة}}",
-  "@resultCount": { "placeholders": { "count": { "type": "int" } } },
-
+  "@resultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mistakes": "الأخطاء",
   "hide": "إخفاء",
   "reveal": "إظهار",
@@ -48,11 +50,22 @@
   "retry": "إعادة المحاولة",
   "toggleTheme": "تبديل المظهر",
   "pageNumber": "صفحة {page}",
-  "@pageNumber": { "placeholders": { "page": { "type": "int" } } },
+  "@pageNumber": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
   "pageLoadFailed": "تعذّر تحميل هذه الصفحة.",
   "versesCount": "{count} آية",
-  "@versesCount": { "placeholders": { "count": { "type": "int" } } },
-
+  "@versesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "reset": "تصفير",
   "resetAllCounts": "تصفير جميع العدادات؟",
   "resetAllCountsBody": "سيعيد هذا كل تسبيحة إلى الصفر.",
@@ -61,8 +74,13 @@
   "listeningReciteFreely": "يستمع — سبّح كما تشاء",
   "counterHint": "المس بطاقة أو الميكروفون وسبّح — يُحتسب أولًا بأول.",
   "repeatTimes": "التكرار ×{count}",
-  "@repeatTimes": { "placeholders": { "count": { "type": "int" } } },
-
+  "@repeatTimes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "continueReading": "متابعة القراءة",
   "openTheAdhkar": "افتح الأذكار",
   "lastPageRead": "آخر صفحة قُرئت",
@@ -70,10 +88,8 @@
   "eveningAdhkar": "أذكار المساء",
   "nightIstighfar": "الليل — الاستغفار",
   "rememberAllah": "اذكر الله",
-
   "greeting": "السلام عليكم",
   "guestSignInSoon": "زائر · تسجيل الدخول قريبًا",
-
   "appearance": "المظهر",
   "themeSystem": "حسب النظام",
   "themeLight": "فاتح",
@@ -97,7 +113,6 @@
   "about": "عن التطبيق",
   "appTagline": "رفيق هادئ للقرآن — اقرأ واستمع واحفظ.",
   "licenses": "التراخيص والإسناد",
-
   "neverShared": "لا تُشارَك أبدًا",
   "sharedOptIn": "تُشارَك — فقط إن وافقت",
   "offTextVerse": "خارج النص — لم تطابق التلاوة الآية هنا",
@@ -106,6 +121,59 @@
   "makhrajExpected": "المخرج: المتوقَّع ",
   "heardArrow": "  ←  سُمِع ",
   "heardLabel": "سُمِع: {text}",
-  "@heardLabel": { "placeholders": { "text": { "type": "String" } } },
-  "pronunciation": "النطق"
+  "@heardLabel": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "pronunciation": "النطق",
+  "greetingDawn": "فجرٌ مبارك",
+  "greetingMorning": "صباح الخير",
+  "greetingAfternoon": "طاب نهارك",
+  "greetingEvening": "مساءٌ مبارك",
+  "greetingNight": "ليلةٌ هانئة",
+  "done": "تمّ ✓",
+  "surahNumber": "سورة {number}",
+  "@surahNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hadithRef": "{collection} · #{number}",
+  "@hadithRef": {
+    "placeholders": {
+      "collection": {
+        "type": "String"
+      },
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "listeningTapToSearch": "يستمع… المس للبحث",
+  "preparing": "جارٍ التحضير…",
+  "stopListening": "أوقف الاستماع",
+  "starting": "جارٍ البدء",
+  "reciteToFind": "اتلُ للبحث",
+  "search": "بحث",
+  "surahsCount": "{count} سورة",
+  "@surahsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ayahNumber": "آية {number}",
+  "@ayahNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  }
 }

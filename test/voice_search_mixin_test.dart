@@ -11,6 +11,7 @@ import 'package:sanad/util/log.dart';
 import 'package:sanad/widgets/mic_toggle_button.dart';
 import 'package:sanad/widgets/search_list_scaffold.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sanad/l10n/app_localizations.dart';
 
 /// The shared voice+typed search shell ([VoiceSearchListMixin]) as the three list
 /// tabs actually use it. Pins the query/results/empty-state contract around the
@@ -34,7 +35,11 @@ void main() {
         ChangeNotifierProvider<AppState>.value(value: app),
         ChangeNotifierProvider<VoiceSearchState>.value(value: _FakeVoice()),
       ],
-      child: const MaterialApp(home: _Screen()),
+      child: const MaterialApp(
+        locale: Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+home: _Screen()),
     );
   }
 

@@ -14,6 +14,7 @@ import '../widgets/highlighted_arabic.dart';
 import '../widgets/search_list_scaffold.dart';
 import 'quran_screen.dart';
 import 'voice_search_list_mixin.dart';
+import '../l10n/app_localizations.dart';
 
 /// The Quran TAB, rendered through the shared [SearchListScaffold] (content list +
 /// unified footer) — the Quran sibling of the Du'a and Hadith tabs. Three
@@ -97,7 +98,8 @@ class _QuranListScreenState extends State<QuranListScreen>
       (id: hit.id, score: hit.score);
   @override
   void openHit(QuranTextHit hit) => _open(
-      hit.meta.page, _verseLabel(hit.meta.surah, hit.meta.ayah),
+      hit.meta.page,
+      _verseLabel(AppLocalizations.of(context)!, hit.meta.surah, hit.meta.ayah),
       autoStart: true);
 
   // autoStart (mic on, follow-along begins immediately) ONLY for a confident
@@ -110,16 +112,18 @@ class _QuranListScreenState extends State<QuranListScreen>
 
   // Surah name for a 1-based surah number (chapters are stored in order); a bare
   // "Surah N" until the index has loaded.
-  String _surahName(int surah) {
+  String _surahName(AppLocalizations t, int surah) {
     final list = _chapters;
-    if (list == null || surah < 1 || surah > list.length) return 'Surah $surah';
+    if (list == null || surah < 1 || surah > list.length) return t.surahNumber(surah);
     return list[surah - 1].nameSimple;
   }
 
-  String _verseLabel(int surah, int ayah) => '${_surahName(surah)} · Ayah $ayah';
+  String _verseLabel(AppLocalizations t, int surah, int ayah) =>
+      '${_surahName(t, surah)} · ${t.ayahNumber(ayah)}';
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final voice = context.watch<VoiceSearchState>();
     final chapters = _chapters;
     final leadExpanded = voice.recording && voiceQuery;
@@ -130,7 +134,7 @@ class _QuranListScreenState extends State<QuranListScreen>
       count = results.length;
       builder = (_, i) {
         final hit = results[i];
-        final label = _verseLabel(hit.meta.surah, hit.meta.ayah);
+        final label = _verseLabel(t, hit.meta.surah, hit.meta.ayah);
         final key = 'ayah:${hit.meta.surah}:${hit.meta.ayah}';
         return _VerseCard(
           label: label,
@@ -153,11 +157,11 @@ class _QuranListScreenState extends State<QuranListScreen>
               'surah:${chapters[i].id}', chapters[i].startPage, chapters[i].nameSimple));
     }
     final countLabel = searching
-        ? '$count result${count == 1 ? '' : 's'}'
-        : (chapters != null ? '$count surahs' : null);
+        ? t.resultCount(count)
+        : (chapters != null ? t.surahsCount(count) : null);
 
     return SearchListScaffold(
-      title: 'Quran',
+      title: t.tabQuran,
       loading: !searching && chapters == null,
       itemCount: count,
       itemBuilder: builder,
@@ -177,12 +181,12 @@ class _QuranListScreenState extends State<QuranListScreen>
       starting: voice.busy,
       level: voice.level,
       heard: '',
-      hearingLabel: voice.recording ? 'Listening… tap to search' : 'Preparing…',
+      hearingLabel: voice.recording ? t.listeningTapToSearch : t.preparing,
       onMicTap: toggleMic,
-      micIdleLabel: 'Recite to find a verse',
+      micIdleLabel: t.reciteToFindVerse,
       searchController: searchController,
       onSearchChanged: onSearchChanged,
-      searchHint: 'Search the Quran',
+      searchHint: t.searchQuran,
       onClear: clearSearch,
     );
   }
@@ -193,12 +197,13 @@ class _NoMatches extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Text('No matches — clear the search to browse surahs',
+        child: Text(t.noMatchesBrowseSurahs,
             textAlign: TextAlign.center, style: TextStyle(color: soft, fontSize: 14)),
       ),
     );
@@ -217,6 +222,7 @@ class _SurahCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
 
@@ -240,7 +246,7 @@ class _SurahCard extends StatelessWidget {
                   Text(chapter.nameSimple,
                       style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 2),
-                  Text('${chapter.translated} · ${chapter.versesCount} verses',
+                  Text('${chapter.translated} · ${t.versesCount(chapter.versesCount)}',
                       style: TextStyle(color: soft, fontSize: 12.5)),
                 ],
               ),

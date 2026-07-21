@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sanad/services/search/text_search.dart';
 import 'package:sanad/widgets/highlighted_arabic.dart';
 import 'package:sanad/widgets/search_list_scaffold.dart';
+import 'package:sanad/l10n/app_localizations.dart';
 
 /// The typed-search UX end to end, without the heavy corpus/provider stack: a
 /// [TextSearch] index drives the shared [SearchListScaffold] so typing filters
@@ -34,6 +35,9 @@ void main() {
 
   testWidgets('HighlightedArabic bolds only the matched words', (tester) async {
     await tester.pumpWidget(MaterialApp(
+        locale: Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: Scaffold(
         body: Directionality(
           textDirection: TextDirection.rtl,
@@ -51,6 +55,9 @@ void main() {
 
   testWidgets('no matched words → plain Text, nothing bold', (tester) async {
     await tester.pumpWidget(MaterialApp(
+        locale: Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: Scaffold(
         body: HighlightedArabic(
           text: 'اللهم رب هذه الدعوة',
@@ -66,7 +73,11 @@ void main() {
 
   testWidgets('typing filters the list to ranked hits + highlights the query',
       (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: _Harness(docs)));
+    await tester.pumpWidget(const MaterialApp(
+        locale: Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+home: _Harness(docs)));
     // Idle: the whole corpus browses.
     expect(find.byType(HighlightedArabic), findsNWidgets(3));
 
@@ -87,7 +98,11 @@ void main() {
 
   testWidgets('a query with no matches shows the empty state, list stays reachable',
       (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: _Harness(docs)));
+    await tester.pumpWidget(const MaterialApp(
+        locale: Locale('en'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+home: _Harness(docs)));
     await tester.enterText(find.byType(TextField), 'زقاق');
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(HighlightedArabic), findsNothing);

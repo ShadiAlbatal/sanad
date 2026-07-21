@@ -3,6 +3,7 @@ import '../theme/app_theme.dart';
 import 'heard_ticker.dart';
 import 'hearing_indicator.dart';
 import 'mic_toggle_button.dart';
+import '../l10n/app_localizations.dart';
 
 /// The unified "content list + footer" shell every content tab (Dua, Hadith, and
 /// eventually Quran) renders through, so they look and behave identically. It is
@@ -47,14 +48,16 @@ class SearchListScaffold extends StatelessWidget {
   final String heard; // decoded-phoneme ticker text; '' when idle
   final String hearingLabel; // status text while listening ("Hearing: X?")
   final VoidCallback onMicTap;
-  final String micIdleLabel; // mic-button semantics
-  final String micActiveLabel;
-  final String micStartingLabel;
+  // Mic-button semantics. Null falls back to the localized defaults at
+  // build time — a const default here could not be translated.
+  final String? micIdleLabel;
+  final String? micActiveLabel;
+  final String? micStartingLabel;
 
   // Footer — search (shell; behavior deferred to piece 2)
   final TextEditingController? searchController;
   final ValueChanged<String>? onSearchChanged;
-  final String searchHint;
+  final String? searchHint;
   final VoidCallback? onClear; // the field's X button — clears text AND results
 
   const SearchListScaffold({
@@ -77,17 +80,18 @@ class SearchListScaffold extends StatelessWidget {
     required this.heard,
     required this.hearingLabel,
     required this.onMicTap,
-    this.micIdleLabel = 'Recite to find',
-    this.micActiveLabel = 'Stop listening',
-    this.micStartingLabel = 'Starting',
+    this.micIdleLabel,
+    this.micActiveLabel,
+    this.micStartingLabel,
     this.searchController,
     this.onSearchChanged,
-    this.searchHint = 'Search',
+    this.searchHint,
     this.onClear,
   });
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
 
@@ -147,12 +151,12 @@ class SearchListScaffold extends StatelessWidget {
         heard: heard,
         hearingLabel: hearingLabel,
         onMicTap: onMicTap,
-        micIdleLabel: micIdleLabel,
-        micActiveLabel: micActiveLabel,
-        micStartingLabel: micStartingLabel,
+        micIdleLabel: micIdleLabel ?? t.reciteToFind,
+        micActiveLabel: micActiveLabel ?? t.stopListening,
+        micStartingLabel: micStartingLabel ?? t.starting,
         searchController: searchController,
         onSearchChanged: onSearchChanged,
-        searchHint: searchHint,
+        searchHint: searchHint ?? t.search,
         onClear: onClear,
       ),
     );
@@ -297,6 +301,7 @@ class _SearchFieldState extends State<_SearchField> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final fill = dark ? AppColors.night : AppColors.paper;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
@@ -318,7 +323,7 @@ class _SearchFieldState extends State<_SearchField> {
         suffixIcon: hasText
             ? IconButton(
                 icon: Icon(Icons.close_rounded, size: 18, color: soft),
-                tooltip: 'Clear',
+                tooltip: t.clear,
                 onPressed: widget.onClear,
               )
             : null,
@@ -353,6 +358,7 @@ class _HeaderMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return PopupMenuButton<_HeaderMenuAction>(
       icon: const Icon(Icons.more_vert_rounded),
       tooltip: 'History & bookmarks',
@@ -360,31 +366,38 @@ class _HeaderMenu extends StatelessWidget {
         switch (a) {
           case _HeaderMenuAction.history:
             _showEntrySheet(context,
-                title: 'History', entries: history, labelOf: labelOf, onTap: onOpenEntry);
+                title: t.history,
+                emptyLabel: t.nothingOpenedYet,
+                removeTooltip: t.removeBookmark,
+                entries: history,
+                labelOf: labelOf,
+                onTap: onOpenEntry);
           case _HeaderMenuAction.bookmarks:
             _showEntrySheet(context,
-                title: 'Bookmarks',
+                title: t.bookmarks,
+                emptyLabel: t.nothingBookmarkedYet,
+                removeTooltip: t.removeBookmark,
                 entries: bookmarks,
                 labelOf: labelOf,
                 onTap: onOpenEntry,
                 onRemove: onRemoveBookmark);
         }
       },
-      itemBuilder: (context) => const [
+      itemBuilder: (context) => [
         PopupMenuItem(
           value: _HeaderMenuAction.history,
           child: Row(children: [
-            Icon(Icons.history_rounded, size: 20),
-            SizedBox(width: 12),
-            Text('History'),
+            const Icon(Icons.history_rounded, size: 20),
+            const SizedBox(width: 12),
+            Text(t.history),
           ]),
         ),
         PopupMenuItem(
           value: _HeaderMenuAction.bookmarks,
           child: Row(children: [
-            Icon(Icons.bookmark_rounded, size: 20),
-            SizedBox(width: 12),
-            Text('Bookmarks'),
+            const Icon(Icons.bookmark_rounded, size: 20),
+            const SizedBox(width: 12),
+            Text(t.bookmarks),
           ]),
         ),
       ],
@@ -397,6 +410,11 @@ enum _HeaderMenuAction { history, bookmarks }
 void _showEntrySheet(
   BuildContext context, {
   required String title,
+  // Passed in rather than derived from `title`: the old code compared
+  // title == 'History', which silently picks the wrong copy the moment
+  // the titles are translated.
+  required String emptyLabel,
+  required String removeTooltip,
   required List<Map<String, dynamic>> entries,
   required String Function(Map<String, dynamic> entry) labelOf,
   required void Function(Map<String, dynamic> entry) onTap,
@@ -422,7 +440,7 @@ void _showEntrySheet(
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                 child: Text(
-                    title == 'History' ? 'Nothing opened yet' : 'Nothing bookmarked yet',
+                    emptyLabel,
                     style: TextStyle(color: soft, fontSize: 14)),
               )
             else
@@ -441,7 +459,7 @@ void _showEntrySheet(
                           ? null
                           : IconButton(
                               icon: const Icon(Icons.close_rounded, size: 20),
-                              tooltip: 'Remove bookmark',
+                              tooltip: removeTooltip,
                               // Closes the sheet rather than trying to patch it in
                               // place — re-open the menu to see the updated list.
                               onPressed: () {

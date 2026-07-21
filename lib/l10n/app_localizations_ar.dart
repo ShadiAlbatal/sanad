@@ -313,4 +313,60 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pronunciation => 'النطق';
+
+  @override
+  String get greetingDawn => 'فجرٌ مبارك';
+
+  @override
+  String get greetingMorning => 'صباح الخير';
+
+  @override
+  String get greetingAfternoon => 'طاب نهارك';
+
+  @override
+  String get greetingEvening => 'مساءٌ مبارك';
+
+  @override
+  String get greetingNight => 'ليلةٌ هانئة';
+
+  @override
+  String get done => 'تمّ ✓';
+
+  @override
+  String surahNumber(int number) {
+    return 'سورة $number';
+  }
+
+  @override
+  String hadithRef(String collection, int number) {
+    return '$collection · #$number';
+  }
+
+  @override
+  String get listeningTapToSearch => 'يستمع… المس للبحث';
+
+  @override
+  String get preparing => 'جارٍ التحضير…';
+
+  @override
+  String get stopListening => 'أوقف الاستماع';
+
+  @override
+  String get starting => 'جارٍ البدء';
+
+  @override
+  String get reciteToFind => 'اتلُ للبحث';
+
+  @override
+  String get search => 'بحث';
+
+  @override
+  String surahsCount(int count) {
+    return '$count سورة';
+  }
+
+  @override
+  String ayahNumber(int number) {
+    return 'آية $number';
+  }
 }

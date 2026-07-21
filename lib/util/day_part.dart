@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 enum DayPart { fajr, morning, afternoon, evening, night }
 
@@ -11,20 +12,13 @@ DayPart dayPartOf(DateTime t) {
   return DayPart.night;
 }
 
-String greetingFor(DayPart p) {
-  switch (p) {
-    case DayPart.fajr:
-      return 'A blessed dawn';
-    case DayPart.morning:
-      return 'Good morning';
-    case DayPart.afternoon:
-      return 'Good afternoon';
-    case DayPart.evening:
-      return 'A blessed evening';
-    case DayPart.night:
-      return 'A peaceful night';
-  }
-}
+String greetingFor(AppLocalizations t, DayPart p) => switch (p) {
+      DayPart.fajr => t.greetingDawn,
+      DayPart.morning => t.greetingMorning,
+      DayPart.afternoon => t.greetingAfternoon,
+      DayPart.evening => t.greetingEvening,
+      DayPart.night => t.greetingNight,
+    };
 
 class AdhkarSuggestion {
   final String label;
@@ -37,30 +31,33 @@ class AdhkarSuggestion {
   });
 }
 
-AdhkarSuggestion suggestionFor(DayPart p) {
+/// [AdhkarSuggestion.category] is a DATA key handed to
+/// AdzkarScreen(initialCategory:) — it selects a category and is never
+/// shown, so it stays English while [label] is localized.
+AdhkarSuggestion suggestionFor(AppLocalizations t, DayPart p) {
   switch (p) {
     case DayPart.fajr:
     case DayPart.morning:
-      return const AdhkarSuggestion(
-        label: 'Morning adhkār',
+      return AdhkarSuggestion(
+        label: t.morningAdhkar,
         category: 'Morning & Evening',
         icon: Icons.wb_sunny_rounded,
       );
     case DayPart.evening:
-      return const AdhkarSuggestion(
-        label: 'Evening adhkār',
+      return AdhkarSuggestion(
+        label: t.eveningAdhkar,
         category: 'Morning & Evening',
         icon: Icons.wb_twilight_rounded,
       );
     case DayPart.night:
-      return const AdhkarSuggestion(
-        label: 'Night — istighfār',
+      return AdhkarSuggestion(
+        label: t.nightIstighfar,
         category: 'Tasbih',
         icon: Icons.nightlight_round,
       );
     case DayPart.afternoon:
-      return const AdhkarSuggestion(
-        label: 'Remember Allah',
+      return AdhkarSuggestion(
+        label: t.rememberAllah,
         category: 'Tasbih',
         icon: Icons.spa_rounded,
       );

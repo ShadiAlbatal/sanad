@@ -3,23 +3,25 @@ import 'package:provider/provider.dart';
 import '../state/app_state.dart';
 import '../theme/app_theme.dart';
 import 'settings_screen.dart';
+import '../l10n/app_localizations.dart';
 
 class UserScreen extends StatelessWidget {
   const UserScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final app = context.watch<AppState>();
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(t.profile),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_rounded),
-            tooltip: 'Settings',
+            tooltip: t.settings,
             onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const SettingsScreen())),
           ),
@@ -44,20 +46,20 @@ class UserScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          const Center(
-            child: Text('Assalamu ʿalaykum',
+          Center(
+            child: Text(t.greeting,
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
           ),
           const SizedBox(height: 4),
           Center(
-            child: Text('Guest · sign-in coming soon',
+            child: Text(t.guestSignInSoon,
                 style: TextStyle(fontSize: 13.5, color: soft)),
           ),
           const SizedBox(height: 28),
           _StatRow(
             icon: Icons.menu_book_rounded,
-            label: 'Last page read',
-            value: 'Page ${app.lastPage}',
+            label: t.lastPageRead,
+            value: t.pageNumber(app.lastPage),
           ),
         ],
       ),

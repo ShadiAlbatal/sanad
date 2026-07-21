@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/adhkar_data.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 class AdzkarScreen extends StatefulWidget {
   // pushed: rendered as its own route (Scaffold + back button) vs. inline in the
@@ -34,6 +35,7 @@ class _AdzkarScreenState extends State<AdzkarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
     final cat = adhkarCategories[_cat];
@@ -45,9 +47,9 @@ class _AdzkarScreenState extends State<AdzkarScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!pushed)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 18, 20, 4),
-              child: Text('Adhkar',
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 4),
+              child: Text(t.adhkar,
                   style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
             ),
           SizedBox(
@@ -88,7 +90,7 @@ class _AdzkarScreenState extends State<AdzkarScreen> {
 
     if (!pushed) return body;
     return Scaffold(
-      appBar: AppBar(title: const Text('Adhkar')),
+      appBar: AppBar(title: Text(t.adhkar)),
       body: body,
     );
   }
@@ -103,6 +105,7 @@ class _DhikrCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
     final done = count >= dhikr.repeat;
@@ -148,7 +151,7 @@ class _DhikrCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Repeat ×${dhikr.repeat}',
+                Text(t.repeatTimes(dhikr.repeat),
                     style: TextStyle(
                         color: soft,
                         fontSize: 12.5,
@@ -163,7 +166,7 @@ class _DhikrCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Text(
-                    done ? 'Done ✓' : '$count / ${dhikr.repeat}',
+                    done ? t.done : '$count / ${dhikr.repeat}',
                     style: TextStyle(
                       color: done ? Colors.white : context.accent,
                       fontWeight: FontWeight.w700,

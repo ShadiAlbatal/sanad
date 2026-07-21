@@ -661,6 +661,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'pronunciation'**
   String get pronunciation;
+
+  /// No description provided for @greetingDawn.
+  ///
+  /// In en, this message translates to:
+  /// **'A blessed dawn'**
+  String get greetingDawn;
+
+  /// No description provided for @greetingMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get greetingMorning;
+
+  /// No description provided for @greetingAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon'**
+  String get greetingAfternoon;
+
+  /// No description provided for @greetingEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'A blessed evening'**
+  String get greetingEvening;
+
+  /// No description provided for @greetingNight.
+  ///
+  /// In en, this message translates to:
+  /// **'A peaceful night'**
+  String get greetingNight;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done ✓'**
+  String get done;
+
+  /// No description provided for @surahNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah {number}'**
+  String surahNumber(int number);
+
+  /// No description provided for @hadithRef.
+  ///
+  /// In en, this message translates to:
+  /// **'{collection} · #{number}'**
+  String hadithRef(String collection, int number);
+
+  /// No description provided for @listeningTapToSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening… tap to search'**
+  String get listeningTapToSearch;
+
+  /// No description provided for @preparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing…'**
+  String get preparing;
+
+  /// No description provided for @stopListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop listening'**
+  String get stopListening;
+
+  /// No description provided for @starting.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting'**
+  String get starting;
+
+  /// No description provided for @reciteToFind.
+  ///
+  /// In en, this message translates to:
+  /// **'Recite to find'**
+  String get reciteToFind;
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// No description provided for @surahsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} surahs'**
+  String surahsCount(int count);
+
+  /// No description provided for @ayahNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah {number}'**
+  String ayahNumber(int number);
 }
 
 class _AppLocalizationsDelegate

@@ -316,4 +316,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pronunciation => 'pronunciation';
+
+  @override
+  String get greetingDawn => 'A blessed dawn';
+
+  @override
+  String get greetingMorning => 'Good morning';
+
+  @override
+  String get greetingAfternoon => 'Good afternoon';
+
+  @override
+  String get greetingEvening => 'A blessed evening';
+
+  @override
+  String get greetingNight => 'A peaceful night';
+
+  @override
+  String get done => 'Done ✓';
+
+  @override
+  String surahNumber(int number) {
+    return 'Surah $number';
+  }
+
+  @override
+  String hadithRef(String collection, int number) {
+    return '$collection · #$number';
+  }
+
+  @override
+  String get listeningTapToSearch => 'Listening… tap to search';
+
+  @override
+  String get preparing => 'Preparing…';
+
+  @override
+  String get stopListening => 'Stop listening';
+
+  @override
+  String get starting => 'Starting';
+
+  @override
+  String get reciteToFind => 'Recite to find';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String surahsCount(int count) {
+    return '$count surahs';
+  }
+
+  @override
+  String ayahNumber(int number) {
+    return 'Ayah $number';
+  }
 }

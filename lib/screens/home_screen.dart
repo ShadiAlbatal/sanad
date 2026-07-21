@@ -17,6 +17,7 @@ import 'dua_reader_screen.dart';
 import 'hadith_reader_screen.dart';
 import 'quran_screen.dart';
 import 'user_screen.dart';
+import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -30,7 +31,8 @@ class HomeScreen extends StatelessWidget {
 
     final now = DateTime.now();
     final part = dayPartOf(now);
-    final suggestion = suggestionFor(part);
+    final t = AppLocalizations.of(context)!;
+    final suggestion = suggestionFor(t, part);
 
     return SafeArea(
       child: ListView(
@@ -42,7 +44,7 @@ class HomeScreen extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(greetingFor(part),
+                  Text(greetingFor(t, part),
                       style: TextStyle(fontSize: 14, color: soft)),
                   const SizedBox(height: 2),
                   GestureDetector(
@@ -51,7 +53,7 @@ class HomeScreen extends StatelessWidget {
                         ? () => Navigator.of(context).push(MaterialPageRoute(
                             builder: (_) => const DebugLogScreen()))
                         : null,
-                    child: const Text('Sanad',
+                    child: Text(t.appName,
                         style:
                             TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
                   ),
@@ -164,6 +166,7 @@ class _ContinueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final accent = context.accent;
     final accentHsl = HSLColor.fromColor(accent);
     final accentDeep =
@@ -194,7 +197,7 @@ class _ContinueCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Continue reading',
+                  Text(t.continueReading,
                       style: TextStyle(
                           color: Colors.white70,
                           fontSize: 13,
@@ -211,7 +214,7 @@ class _ContinueCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text('Page $page',
+                  Text(t.pageNumber(page),
                       style: const TextStyle(color: Colors.white70)),
                 ],
               ),
@@ -389,6 +392,7 @@ class _SuggestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
     return GestureDetector(
@@ -413,7 +417,7 @@ class _SuggestionCard extends StatelessWidget {
                       style: const TextStyle(
                           fontWeight: FontWeight.w700, fontSize: 14.5)),
                   const SizedBox(height: 2),
-                  Text('Open the adhkar',
+                  Text(t.openTheAdhkar,
                       style: TextStyle(color: soft, fontSize: 12.5)),
                 ],
               ),

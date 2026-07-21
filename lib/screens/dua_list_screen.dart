@@ -16,6 +16,7 @@ import '../widgets/highlighted_arabic.dart';
 import '../widgets/search_list_scaffold.dart';
 import 'dua_reader_screen.dart';
 import 'voice_search_list_mixin.dart';
+import '../l10n/app_localizations.dart';
 
 /// The Azkar tab's root: the browsable list of du'ās & adhkār (Hisn al-Muslim,
 /// ~260) from the bundled du'a corpus, rendered through the shared
@@ -115,6 +116,7 @@ class _DuaListScreenState extends State<DuaListScreen>
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final voice = context.watch<VoiceSearchState>();
     final metas = _search?.allDuas;
     final leadExpanded = voice.recording && voiceQuery;
@@ -150,11 +152,11 @@ class _DuaListScreenState extends State<DuaListScreen>
       };
     }
     final countLabel = searching
-        ? '$count result${count == 1 ? '' : 's'}'
+        ? t.resultCount(count)
         : (metas != null ? '$count duas' : null);
 
     return SearchListScaffold(
-      title: 'Duas & Adhkār',
+      title: t.duasAndAdhkar,
       loading: metas == null,
       itemCount: count,
       itemBuilder: builder,
@@ -176,12 +178,12 @@ class _DuaListScreenState extends State<DuaListScreen>
       starting: voice.busy,
       level: voice.level,
       heard: '',
-      hearingLabel: voice.recording ? 'Listening… tap to search' : 'Preparing…',
+      hearingLabel: voice.recording ? t.listeningTapToSearch : t.preparing,
       onMicTap: toggleMic,
-      micIdleLabel: 'Recite to find a du\'ā',
+      micIdleLabel: t.reciteToFindDua,
       searchController: searchController,
       onSearchChanged: onSearchChanged,
-      searchHint: 'Search du\'ās',
+      searchHint: t.searchDuas,
       onClear: clearSearch,
     );
   }
@@ -192,12 +194,13 @@ class _NoMatches extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Text('No matches — clear the search to browse all',
+        child: Text(t.noMatchesBrowseAll,
             textAlign: TextAlign.center, style: TextStyle(color: soft, fontSize: 14)),
       ),
     );

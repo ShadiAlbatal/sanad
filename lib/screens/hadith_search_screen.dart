@@ -14,6 +14,7 @@ import '../widgets/highlighted_arabic.dart';
 import '../widgets/search_list_scaffold.dart';
 import 'hadith_reader_screen.dart';
 import 'voice_search_list_mixin.dart';
+import '../l10n/app_localizations.dart';
 
 /// The Hadith tab, rendered through the shared [SearchListScaffold] (content list
 /// + unified footer). Idle, it browses the WHOLE corpus (Sahih Bukhari + Muslim,
@@ -111,6 +112,7 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final voice = context.watch<VoiceSearchState>();
     final browse = _search?.allHadith;
 
@@ -150,11 +152,11 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
           );
     }
     final countLabel = searching
-        ? '$count result${count == 1 ? '' : 's'}'
+        ? t.resultCount(count)
         : (browse != null ? '$count hadith' : null);
 
     return SearchListScaffold(
-      title: 'Hadith',
+      title: t.tabHadith,
       loading: browse == null,
       itemCount: count,
       itemBuilder: builder,
@@ -174,12 +176,12 @@ class _HadithSearchScreenState extends State<HadithSearchScreen>
       starting: voice.busy,
       level: voice.level,
       heard: '',
-      hearingLabel: voice.recording ? 'Listening… tap to search' : 'Preparing…',
+      hearingLabel: voice.recording ? t.listeningTapToSearch : t.preparing,
       onMicTap: toggleMic,
-      micIdleLabel: 'Recite to find a hadith',
+      micIdleLabel: t.reciteToFindHadith,
       searchController: searchController,
       onSearchChanged: onSearchChanged,
-      searchHint: 'Search hadith',
+      searchHint: t.searchHadith,
       onClear: clearSearch,
     );
   }
@@ -190,12 +192,13 @@ class _NoMatches extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Text('No matches — clear the search to browse all',
+        child: Text(t.noMatchesBrowseAll,
             textAlign: TextAlign.center, style: TextStyle(color: soft, fontSize: 14)),
       ),
     );
