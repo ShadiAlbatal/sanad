@@ -2,7 +2,7 @@
 
 ## ⭐ SESSION 12 (2026-07-21) — MULTI-LENS ADVERSARIAL REVIEW OF THE 10 UNPUSHED COMMITS — RESUME HERE
 
-**One-line state:** `master` still UNPUSHED at `87cc120`; all work below is in the WORKING TREE, uncommitted. 243 host tests (was 229), analyze clean (same 5 pre-existing infos). Reviewed the 10 unpushed commits with 7 lenses + 3-vote adversarial verification (62 agents): **all 7 confirmed defects fixed, plus 2 more found while fixing them.** Every fix was MUTATION-VERIFIED: its test was run against the unfixed code and observed to fail.
+**One-line state:** `master` PUSHED to origin at `ac58553` (16 commits: the 10 that were pending plus session 12's 6). 243 host tests (was 229), analyze clean (same 5 pre-existing infos). Reviewed the 10 unpushed commits with 7 lenses + 3-vote adversarial verification (62 agents): **all 7 confirmed defects fixed, plus 2 more found while fixing them.** Every fix was MUTATION-VERIFIED: its test was run against the unfixed code and observed to fail.
 
 **⚠️ DEVICE GATE (owed, on top of session 9/10/11's):** the matcher window change below alters live follow-along for du'ā + hadith. Recite a du'ā and a long hadith on device and confirm the final word greens and nothing regresses mid-clip.
 
