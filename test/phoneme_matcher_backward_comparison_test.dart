@@ -84,7 +84,8 @@ void main() {
   group('natural stumble-and-repeat over a real surah', () {
     // Al-Ikhlas (112): short, no internal repeats of its own (a clean surah
     // to isolate the INJECTED stumble from any pre-existing textual repeats).
-    Future<void> run(String label, bool allowBackward) async {
+    Future<({int greens, int n, bool anchored})> run(
+        String label, bool allowBackward) async {
       final units = await loadPhonemeUnits();
       final sc = await loadSurahClip(112);
       final ref = sc.clip.phonemes;
@@ -115,11 +116,21 @@ void main() {
       final greens = out.states.where((s) => s == WordState.correct).length;
       // ignore: avoid_print
       print('$label: greens=$greens/$n cursor=${out.cursor} anchored=${m.anchored}');
+      return (greens: greens, n: n, anchored: m.anchored);
     }
 
     test('follow-anywhere vs sidestep on an ordinary stumble-and-repeat', () async {
-      await run('follow-anywhere', true);
-      await run('sidestep       ', false);
+      final anywhere = await run('follow-anywhere', true);
+      final sidestep = await run('sidestep       ', false);
+      // These two groups used to be print-only: a regression could stall the
+      // sidestep frontier completely and the file still reported success, even
+      // though reading_state.dart ships allowBackward:false for the Qur'an
+      // reader. Floors, not exact counts — the point is to catch a collapse
+      // (a broken window drops sidestep to 2/46), not to freeze a tuning number.
+      expect(anywhere.anchored, isTrue, reason: 'follow-anywhere must lock on');
+      expect(sidestep.anchored, isTrue, reason: 'sidestep must lock on');
+      expect(anywhere.greens, greaterThanOrEqualTo((anywhere.n * 0.85).floor()));
+      expect(sidestep.greens, greaterThanOrEqualTo((sidestep.n * 0.80).floor()));
     });
   });
 
@@ -132,7 +143,8 @@ void main() {
     // comparison is under a load closer to what that number represented —
     // while still being a fresh, in-repo measurement of THIS variant, not
     // a re-run of the old (different) forward-pegged retrofit.
-    Future<void> run(String label, bool allowBackward) async {
+    Future<({int greens, int n, bool anchored})> run(
+        String label, bool allowBackward) async {
       final units = await loadPhonemeUnits();
       final sc = await loadSurahClip(2);
       final ayahIdx = 254; // 0-indexed ayah 255
@@ -178,11 +190,21 @@ void main() {
       final greens = out.states.where((s) => s == WordState.correct).length;
       // ignore: avoid_print
       print('$label: greens=$greens/$n cursor=${out.cursor} anchored=${m.anchored}');
+      return (greens: greens, n: n, anchored: m.anchored);
     }
 
     test('follow-anywhere vs sidestep under 3 stumbles across Ayat al-Kursi', () async {
-      await run('follow-anywhere', true);
-      await run('sidestep       ', false);
+      final anywhere = await run('follow-anywhere', true);
+      final sidestep = await run('sidestep       ', false);
+      // These two groups used to be print-only: a regression could stall the
+      // sidestep frontier completely and the file still reported success, even
+      // though reading_state.dart ships allowBackward:false for the Qur'an
+      // reader. Floors, not exact counts — the point is to catch a collapse
+      // (a broken window drops sidestep to 2/46), not to freeze a tuning number.
+      expect(anywhere.anchored, isTrue, reason: 'follow-anywhere must lock on');
+      expect(sidestep.anchored, isTrue, reason: 'sidestep must lock on');
+      expect(anywhere.greens, greaterThanOrEqualTo((anywhere.n * 0.85).floor()));
+      expect(sidestep.greens, greaterThanOrEqualTo((sidestep.n * 0.80).floor()));
     });
   });
 }

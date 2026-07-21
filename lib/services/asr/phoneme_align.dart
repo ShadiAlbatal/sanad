@@ -111,7 +111,9 @@ class LocResult {
   const LocResult(this.word, this.refPos, this.score);
 }
 
-const _locMatch = 3;
+/// Points a single matched phoneme adds to a localizer score. Public because
+/// the matcher's score floor has to know what a full match of a clip is worth.
+const int kLocMatch = 3;
 const _locMismatch = -3;
 const _locGap = -3;
 
@@ -158,7 +160,7 @@ class PhonemeLocalizer {
       cur[0] = 0;
       curStart[0] = 0;
       for (var j = 1; j <= n; j++) {
-        final s = mk[j - 1] != 0 ? _locMatch : _locMismatch;
+        final s = mk[j - 1] != 0 ? kLocMatch : _locMismatch;
         final dv = prev[j - 1] + s;
         final dStart = prev[j - 1] > 0 ? prevStart[j - 1] : j - 1;
         final uv = prev[j] + _locGap;

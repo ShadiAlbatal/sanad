@@ -116,6 +116,14 @@ class PhonemeMatchSession {
     _current = List<WordState>.filled(_n, WordState.pending);
   }
 
+  /// The localizer adds [kLocMatch] per matched phoneme, so a clip with fewer
+  /// than `_scoreFloor / kLocMatch` phonemes TOTAL can never reach a flat floor
+  /// — the matcher would reject a perfect recitation of it forever (hisn-197,
+  /// a lone 3-phoneme word, maxes out at 9 against a floor of 12 and so never
+  /// anchored). Cap the floor at what a full match of the whole clip is worth.
+  late final double _floor =
+      math.min(_scoreFloor, _ref.length * kLocMatch.toDouble());
+
   bool _maj(int wi) => _wordBestFrac[wi] >= _green;
   double _greenNeed(int wi) {
     final len = _wordPhonemes[wi].length;
@@ -182,19 +190,24 @@ class PhonemeMatchSession {
       // now-out-of-window match while newer in-window audio is also present. A
       // short recency-biased snippet, gated by the same window+score check, only
       // rescues a chunk the primary was about to reject.
-      if (!(loc.word >= reachLo && loc.word <= reachHi && loc.score >= _scoreFloor) && tail.length >= _shortTail) {
+      if (!(loc.word >= reachLo && loc.word <= reachHi && loc.score >= _floor) && tail.length >= _shortTail) {
         final shortLoc = _localizer.localizeScored(tail.sublist(tail.length - _shortTail));
-        if (shortLoc.word >= reachLo && shortLoc.word <= reachHi && shortLoc.score >= _scoreFloor) {
+        if (shortLoc.word >= reachLo && shortLoc.word <= reachHi && shortLoc.score >= _floor) {
           use = shortLoc;
           tShortRescued = true;
         }
       }
       tUseWord = use.word;
       tUseScore = use.score;
-      if (use.word >= reachLo && use.word <= reachHi && use.score >= _scoreFloor) {
+      if (use.word >= reachLo && use.word <= reachHi && use.score >= _floor) {
         accepted = true;
         final wLo = math.max(reachLo, use.word - 3);
-        final wHi = math.min(reachHi, use.word + 6);
+        // The frontier can only ever advance to _reached+1, so that word MUST
+        // be inside the scoring window or it walls forever. use.word is where
+        // the tail's alignment STARTS, and a 24-token tail spans more than 6
+        // words once the words are short (2-4 phonemes) — which left the final
+        // word of 26 du'ās at frac 0.00, unscored and so permanently un-green.
+        final wHi = math.min(reachHi, math.max(use.word + 6, _reached + 1));
         final refLo = _wordPhonemes[wLo][0];
         final refHi = _wordPhonemes[wHi][_wordPhonemes[wHi].length - 1];
         final pairs = nwAlign(tail, _ref.sublist(refLo, refHi + 1), 0, _threshold)
@@ -223,7 +236,7 @@ class PhonemeMatchSession {
     // this whole detector is off; a re-read's audio already can't reach
     // anything behind reachLo (bound to _reached+1 above) either way.
     final lr = _lastReloc;
-    if (_allowBackward && _anchor >= 0 && lr != null && lr.word >= 0 && lr.word < reachLo && lr.score >= _scoreFloor) {
+    if (_allowBackward && _anchor >= 0 && lr != null && lr.word >= 0 && lr.word < reachLo && lr.score >= _floor) {
       final region = (lr.word / _backRegionSize).floor();
       if (region == _backRegion) {
         _backStable++;
@@ -269,12 +282,24 @@ class PhonemeMatchSession {
 
     // Lock the mid-verse anchor at the first two consecutive green words.
     if (_anchor < 0) {
-      for (var i = 0; i < _n - 1; i++) {
-        if (_majAdv(i) && _majAdv(i + 1)) {
-          _anchor = i;
-          _reached = i - 1;
-          Log.d(_logTag, 'ANCHOR lock @w$i (ayah $_curAyah)');
-          break;
+      if (_n == 1) {
+        // A one-word clip (3 of the hisn du'ās) has no second word to confirm
+        // with, so that word alone is the whole signal. Requiring a pair left
+        // those clips unable to anchor, green, or even reach skip-advance
+        // recovery — permanently dead in follow-along.
+        if (_majAdv(0)) {
+          _anchor = 0;
+          _reached = -1;
+          Log.d(_logTag, 'ANCHOR lock @w0 (single-word clip)');
+        }
+      } else {
+        for (var i = 0; i < _n - 1; i++) {
+          if (_majAdv(i) && _majAdv(i + 1)) {
+            _anchor = i;
+            _reached = i - 1;
+            Log.d(_logTag, 'ANCHOR lock @w$i (ayah $_curAyah)');
+            break;
+          }
         }
       }
     }
@@ -391,7 +416,7 @@ class PhonemeMatchSession {
     Log.t(_logTag,
         'ATOM tail=${tail.length} loc=$tLocWord/${tLocScore.isNaN ? '-' : tLocScore.toStringAsFixed(1)} '
         '${tShortRescued ? 'RESCUED->' : ''}use=$tUseWord/${tUseScore.isNaN ? '-' : tUseScore.toStringAsFixed(1)} '
-        'floor=$_scoreFloor win=[$reachLo,$reachHi] accepted=$accepted '
+        'floor=$_floor win=[$reachLo,$reachHi] accepted=$accepted '
         'anchor=$_anchor reached=$_reached head=$_head ay=$_curAyah '
         'frac[r+1,r+2]=$frontierFrac,$next2Frac backStable=$_backStable/$_backStableNeed '
         'stuck=$_stuckChunks/$_freezeChunks allowBack=$_allowBackward');
