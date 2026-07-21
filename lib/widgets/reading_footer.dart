@@ -87,7 +87,11 @@ class ReadingFooter extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         fontFeatures: const [FontFeature.tabularFigures()])),
                 const SizedBox(width: 12),
-              ] else
+              ] else if (!(showMic && reading.hidden))
+                // Only pad out the row when the reveal chevrons AREN'T here.
+                // Spacer is an Expanded(flex: 1), so beside the reveal row's
+                // Flexible(flex: 1) it took half the free width for nothing and
+                // the FittedBox scaled the four chevrons down to ~19x14.
                 const Spacer(),
               if (showMic)
                 MicToggleButton(

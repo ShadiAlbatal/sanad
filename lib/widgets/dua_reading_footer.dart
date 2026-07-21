@@ -85,7 +85,9 @@ class DuaReadingFooter extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         fontFeatures: const [FontFeature.tabularFigures()])),
                 const SizedBox(width: 12),
-              ] else
+              ] else if (!dua.hidden)
+                // See ReadingFooter: Spacer is an Expanded(flex: 1) and would
+                // halve the reveal row's share of the free width.
                 const Spacer(),
               MicToggleButton(
                 active: dua.active,
