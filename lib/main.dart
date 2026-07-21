@@ -13,6 +13,7 @@ import 'state/reading_state.dart';
 import 'state/voice_search_state.dart';
 import 'util/log.dart';
 import 'screens/root_scaffold.dart';
+import 'l10n/app_localizations.dart';
 import 'state/app_state.dart';
 import 'theme/app_theme.dart';
 import 'util/licenses.dart';
@@ -90,6 +91,12 @@ class TilawaApp extends StatelessWidget {
           theme: AppTheme.light(app.accentColor),
           darkTheme: AppTheme.dark(app.accentColor),
           themeMode: app.themeMode,
+          // Arabic by default (see Prefs.languageCode) — this also sets the
+          // app's text direction to RTL, which is why the reader/list screens
+          // no longer need to wrap their Arabic content in Directionality.
+          locale: app.locale,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           home: const RootScaffold(),
         ),
       ),

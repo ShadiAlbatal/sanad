@@ -21,6 +21,7 @@ class AppState extends ChangeNotifier {
         _lastDuaId = prefs.lastDuaId,
         _lastHadithId = prefs.lastHadithId {
     _themeMode = _parse(prefs.themeMode);
+    _locale = Locale(prefs.languageCode);
     _accentChoice = _parseAccent(prefs.accent);
     _shareEssential = prefs.shareEssential;
     _sharePerformance = prefs.sharePerformance;
@@ -64,6 +65,18 @@ class AppState extends ChangeNotifier {
 
   void cycleTheme() {
     setThemeMode(_themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark);
+  }
+
+  /// UI language. Arabic by default — see [Prefs.languageCode]. Changing it
+  /// also flips the app's text direction, since MaterialApp derives that from
+  /// the locale.
+  late Locale _locale;
+  Locale get locale => _locale;
+  void setLocale(Locale l) {
+    if (l.languageCode == _locale.languageCode) return;
+    _locale = l;
+    prefs.setLanguageCode(l.languageCode);
+    notifyListeners();
   }
 
   late AccentChoice _accentChoice;

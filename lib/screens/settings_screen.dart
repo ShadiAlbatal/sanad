@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../state/app_state.dart';
 import '../theme/app_theme.dart';
 import 'privacy_screen.dart';
@@ -12,15 +13,16 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final app = context.watch<AppState>();
+    final t = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(t.settings)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
         children: [
-          _SectionLabel('Appearance', color: soft),
+          _SectionLabel(t.appearance, color: soft),
           _Card(
             dark: dark,
             child: Column(
@@ -37,7 +39,7 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 22),
-          _SectionLabel('Accent', color: soft),
+          _SectionLabel(t.accent, color: soft),
           _Card(
             dark: dark,
             child: Padding(
@@ -57,30 +59,27 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _Caption('Auto shifts the colour with the time of day.', color: soft),
+          _Caption(t.accentAutoCaption, color: soft),
           const SizedBox(height: 22),
-          _SectionLabel('Language', color: soft),
+          _SectionLabel(t.language, color: soft),
           _Card(
             dark: dark,
-            child: Opacity(
-              opacity: 0.55,
-              child: Row(
-                children: [
-                  Icon(Icons.language_rounded, color: soft, size: 22),
-                  const SizedBox(width: 14),
-                  const Expanded(
-                    child: Text('English',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 15)),
+            child: Column(
+              children: [
+                for (final code in const ['ar', 'en'])
+                  _LanguageOption(
+                    code: code,
+                    label: code == 'ar' ? t.languageArabic : t.languageEnglish,
+                    selected: app.locale.languageCode == code,
+                    onTap: () => app.setLocale(Locale(code)),
+                    soft: soft,
+                    showDivider: code == 'ar',
                   ),
-                  Text('More languages coming soon',
-                      style: TextStyle(color: soft, fontSize: 12)),
-                ],
-              ),
+              ],
             ),
           ),
           const SizedBox(height: 22),
-          _SectionLabel('Help improve Sanad', color: soft),
+          _SectionLabel(t.helpImprove, color: soft),
           _Card(
             dark: dark,
             child: Column(
@@ -89,11 +88,11 @@ class SettingsScreen extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   value: app.shareEssential,
                   onChanged: app.setShareEssential,
-                  title: const Text('Crash & error reports',
+                  title: Text(t.crashReports,
                       style:
                           TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
                   subtitle: Text(
-                      'Optional. Anonymous crash/error summaries to help fix bugs. The app works fully without this.',
+                      t.crashReportsBody,
                       style: TextStyle(color: soft, fontSize: 12.5)),
                 ),
                 Divider(height: 1, color: soft.withValues(alpha: 0.15)),
@@ -101,11 +100,11 @@ class SettingsScreen extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   value: app.sharePerformance,
                   onChanged: app.setSharePerformance,
-                  title: const Text('Performance & usage',
+                  title: Text(t.performanceUsage,
                       style:
                           TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
                   subtitle: Text(
-                      'Anonymous performance and usage to improve the app.',
+                      t.performanceUsageBody,
                       style: TextStyle(color: soft, fontSize: 12.5)),
                 ),
                 Divider(height: 1, color: soft.withValues(alpha: 0.15)),
@@ -120,8 +119,8 @@ class SettingsScreen extends StatelessWidget {
                         Icon(Icons.shield_outlined,
                             color: context.accent, size: 22),
                         const SizedBox(width: 14),
-                        const Expanded(
-                          child: Text('Data & Privacy',
+                        Expanded(
+                          child: Text(t.dataPrivacy,
                               style: TextStyle(
                                   fontWeight: FontWeight.w700, fontSize: 15)),
                         ),
@@ -135,20 +134,20 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           _Caption(
-              'Anonymous, and kept on-device for now — nothing is uploaded anywhere yet. You can use the app fully without an account or sharing. See Data & Privacy.',
+              t.privacyCaption,
               color: soft),
           const SizedBox(height: 22),
-          _SectionLabel('About', color: soft),
+          _SectionLabel(t.about, color: soft),
           _Card(
             dark: dark,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Sanad',
+                Text(t.appName,
                     style:
                         TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
                 const SizedBox(height: 6),
-                Text('A calm Quran companion — read, listen, and remember.',
+                Text(t.appTagline,
                     style: TextStyle(color: soft, fontSize: 13.5, height: 1.4)),
                 const SizedBox(height: 10),
                 Text(_appVersion,
@@ -171,8 +170,8 @@ class SettingsScreen extends StatelessWidget {
                         Icon(Icons.description_outlined,
                             color: context.accent, size: 20),
                         const SizedBox(width: 14),
-                        const Expanded(
-                          child: Text('Licenses & Attribution',
+                        Expanded(
+                          child: Text(t.licenses,
                               style: TextStyle(
                                   fontWeight: FontWeight.w700, fontSize: 15)),
                         ),
@@ -184,6 +183,64 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Same row shape as [_ThemeOption]. Each label is written in its OWN language
+/// (العربية / English) rather than translated, so it stays recognisable to
+/// someone stuck in a language they can't read.
+class _LanguageOption extends StatelessWidget {
+  final String code;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final Color soft;
+  final bool showDivider;
+  const _LanguageOption({
+    required this.code,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.soft,
+    required this.showDivider,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              children: [
+                Icon(Icons.language_rounded,
+                    color: selected ? context.accent : soft, size: 22),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(label,
+                      textDirection:
+                          code == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+                      style: TextStyle(
+                          fontWeight:
+                              selected ? FontWeight.w700 : FontWeight.w600,
+                          fontSize: 15)),
+                ),
+                Icon(
+                    selected
+                        ? Icons.check_circle_rounded
+                        : Icons.circle_outlined,
+                    color: selected ? context.accent : soft,
+                    size: 22),
+              ],
+            ),
+          ),
+          if (showDivider)
+            Divider(height: 1, color: soft.withValues(alpha: 0.15)),
         ],
       ),
     );
@@ -255,13 +312,6 @@ class _AccentSwatch extends StatelessWidget {
     required this.soft,
   });
 
-  static const _labels = {
-    AccentChoice.auto: 'Auto',
-    AccentChoice.iris: 'Iris',
-    AccentChoice.emerald: 'Emerald',
-    AccentChoice.coral: 'Coral',
-    AccentChoice.ocean: 'Ocean',
-  };
 
   static const _colors = {
     AccentChoice.iris: AppColors.accentIris,
@@ -272,6 +322,14 @@ class _AccentSwatch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final label = switch (choice) {
+      AccentChoice.auto => t.accentAuto,
+      AccentChoice.iris => t.accentIris,
+      AccentChoice.emerald => t.accentEmerald,
+      AccentChoice.coral => t.accentCoral,
+      AccentChoice.ocean => t.accentOcean,
+    };
     final color = _colors[choice];
     // Named swatches show their fixed preset; the Auto swatch's ring/label track
     // the live accent (which, on Auto, is the current time-of-day colour).
@@ -304,7 +362,7 @@ class _AccentSwatch extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            _labels[choice]!,
+            label,
             style: TextStyle(
               fontSize: 11.5,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
@@ -331,15 +389,21 @@ class _ThemeOption extends StatelessWidget {
     required this.showDivider,
   });
 
-  static const _labels = {
-    ThemeMode.system: ('System', Icons.brightness_auto_rounded),
-    ThemeMode.light: ('Light', Icons.light_mode_rounded),
-    ThemeMode.dark: ('Dark', Icons.dark_mode_rounded),
+  static const _icons = {
+    ThemeMode.system: Icons.brightness_auto_rounded,
+    ThemeMode.light: Icons.light_mode_rounded,
+    ThemeMode.dark: Icons.dark_mode_rounded,
   };
 
   @override
   Widget build(BuildContext context) {
-    final (label, icon) = _labels[mode]!;
+    final t = AppLocalizations.of(context)!;
+    final label = switch (mode) {
+      ThemeMode.system => t.themeSystem,
+      ThemeMode.light => t.themeLight,
+      ThemeMode.dark => t.themeDark,
+    };
+    final icon = _icons[mode]!;
     return InkWell(
       onTap: onTap,
       child: Column(

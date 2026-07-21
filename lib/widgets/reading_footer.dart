@@ -130,9 +130,15 @@ class _RevealRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      child: Row(
+    // The four chevrons encode ARABIC reading semantics directly in their icons
+    // (left-pointing = forward). Pin this row to LTR so the app locale can't
+    // mirror it: under an Arabic (RTL) locale the Row would reverse child order
+    // while the icons stayed put, flipping "reveal forward" to the wrong side.
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         // RTL: reading runs right→left, so the LEFT-pointing chevrons reveal
@@ -168,7 +174,8 @@ class _RevealRow extends StatelessWidget {
           semanticLabel: 'Hide previous ayah',
           onTap: () => reading.revealBack(ayah: true),
         ),
-      ],
+          ],
+        ),
       ),
     );
   }

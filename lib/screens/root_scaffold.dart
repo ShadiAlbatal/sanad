@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../state/app_state.dart';
 import '../state/dhikr_counter_state.dart';
 import '../state/reading_state.dart';
@@ -56,6 +57,7 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final app = context.watch<AppState>();
+    final t = AppLocalizations.of(context)!;
     final tab = app.tabIndex;
 
     // Voice search is ONE shared state across the Dua/Quran/Hadith tabs, kept
@@ -105,31 +107,31 @@ class _RootViewState extends State<_RootView> with WidgetsBindingObserver {
             : NavigationBar(
                 selectedIndex: tab,
                 onDestinationSelected: (i) => app.tabIndex = i,
-                destinations: const [
+                destinations: [
                   NavigationDestination(
-                    icon: Icon(Icons.wb_twilight_outlined),
-                    selectedIcon: Icon(Icons.wb_twilight_rounded),
-                    label: 'Duas',
+                    icon: const Icon(Icons.wb_twilight_outlined),
+                    selectedIcon: const Icon(Icons.wb_twilight_rounded),
+                    label: t.tabDuas,
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.home_outlined),
-                    selectedIcon: Icon(Icons.home_rounded),
-                    label: 'Home',
+                    icon: const Icon(Icons.home_outlined),
+                    selectedIcon: const Icon(Icons.home_rounded),
+                    label: t.tabHome,
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.menu_book_outlined),
-                    selectedIcon: Icon(Icons.menu_book_rounded),
-                    label: 'Quran',
+                    icon: const Icon(Icons.menu_book_outlined),
+                    selectedIcon: const Icon(Icons.menu_book_rounded),
+                    label: t.tabQuran,
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.format_quote_outlined),
-                    selectedIcon: Icon(Icons.format_quote_rounded),
-                    label: 'Hadith',
+                    icon: const Icon(Icons.format_quote_outlined),
+                    selectedIcon: const Icon(Icons.format_quote_rounded),
+                    label: t.tabHadith,
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.fingerprint_rounded),
-                    selectedIcon: Icon(Icons.fingerprint_rounded),
-                    label: 'Counter',
+                    icon: const Icon(Icons.fingerprint_rounded),
+                    selectedIcon: const Icon(Icons.fingerprint_rounded),
+                    label: t.tabCounter,
                   ),
                 ],
               ),

@@ -16,6 +16,7 @@ class Prefs {
   static const _kHadithBookmarks = 'hadith_bookmarks';
   static const _kQuranBookmarks = 'quran_bookmarks';
   static const _kDhikrCounts = 'dhikr_counts';
+  static const _kLanguage = 'language'; // 'ar' | 'en'
 
   final SharedPreferences _sp;
   Prefs(this._sp);
@@ -33,6 +34,12 @@ class Prefs {
 
   String get themeMode => _sp.getString(_kThemeMode) ?? 'system';
   Future<void> setThemeMode(String m) => _sp.setString(_kThemeMode, m);
+
+  /// UI language tag ('ar' | 'en'). Defaults to Arabic, not the device locale:
+  /// every collection in the app is Arabic and the user recites in Arabic, so
+  /// an Arabic UI is the right first impression regardless of phone settings.
+  String get languageCode => _sp.getString(_kLanguage) ?? 'ar';
+  Future<void> setLanguageCode(String c) => _sp.setString(_kLanguage, c);
 
   String get accent => _sp.getString(_kAccent) ?? 'auto';
   Future<void> setAccent(String a) => _sp.setString(_kAccent, a);
