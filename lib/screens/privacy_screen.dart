@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 /// Plain-language "what leaves this app" screen, linked from Settings. Lists
 /// exactly what a session report contains (only when the usage toggle is on)
@@ -8,41 +9,28 @@ import '../theme/app_theme.dart';
 class PrivacyScreen extends StatelessWidget {
   const PrivacyScreen({super.key});
 
-  static const _shared = [
-    'A random install id — a code for this app copy, not linked to you.',
-    'Which surah or du’a you read, and how far you reached.',
-    'How many sounds the app decoded, and whether it locked on.',
-    'Tajwīd notes it raised (the reference letter vs the one it heard).',
-    'Words skipped and how long the session was.',
-    'App version and your phone’s system (Android / iOS).',
-    'With “Essential app data” on: anonymous crash/error summaries '
-        '(what failed and roughly where — never a full stack or your data).',
-  ];
-
-  static const _never = [
-    'Your voice or any audio recording.',
-    'Your name, email, or any account.',
-    'Your contacts or location.',
-    'Anything that identifies you personally.',
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
     final accent = context.accent;
+    final shared = [
+      t.privacyShared1, t.privacyShared2, t.privacyShared3, t.privacyShared4,
+      t.privacyShared5, t.privacyShared6, t.privacyShared7,
+    ];
+    final never = [
+      t.privacyNever1, t.privacyNever2, t.privacyNever3, t.privacyNever4,
+    ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Data & Privacy')),
+      appBar: AppBar(title: Text(t.dataPrivacy)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
         children: [
           Text(
-            'Sanad works fully offline and needs no account. The two “Help '
-            'improve” switches are optional and independent: “Performance & '
-            'usage” records an anonymous summary of each recitation, and '
-            '“Essential app data” records anonymous crash/error summaries. Both '
-            'are off by default.',
+            t.privacyIntro,
             style: TextStyle(fontSize: 13.5, height: 1.5, color: soft),
           ),
           const SizedBox(height: 24),
@@ -51,8 +39,8 @@ class PrivacyScreen extends StatelessWidget {
             soft: soft,
             icon: Icons.check_circle_rounded,
             iconColor: accent,
-            title: 'Shared — only if you opt in',
-            items: _shared,
+            title: t.sharedOptIn,
+            items: shared,
           ),
           const SizedBox(height: 20),
           _Group(
@@ -60,8 +48,8 @@ class PrivacyScreen extends StatelessWidget {
             soft: soft,
             icon: Icons.block_rounded,
             iconColor: AppColors.tajweedMajor,
-            title: 'Never shared',
-            items: _never,
+            title: t.neverShared,
+            items: never,
           ),
           const SizedBox(height: 20),
           Container(
@@ -72,10 +60,7 @@ class PrivacyScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
-              'In this version nothing is uploaded anywhere — reports are written '
-              'only to this device’s diagnostic log. Sending to a server stays '
-              'off until a future update, and will always require this opt-in and a '
-              'published privacy policy.',
+              t.privacyLocalNote,
               style: TextStyle(fontSize: 12.5, height: 1.5, color: soft),
             ),
           ),

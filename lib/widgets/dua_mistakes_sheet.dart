@@ -5,6 +5,7 @@ import '../services/asr/session.dart';
 import '../state/dua_reading_state.dart';
 import '../theme/app_theme.dart';
 import '../util/log.dart';
+import '../l10n/app_localizations.dart';
 
 void showDuaMistakesSheet(BuildContext context) {
   showModalBottomSheet(
@@ -54,6 +55,7 @@ class _DuaMistakesSheetState extends State<_DuaMistakesSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dua = context.watch<DuaReadingState>();
     final mistakes = dua.mistakes;
     final h = MediaQuery.of(context).size.height * 0.7;
@@ -68,7 +70,7 @@ class _DuaMistakesSheetState extends State<_DuaMistakesSheet> {
               children: [
                 Icon(Icons.spellcheck_rounded, color: context.accent),
                 const SizedBox(width: 10),
-                Text('Mistakes',
+                Text(t.mistakes,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
                 const Spacer(),
                 Text('${mistakes.length}',
@@ -77,12 +79,12 @@ class _DuaMistakesSheetState extends State<_DuaMistakesSheet> {
             ),
           ),
           if (mistakes.isEmpty)
-            const Expanded(
+            Expanded(
               child: Center(
                 child: Padding(
-                  padding: EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(24),
                   child: Text(
-                    'No mistakes yet. Tap the mic and recite — mispronounced\nand skipped words show up here to review.',
+                    t.noMistakesDua,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -122,6 +124,7 @@ class _DuaMistakeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       child: Row(
@@ -137,7 +140,7 @@ class _DuaMistakeTile extends StatelessWidget {
                   Text(mistake.expectedText,
                       style: const TextStyle(fontFamily: 'UthmanicHafs', fontSize: 24)),
                 const SizedBox(height: 3),
-                _detail(),
+                _detail(t),
               ],
             ),
           ),
@@ -146,7 +149,7 @@ class _DuaMistakeTile extends StatelessWidget {
             icon: Icon(playing ? Icons.stop_circle_rounded : Icons.play_circle_rounded,
                 size: 34, color: canPlay ? context.accent : AppColors.inkSoft.withValues(alpha: 0.4)),
             onPressed: canPlay ? onPlay : null,
-            tooltip: canPlay ? 'Hear it' : 'Audio unavailable',
+            tooltip: canPlay ? t.hearIt : t.audioUnavailable,
           ),
         ],
       ),
@@ -170,20 +173,20 @@ class _DuaMistakeTile extends StatelessWidget {
     );
   }
 
-  Widget _detail() {
+  Widget _detail(AppLocalizations t) {
     switch (mistake.kind) {
       case MistakeKind.mispronounced:
         final bad = mistake.badPhonemes;
         return Row(
           children: [
-            const Text('makhraj: expected ',
+            Text(t.makhrajExpected,
                 style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
             if (bad.isNotEmpty)
               Text(bad.first.piece,
                   style: const TextStyle(
                       fontFamily: 'UthmanicHafs', fontSize: 18, color: AppColors.tajweedMajor)),
             if (mistake.heardText.isNotEmpty) ...[
-              const Text('  →  heard ',
+              Text(t.heardArrow,
                   style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
               Text(mistake.heardText,
                   style: const TextStyle(
@@ -192,10 +195,10 @@ class _DuaMistakeTile extends StatelessWidget {
           ],
         );
       case MistakeKind.skipped:
-        return const Text('Skipped — jumped over this word',
+        return Text(t.skippedWord,
             style: TextStyle(fontSize: 12.5, color: AppColors.tajweedMajor));
       case MistakeKind.offText:
-        return const Text('Off-text — recitation did not match here',
+        return Text(t.offTextDua,
             style: TextStyle(fontSize: 12.5, color: AppColors.gold));
     }
   }

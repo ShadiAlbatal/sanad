@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sanad/screens/privacy_screen.dart';
+import 'package:sanad/l10n/app_localizations.dart';
 
 /// Smoke-pins the Data & Privacy screen: it renders (all color tokens resolve),
 /// shows both the shared / never-shared groups, and states plainly that nothing
@@ -9,6 +10,10 @@ void main() {
   Future<void> pump(WidgetTester tester, {Brightness b = Brightness.light}) async {
     await tester.pumpWidget(
       MaterialApp(
+      locale: const Locale('en'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+
         theme: ThemeData(
           brightness: b,
           colorScheme: ColorScheme.fromSeed(

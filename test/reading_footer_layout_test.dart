@@ -8,6 +8,7 @@ import 'package:sanad/util/log.dart';
 import 'package:sanad/widgets/chevron_button.dart';
 import 'package:sanad/widgets/dua_reading_footer.dart';
 import 'package:sanad/widgets/reading_footer.dart';
+import 'package:sanad/l10n/app_localizations.dart';
 
 /// The hidden-mode reveal chevrons live INLINE in the footer row (not a row of
 /// their own), inside a FittedBox that scales them down to fit. That makes their
@@ -27,6 +28,10 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(MaterialApp(
+      locale: const Locale('en'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+
       home: Scaffold(body: Column(children: [const Spacer(), footer])),
     ));
     await tester.pump();

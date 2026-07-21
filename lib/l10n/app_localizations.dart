@@ -757,6 +757,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ayah {number}'**
   String ayahNumber(int number);
+
+  /// No description provided for @countingWhatYouRecite.
+  ///
+  /// In en, this message translates to:
+  /// **'Counting what you recite…'**
+  String get countingWhatYouRecite;
+
+  /// No description provided for @tapMicAndRecite.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the mic and recite'**
+  String get tapMicAndRecite;
+
+  /// No description provided for @hearIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Hear it'**
+  String get hearIt;
+
+  /// No description provided for @audioUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio unavailable'**
+  String get audioUnavailable;
+
+  /// No description provided for @noMistakesQuran.
+  ///
+  /// In en, this message translates to:
+  /// **'No mistakes yet. Tap the mic and recite — mispronounced,\nskipped, and off-text words show up here to review.'**
+  String get noMistakesQuran;
+
+  /// No description provided for @noMistakesDua.
+  ///
+  /// In en, this message translates to:
+  /// **'No mistakes yet. Tap the mic and recite — mispronounced\nand skipped words show up here to review.'**
+  String get noMistakesDua;
+
+  /// No description provided for @juzLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Juz {number}'**
+  String juzLabel(int number);
+
+  /// No description provided for @hizbLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ḥizb {number}'**
+  String hizbLabel(int number);
+
+  /// No description provided for @privacyIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Sanad works fully offline and needs no account. The two “Help improve” switches are optional and independent: “Performance & usage” records an anonymous summary of each recitation, and “Essential app data” records anonymous crash/error summaries. Both are off by default.'**
+  String get privacyIntro;
+
+  /// No description provided for @privacyLocalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'In this version nothing is uploaded anywhere — reports are written only to this device’s diagnostic log. Sending to a server stays off until a future update, and will always require this opt-in and a published privacy policy.'**
+  String get privacyLocalNote;
+
+  /// No description provided for @privacyShared1.
+  ///
+  /// In en, this message translates to:
+  /// **'A random install id — a code for this app copy, not linked to you.'**
+  String get privacyShared1;
+
+  /// No description provided for @privacyShared2.
+  ///
+  /// In en, this message translates to:
+  /// **'Which surah or du’a you read, and how far you reached.'**
+  String get privacyShared2;
+
+  /// No description provided for @privacyShared3.
+  ///
+  /// In en, this message translates to:
+  /// **'How many sounds the app decoded, and whether it locked on.'**
+  String get privacyShared3;
+
+  /// No description provided for @privacyShared4.
+  ///
+  /// In en, this message translates to:
+  /// **'Tajwīd notes it raised (the reference letter vs the one it heard).'**
+  String get privacyShared4;
+
+  /// No description provided for @privacyShared5.
+  ///
+  /// In en, this message translates to:
+  /// **'Words skipped and how long the session was.'**
+  String get privacyShared5;
+
+  /// No description provided for @privacyShared6.
+  ///
+  /// In en, this message translates to:
+  /// **'App version and your phone’s system (Android / iOS).'**
+  String get privacyShared6;
+
+  /// No description provided for @privacyShared7.
+  ///
+  /// In en, this message translates to:
+  /// **'With “Essential app data” on: anonymous crash/error summaries (what failed and roughly where — never a full stack or your data).'**
+  String get privacyShared7;
+
+  /// No description provided for @privacyNever1.
+  ///
+  /// In en, this message translates to:
+  /// **'Your voice or any audio recording.'**
+  String get privacyNever1;
+
+  /// No description provided for @privacyNever2.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name, email, or any account.'**
+  String get privacyNever2;
+
+  /// No description provided for @privacyNever3.
+  ///
+  /// In en, this message translates to:
+  /// **'Your contacts or location.'**
+  String get privacyNever3;
+
+  /// No description provided for @privacyNever4.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything that identifies you personally.'**
+  String get privacyNever4;
 }
 
 class _AppLocalizationsDelegate

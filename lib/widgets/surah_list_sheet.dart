@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/quran_repository.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 /// Opens the surah index. [onSelect] receives the tapped surah's start page.
 Future<void> showSurahList(
   BuildContext context, {
   required void Function(int startPage) onSelect,
 }) async {
+  final t = AppLocalizations.of(context)!;
   final repo = context.read<QuranRepository>();
   final chapters = await repo.chapters();
   if (!context.mounted) return;
@@ -21,9 +23,9 @@ Future<void> showSurahList(
       maxChildSize: 0.92,
       builder: (_, sc) => Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 8),
-            child: Text('Surahs',
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(t.surahs,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           ),
           Expanded(
@@ -36,7 +38,7 @@ Future<void> showSurahList(
                   leading: _SurahBadge(number: c.id),
                   title: Text(c.nameSimple,
                       style: const TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: Text('${c.translated} · ${c.versesCount} verses'),
+                  subtitle: Text('${c.translated} · ${t.versesCount(c.versesCount)}'),
                   trailing: Text(c.nameArabic,
                       style: const TextStyle(
                           fontFamily: 'UthmanicHafs', fontSize: 20)),

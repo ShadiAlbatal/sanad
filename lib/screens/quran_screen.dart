@@ -10,6 +10,7 @@ import '../widgets/curl_page_view.dart';
 import '../widgets/mushaf_page_view.dart';
 import '../widgets/reading_footer.dart';
 import '../widgets/surah_list_sheet.dart';
+import '../l10n/app_localizations.dart';
 
 class QuranScreen extends StatefulWidget {
   final int? initialPage;
@@ -372,6 +373,7 @@ class _PageContentState extends State<_PageContent> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return FutureBuilder<MushafPage>(
       future: _future,
       initialData: widget.repo.cachedPage(widget.page),
@@ -384,10 +386,10 @@ class _PageContentState extends State<_PageContent> {
               children: [
                 Icon(Icons.error_outline_rounded, color: soft, size: 28),
                 const SizedBox(height: 10),
-                Text('This page could not be loaded.',
+                Text(t.pageLoadFailed,
                     style: TextStyle(color: soft, fontSize: 13.5)),
                 const SizedBox(height: 10),
-                TextButton(onPressed: _retry, child: const Text('Retry')),
+                TextButton(onPressed: _retry, child: Text(t.retry)),
               ],
             ),
           );
@@ -476,6 +478,7 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 4, 12, 2),
       child: Row(
@@ -485,12 +488,12 @@ class _TopBar extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
             onPressed: () => Navigator.of(context).maybePop(),
-            tooltip: 'Back',
+            tooltip: t.back,
           ),
           IconButton(
             icon: const Icon(Icons.menu_book_rounded),
             onPressed: onIndex,
-            tooltip: 'Surah index',
+            tooltip: t.surahIndex,
           ),
           Expanded(
             child: Text(
@@ -504,7 +507,7 @@ class _TopBar extends StatelessWidget {
                 ? Icons.light_mode_rounded
                 : Icons.dark_mode_rounded),
             onPressed: () => context.read<AppState>().cycleTheme(),
-            tooltip: 'Toggle theme',
+            tooltip: t.toggleTheme,
           ),
         ],
       ),
@@ -519,6 +522,7 @@ class _BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final soft = Theme.of(context).brightness == Brightness.dark
         ? AppColors.nightInkSoft
         : AppColors.inkSoft;
@@ -528,14 +532,14 @@ class _BottomBar extends StatelessWidget {
     final m = repo.metaSync(page);
     final left = m == null
         ? ''
-        : 'Juz ${m.juz}  ·  Ḥizb ${m.hizb}${m.quarterLabel.isEmpty ? '' : ' ${m.quarterLabel}'}';
+        : '${t.juzLabel(m.juz)}  ·  ${t.hizbLabel(m.hizb)}${m.quarterLabel.isEmpty ? '' : ' ${m.quarterLabel}'}';
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(left, style: style),
-          Text('Page $page', style: strong),
+          Text(t.pageNumber(page), style: strong),
         ],
       ),
     );

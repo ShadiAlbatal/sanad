@@ -7,6 +7,7 @@ import 'dua_mistakes_sheet.dart';
 import 'heard_ticker.dart';
 import 'hearing_indicator.dart';
 import 'mic_toggle_button.dart';
+import '../l10n/app_localizations.dart';
 
 /// Bottom action bar for the du'a reader: mistakes review, hide/reveal
 /// (memorization) toggle, the `< << > >>` step-reveal row in hidden mode, and
@@ -17,6 +18,7 @@ class DuaReadingFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dua = context.watch<DuaReadingState>();
     final dark = Theme.of(context).brightness == Brightness.dark;
     final barColor = dark ? AppColors.nightCard : AppColors.paperEdge;
@@ -48,7 +50,7 @@ class DuaReadingFooter extends StatelessWidget {
               if (!dua.active) ...[
                 _IconPill(
                   icon: Icons.spellcheck_rounded,
-                  semanticLabel: 'Mistakes',
+                  semanticLabel: t.mistakes,
                   fg: fg,
                   dark: dark,
                   onTap: () => showDuaMistakesSheet(context),
@@ -57,7 +59,7 @@ class DuaReadingFooter extends StatelessWidget {
               ],
               _IconPill(
                 icon: dua.hidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                semanticLabel: dua.hidden ? 'Reveal' : 'Hide',
+                semanticLabel: dua.hidden ? t.reveal : t.hide,
                 fg: dua.hidden ? Colors.white : fg,
                 dark: dark,
                 active: dua.hidden,
@@ -70,7 +72,7 @@ class DuaReadingFooter extends StatelessWidget {
               if (dua.active) ...[
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 12),
+                    padding: const EdgeInsetsDirectional.only(start: 12),
                     child: HearingIndicator(
                       active: true,
                       level: dua.level,
@@ -122,6 +124,7 @@ class _RevealRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     // The four chevrons encode ARABIC reading semantics directly in their icons
     // (left-pointing = forward). Pin this row to LTR so the app locale can't
     // mirror it: under an Arabic (RTL) locale the Row would reverse child order
@@ -138,7 +141,7 @@ class _RevealRow extends StatelessWidget {
             icon: Icons.keyboard_double_arrow_left_rounded,
             fg: fg,
             dark: dark,
-            semanticLabel: 'Reveal next segment',
+            semanticLabel: t.revealNextSegment,
             onTap: () => dua.revealForward(ayah: true),
           ),
           const SizedBox(width: 8),
@@ -146,7 +149,7 @@ class _RevealRow extends StatelessWidget {
             icon: Icons.chevron_left_rounded,
             fg: fg,
             dark: dark,
-            semanticLabel: 'Reveal next word',
+            semanticLabel: t.revealNextWord,
             onTap: () => dua.revealForward(ayah: false),
           ),
           const SizedBox(width: 18),
@@ -154,7 +157,7 @@ class _RevealRow extends StatelessWidget {
             icon: Icons.chevron_right_rounded,
             fg: fg,
             dark: dark,
-            semanticLabel: 'Hide previous word',
+            semanticLabel: t.hidePreviousWord,
             onTap: () => dua.revealBack(ayah: false),
           ),
           const SizedBox(width: 8),
@@ -162,7 +165,7 @@ class _RevealRow extends StatelessWidget {
             icon: Icons.keyboard_double_arrow_right_rounded,
             fg: fg,
             dark: dark,
-            semanticLabel: 'Hide previous segment',
+            semanticLabel: t.hidePreviousSegment,
             onTap: () => dua.revealBack(ayah: true),
           ),
           ],

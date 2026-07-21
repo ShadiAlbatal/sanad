@@ -6,6 +6,7 @@ import '../services/asr/session.dart';
 import '../state/reading_state.dart';
 import '../theme/app_theme.dart';
 import '../util/log.dart';
+import '../l10n/app_localizations.dart';
 
 void showMistakesSheet(BuildContext context) {
   showModalBottomSheet(
@@ -55,6 +56,7 @@ class _MistakesSheetState extends State<_MistakesSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final reading = context.watch<ReadingState>();
     final mistakes = reading.mistakes;
     final h = MediaQuery.of(context).size.height * 0.7;
@@ -69,7 +71,7 @@ class _MistakesSheetState extends State<_MistakesSheet> {
               children: [
                 Icon(Icons.spellcheck_rounded, color: context.accent),
                 const SizedBox(width: 10),
-                Text('Mistakes',
+                Text(t.mistakes,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
                 const Spacer(),
                 Text('${mistakes.length}',
@@ -78,12 +80,12 @@ class _MistakesSheetState extends State<_MistakesSheet> {
             ),
           ),
           if (mistakes.isEmpty)
-            const Expanded(
+            Expanded(
               child: Center(
                 child: Padding(
-                  padding: EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(24),
                   child: Text(
-                    'No mistakes yet. Tap the mic and recite — mispronounced,\nskipped, and off-text words show up here to review.',
+                    t.noMistakesQuran,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -123,6 +125,7 @@ class _MistakeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
@@ -147,7 +150,7 @@ class _MistakeTile extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 3),
-                _detail(dark),
+                _detail(t, dark),
               ],
             ),
           ),
@@ -156,7 +159,7 @@ class _MistakeTile extends StatelessWidget {
             icon: Icon(playing ? Icons.stop_circle_rounded : Icons.play_circle_rounded,
                 size: 34, color: canPlay ? context.accent : AppColors.inkSoft.withValues(alpha: 0.4)),
             onPressed: canPlay ? onPlay : null,
-            tooltip: canPlay ? 'Hear it' : 'Audio unavailable',
+            tooltip: canPlay ? t.hearIt : t.audioUnavailable,
           ),
         ],
       ),
@@ -180,7 +183,7 @@ class _MistakeTile extends StatelessWidget {
     );
   }
 
-  Widget _detail(bool dark) {
+  Widget _detail(AppLocalizations t, bool dark) {
     switch (mistake.kind) {
       case MistakeKind.mispronounced:
         final bad = mistake.badPhonemes;
@@ -189,14 +192,14 @@ class _MistakeTile extends StatelessWidget {
         if (mistake.prob == null) {
           return Row(
             children: [
-              const Text('makhraj: expected ',
+              Text(t.makhrajExpected,
                   style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
               if (bad.isNotEmpty)
                 Text(bad.first.piece,
                     style: const TextStyle(
                         fontFamily: 'UthmanicHafs', fontSize: 18, color: AppColors.tajweedMajor)),
               if (mistake.heardText.isNotEmpty) ...[
-                const Text('  →  heard ',
+                Text(t.heardArrow,
                     style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
                 Text(mistake.heardText,
                     style: const TextStyle(
@@ -209,7 +212,7 @@ class _MistakeTile extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${pct}pronunciation',
+            Text(pct + t.pronunciation,
                 style: const TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
             if (bad.isNotEmpty)
               Padding(
@@ -225,16 +228,16 @@ class _MistakeTile extends StatelessWidget {
             if (mistake.heardText.isNotEmpty && mistake.heardText != mistake.expectedText)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
-                child: Text('heard: ${mistake.heardText}',
+                child: Text(t.heardLabel(mistake.heardText),
                     style: const TextStyle(fontFamily: 'UthmanicHafs', fontSize: 15, color: AppColors.inkSoft)),
               ),
           ],
         );
       case MistakeKind.skipped:
-        return const Text('Skipped — jumped over this word',
+        return Text(t.skippedWord,
             style: TextStyle(fontSize: 12.5, color: AppColors.tajweedMajor));
       case MistakeKind.offText:
-        return const Text('Off-text — recitation did not match the verse here',
+        return Text(t.offTextVerse,
             style: TextStyle(fontSize: 12.5, color: AppColors.gold));
     }
   }

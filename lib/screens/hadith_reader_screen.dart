@@ -6,6 +6,7 @@ import '../state/app_state.dart';
 import '../state/hadith_reading_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/hadith_reading_footer.dart';
+import '../l10n/app_localizations.dart';
 
 /// One hadith, read-along. Shows the matn (RTL Arabic) where each word tracks the
 /// reciter (current / read) exactly like the du'a reader, plus its `Bukhari #n` /
@@ -71,6 +72,7 @@ class _HadithReaderView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final state = context.watch<HadithReadingState>();
     final dark = Theme.of(context).brightness == Brightness.dark;
 
@@ -100,7 +102,7 @@ class _HadithReaderView extends StatelessWidget {
                   ),
           ),
           const SizedBox(height: 20),
-          Text('${hadithCollectionName(collection).toUpperCase()} · #$number',
+          Text(t.hadithRef(hadithCollectionName(collection).toUpperCase(), number),
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,

@@ -6,6 +6,7 @@ import '../theme/app_theme.dart';
 import '../widgets/heard_ticker.dart';
 import '../widgets/hearing_indicator.dart';
 import '../widgets/mic_toggle_button.dart';
+import '../l10n/app_localizations.dart';
 
 /// The Counter tab: tasbīḥ tallies that climb by TAP or by VOICE. Tap the mic and
 /// recite freely — سبحان الله, الحمد لله, الله أكبر … — and each recognized phrase
@@ -19,6 +20,7 @@ class CounterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final state = context.watch<DhikrCounterState>();
     final dark = Theme.of(context).brightness == Brightness.dark;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
@@ -33,22 +35,22 @@ class CounterScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 2),
               child: Row(
                 children: [
-                  const Expanded(
-                    child: Text('Counter',
+                  Expanded(
+                    child: Text(t.tabCounter,
                         style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
                   ),
                   if (state.total > 0)
                     TextButton.icon(
                       onPressed: () => _confirmReset(context, state),
                       icon: const Icon(Icons.refresh_rounded, size: 18),
-                      label: const Text('Reset'),
+                      label: Text(t.reset),
                     ),
                 ],
               ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-              child: Text('Tap a card or the mic and recite — it counts as you go.',
+              child: Text(t.counterHint,
                   style: TextStyle(color: soft, fontSize: 13.5)),
             ),
             Expanded(
@@ -70,14 +72,15 @@ class CounterScreen extends StatelessWidget {
   }
 
   Future<void> _confirmReset(BuildContext context, DhikrCounterState state) async {
+    final t = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reset all counts?'),
-        content: const Text('This clears every tasbīḥ tally back to zero.'),
+        title: Text(t.resetAllCounts),
+        content: Text(t.resetAllCountsBody),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Reset')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t.cancel)),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(t.reset)),
         ],
       ),
     );
@@ -163,6 +166,7 @@ class _MicFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final barColor = dark ? AppColors.nightCard : AppColors.paperEdge;
     final soft = dark ? AppColors.nightInkSoft : AppColors.inkSoft;
@@ -183,7 +187,7 @@ class _MicFooter extends StatelessWidget {
               active: true,
               level: state.level,
               tracking: false,
-              label: 'Listening — recite freely',
+              label: t.listeningReciteFreely,
             ),
             const SizedBox(height: 8),
           ],
@@ -191,7 +195,7 @@ class _MicFooter extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  listening ? 'Counting what you recite…' : 'Tap the mic and recite',
+                  listening ? t.countingWhatYouRecite : t.tapMicAndRecite,
                   style: TextStyle(color: soft, fontSize: 13.5),
                 ),
               ),

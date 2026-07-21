@@ -116,7 +116,8 @@ class SearchListScaffold extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 12, 10),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(20, 18, 12, 10),
               child: Row(
                 children: [
                   Expanded(
@@ -361,7 +362,7 @@ class _HeaderMenu extends StatelessWidget {
     final t = AppLocalizations.of(context)!;
     return PopupMenuButton<_HeaderMenuAction>(
       icon: const Icon(Icons.more_vert_rounded),
-      tooltip: 'History & bookmarks',
+      tooltip: t.historyAndBookmarks,
       onSelected: (a) {
         switch (a) {
           case _HeaderMenuAction.history:

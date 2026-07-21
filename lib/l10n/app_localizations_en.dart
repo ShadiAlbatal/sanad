@@ -372,4 +372,81 @@ class AppLocalizationsEn extends AppLocalizations {
   String ayahNumber(int number) {
     return 'Ayah $number';
   }
+
+  @override
+  String get countingWhatYouRecite => 'Counting what you recite…';
+
+  @override
+  String get tapMicAndRecite => 'Tap the mic and recite';
+
+  @override
+  String get hearIt => 'Hear it';
+
+  @override
+  String get audioUnavailable => 'Audio unavailable';
+
+  @override
+  String get noMistakesQuran =>
+      'No mistakes yet. Tap the mic and recite — mispronounced,\nskipped, and off-text words show up here to review.';
+
+  @override
+  String get noMistakesDua =>
+      'No mistakes yet. Tap the mic and recite — mispronounced\nand skipped words show up here to review.';
+
+  @override
+  String juzLabel(int number) {
+    return 'Juz $number';
+  }
+
+  @override
+  String hizbLabel(int number) {
+    return 'Ḥizb $number';
+  }
+
+  @override
+  String get privacyIntro =>
+      'Sanad works fully offline and needs no account. The two “Help improve” switches are optional and independent: “Performance & usage” records an anonymous summary of each recitation, and “Essential app data” records anonymous crash/error summaries. Both are off by default.';
+
+  @override
+  String get privacyLocalNote =>
+      'In this version nothing is uploaded anywhere — reports are written only to this device’s diagnostic log. Sending to a server stays off until a future update, and will always require this opt-in and a published privacy policy.';
+
+  @override
+  String get privacyShared1 =>
+      'A random install id — a code for this app copy, not linked to you.';
+
+  @override
+  String get privacyShared2 =>
+      'Which surah or du’a you read, and how far you reached.';
+
+  @override
+  String get privacyShared3 =>
+      'How many sounds the app decoded, and whether it locked on.';
+
+  @override
+  String get privacyShared4 =>
+      'Tajwīd notes it raised (the reference letter vs the one it heard).';
+
+  @override
+  String get privacyShared5 => 'Words skipped and how long the session was.';
+
+  @override
+  String get privacyShared6 =>
+      'App version and your phone’s system (Android / iOS).';
+
+  @override
+  String get privacyShared7 =>
+      'With “Essential app data” on: anonymous crash/error summaries (what failed and roughly where — never a full stack or your data).';
+
+  @override
+  String get privacyNever1 => 'Your voice or any audio recording.';
+
+  @override
+  String get privacyNever2 => 'Your name, email, or any account.';
+
+  @override
+  String get privacyNever3 => 'Your contacts or location.';
+
+  @override
+  String get privacyNever4 => 'Anything that identifies you personally.';
 }

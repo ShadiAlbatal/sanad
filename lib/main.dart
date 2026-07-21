@@ -86,7 +86,9 @@ class TilawaApp extends StatelessWidget {
       ],
       child: Consumer<AppState>(
         builder: (context, app, _) => MaterialApp(
-          title: 'Sanad',
+          // onGenerateTitle, not title: the task-switcher label needs a
+          // localized string, and that needs a context with the delegates.
+          onGenerateTitle: (context) => AppLocalizations.of(context)!.appName,
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(app.accentColor),
           darkTheme: AppTheme.dark(app.accentColor),

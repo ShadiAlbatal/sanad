@@ -255,7 +255,7 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 10),
+      padding: const EdgeInsetsDirectional.only(start: 4, bottom: 10),
       child: Text(text.toUpperCase(),
           style: TextStyle(
             fontSize: 12,

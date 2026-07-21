@@ -369,4 +369,79 @@ class AppLocalizationsAr extends AppLocalizations {
   String ayahNumber(int number) {
     return 'آية $number';
   }
+
+  @override
+  String get countingWhatYouRecite => 'يَعُدّ ما تُسبّح…';
+
+  @override
+  String get tapMicAndRecite => 'المس الميكروفون وسبّح';
+
+  @override
+  String get hearIt => 'استمع';
+
+  @override
+  String get audioUnavailable => 'الصوت غير متاح';
+
+  @override
+  String get noMistakesQuran =>
+      'لا أخطاء بعد. المس الميكروفون واتلُ — تظهر هنا الكلمات\nالمنطوقة خطأً والمتخطّاة والخارجة عن النص للمراجعة.';
+
+  @override
+  String get noMistakesDua =>
+      'لا أخطاء بعد. المس الميكروفون واتلُ — تظهر هنا الكلمات\nالمنطوقة خطأً والمتخطّاة للمراجعة.';
+
+  @override
+  String juzLabel(int number) {
+    return 'جزء $number';
+  }
+
+  @override
+  String hizbLabel(int number) {
+    return 'حزب $number';
+  }
+
+  @override
+  String get privacyIntro =>
+      'يعمل سَنَد دون اتصال تمامًا ولا يحتاج حسابًا. مفتاحا «ساعد في التحسين» اختياريان ومستقلان: «الأداء والاستخدام» يسجّل ملخّصًا مجهولًا لكل تلاوة، و«بيانات التطبيق الأساسية» تسجّل ملخّصات مجهولة للأعطال. كلاهما معطّل افتراضيًا.';
+
+  @override
+  String get privacyLocalNote =>
+      'في هذه النسخة لا يُرفع شيء إلى أي مكان — تُكتب التقارير في سجلّ التشخيص على هذا الجهاز فقط. يبقى الإرسال إلى خادم معطّلًا حتى تحديث لاحق، وسيظلّ دائمًا مشروطًا بموافقتك وبسياسة خصوصية منشورة.';
+
+  @override
+  String get privacyShared1 =>
+      'معرّف تثبيت عشوائي — رمز لهذه النسخة من التطبيق، غير مرتبط بك.';
+
+  @override
+  String get privacyShared2 => 'أي سورة أو دعاء قرأت، وإلى أين وصلت.';
+
+  @override
+  String get privacyShared3 =>
+      'كم صوتًا فكّ التطبيق ترميزه، وهل تمكّن من التتبّع.';
+
+  @override
+  String get privacyShared4 =>
+      'ملاحظات التجويد التي أظهرها (الحرف المرجعي مقابل ما سُمِع).';
+
+  @override
+  String get privacyShared5 => 'الكلمات المتخطّاة ومدة الجلسة.';
+
+  @override
+  String get privacyShared6 => 'إصدار التطبيق ونظام هاتفك (أندرويد / iOS).';
+
+  @override
+  String get privacyShared7 =>
+      'عند تفعيل «بيانات التطبيق الأساسية»: ملخّصات مجهولة للأعطال (ما الذي أخفق وأين تقريبًا — دون أثر كامل ودون بياناتك).';
+
+  @override
+  String get privacyNever1 => 'صوتك أو أي تسجيل صوتي.';
+
+  @override
+  String get privacyNever2 => 'اسمك أو بريدك أو أي حساب.';
+
+  @override
+  String get privacyNever3 => 'جهات اتصالك أو موقعك.';
+
+  @override
+  String get privacyNever4 => 'أي شيء يُعرّف بك شخصيًا.';
 }

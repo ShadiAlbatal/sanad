@@ -7,6 +7,7 @@ import 'heard_ticker.dart';
 import 'hearing_indicator.dart';
 import 'mic_toggle_button.dart';
 import 'mistakes_sheet.dart';
+import '../l10n/app_localizations.dart';
 
 /// Bottom action bar shown on the Quran and Adzkar tabs: mistakes review,
 /// hide/reveal (memorization) toggle, and — on the Quran tab only — the
@@ -17,6 +18,7 @@ class ReadingFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final reading = context.watch<ReadingState>();
     final dark = Theme.of(context).brightness == Brightness.dark;
     final barColor = dark ? AppColors.nightCard : AppColors.paperEdge;
@@ -48,7 +50,7 @@ class ReadingFooter extends StatelessWidget {
               if (!(showMic && reading.asrActive)) ...[
                 _IconPill(
                   icon: Icons.auto_stories_rounded,
-                  semanticLabel: 'Mistakes',
+                  semanticLabel: t.mistakes,
                   fg: fg,
                   dark: dark,
                   onTap: () => showMistakesSheet(context),
@@ -59,7 +61,7 @@ class ReadingFooter extends StatelessWidget {
                 icon: reading.hidden
                     ? Icons.visibility_off_rounded
                     : Icons.visibility_rounded,
-                semanticLabel: reading.hidden ? 'Reveal' : 'Hide',
+                semanticLabel: reading.hidden ? t.reveal : t.hide,
                 fg: reading.hidden ? Colors.white : fg,
                 dark: dark,
                 active: reading.hidden,
@@ -72,7 +74,7 @@ class ReadingFooter extends StatelessWidget {
               if (showMic && reading.asrActive) ...[
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 12),
+                    padding: const EdgeInsetsDirectional.only(start: 12),
                     child: HearingIndicator(
                       active: true,
                       level: reading.asrLevel,
@@ -130,6 +132,7 @@ class _RevealRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     // The four chevrons encode ARABIC reading semantics directly in their icons
     // (left-pointing = forward). Pin this row to LTR so the app locale can't
     // mirror it: under an Arabic (RTL) locale the Row would reverse child order
@@ -147,7 +150,7 @@ class _RevealRow extends StatelessWidget {
           icon: Icons.keyboard_double_arrow_left_rounded,
           fg: fg,
           dark: dark,
-          semanticLabel: 'Reveal next ayah',
+          semanticLabel: t.revealNextAyah,
           onTap: () => reading.revealForward(ayah: true),
         ),
         const SizedBox(width: 8),
@@ -155,7 +158,7 @@ class _RevealRow extends StatelessWidget {
           icon: Icons.chevron_left_rounded,
           fg: fg,
           dark: dark,
-          semanticLabel: 'Reveal next word',
+          semanticLabel: t.revealNextWord,
           onTap: () => reading.revealForward(ayah: false),
         ),
         const SizedBox(width: 18),
@@ -163,7 +166,7 @@ class _RevealRow extends StatelessWidget {
           icon: Icons.chevron_right_rounded,
           fg: fg,
           dark: dark,
-          semanticLabel: 'Hide previous word',
+          semanticLabel: t.hidePreviousWord,
           onTap: () => reading.revealBack(ayah: false),
         ),
         const SizedBox(width: 8),
@@ -171,7 +174,7 @@ class _RevealRow extends StatelessWidget {
           icon: Icons.keyboard_double_arrow_right_rounded,
           fg: fg,
           dark: dark,
-          semanticLabel: 'Hide previous ayah',
+          semanticLabel: t.hidePreviousAyah,
           onTap: () => reading.revealBack(ayah: true),
         ),
           ],
