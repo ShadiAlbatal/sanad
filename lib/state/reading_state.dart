@@ -347,7 +347,7 @@ class ReadingState extends ChangeNotifier {
     // Verbose: log every NEW phoneme the model emitted this chunk (delta, not the
     // whole cumulative string — that would grow unbounded per 80ms chunk).
     if (tokens.length > _prevTokens) {
-      Log.t('phon', '+${tokens.length - _prevTokens} "${tokens.sublist(_prevTokens).join()}" '
+      Log.t('phon', () => '+${tokens.length - _prevTokens} "${tokens.sublist(_prevTokens).join()}" '
           '(total=${tokens.length} rms=${_lastRms.toStringAsFixed(0)})');
     }
     _prevTokens = tokens.length;
@@ -527,7 +527,7 @@ class ReadingState extends ChangeNotifier {
       if (loc != null) _revealed.add(loc);
     }
     final m = _matcher;
-    Log.t('recite', 'cursor=${out.cursor} cur=$_asrCurrentLocation read=${read.length} skip=${skipped.length}'
+    Log.t('recite', () => 'cursor=${out.cursor} cur=$_asrCurrentLocation read=${read.length} skip=${skipped.length}'
         '${m == null ? '' : ' head=${m.head} reach=${m.reached} ay=${m.curAyah} '
             'loc=${m.lastLocWord}/${m.lastLocScore.toStringAsFixed(0)}'} toks=$_lastTokens rms=${_lastRms.toStringAsFixed(0)}');
     // Verbose: log every word state-change event with its mushaf glyph(s).
@@ -540,7 +540,7 @@ class ReadingState extends ChangeNotifier {
               ? 'SKIP'
               : 'skip-attempt';
       if (e.type == PhonemeEventType.skipped) newSkip = true;
-      Log.t('word', '$kind w${e.wordIndex} -> ${locs.join(",")}');
+      Log.t('word', () => '$kind w${e.wordIndex} -> ${locs.join(",")}');
     }
     if (newSkip && _liveMic) {
       HapticFeedback.mediumImpact();

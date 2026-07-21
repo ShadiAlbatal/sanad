@@ -81,7 +81,7 @@ class SherpaAsr {
     if (_disposed) return;
     _stream.free();
     _stream = _recognizer.createStream();
-    Log.t('sherpa', 'stream reset (fresh recitation)');
+    Log.t('sherpa', () => 'stream reset (fresh recitation)');
   }
 
   void dispose() {

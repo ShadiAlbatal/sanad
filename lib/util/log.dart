@@ -17,7 +17,13 @@ import 'package:path_provider/path_provider.dart';
 class Log {
   static final ValueNotifier<List<String>> lines = ValueNotifier<List<String>>([]);
   static const _max = 5000;
-  static bool traceOn = true;
+
+  /// Defaults OFF in a store build. [t] fires once per matcher `apply()` —
+  /// 10-25x/sec for the whole of a recitation — and release has neither the
+  /// file sink nor the Debug Log screen to read it, so every one of those
+  /// lines was pure cost on the hot path of the core feature. Still
+  /// toggleable from the (dev-only) Debug Log screen.
+  static bool traceOn = diagEnabled;
 
   /// Diagnostics (the external-storage file sink + the on-device Debug Log
   /// screen that can export recitation traces) are DEV-ONLY: on in debug builds,
@@ -63,15 +69,24 @@ class Log {
   static void d(String tag, String msg) => _write(tag, msg);
 
   /// High-volume trace — skipped entirely when [traceOn] is false.
-  static void t(String tag, String msg) {
+  ///
+  /// Takes a BUILDER, not a String: these lines interpolate a dozen fields, and
+  /// Dart evaluates arguments before the call, so a String parameter would pay
+  /// the full formatting cost at every call site even with tracing off.
+  static void t(String tag, String Function() msg) {
     if (!traceOn) return;
-    _write(tag, msg);
+    _write(tag, msg());
   }
 
   static void _write(String tag, String msg) {
     final ts = DateTime.now().toIso8601String().substring(11, 23);
     final line = '$ts  [$tag] $msg';
     debugPrint(line);
+    // The ring buffer, its notifier and the flush timer below feed ONLY the
+    // Debug Log screen and the file sink, both diagEnabled-gated. Without this
+    // a store build kept a 5000-line buffer nobody could read and copied it
+    // into a ValueNotifier 4x/sec for the life of the process.
+    if (!diagEnabled) return;
     _buf.add(line);
     if (_buf.length > _max) _buf.removeRange(0, _buf.length - _max);
     _dirty = true;

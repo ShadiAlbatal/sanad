@@ -413,8 +413,7 @@ class PhonemeMatchSession {
     // inferring it from silence in the logs. One line per apply() call.
     final frontierFrac = _reached + 1 < _n ? _wordBestFrac[_reached + 1].toStringAsFixed(2) : '-';
     final next2Frac = _reached + 2 < _n ? _wordBestFrac[_reached + 2].toStringAsFixed(2) : '-';
-    Log.t(_logTag,
-        'ATOM tail=${tail.length} loc=$tLocWord/${tLocScore.isNaN ? '-' : tLocScore.toStringAsFixed(1)} '
+    Log.t(_logTag, () => 'ATOM tail=${tail.length} loc=$tLocWord/${tLocScore.isNaN ? '-' : tLocScore.toStringAsFixed(1)} '
         '${tShortRescued ? 'RESCUED->' : ''}use=$tUseWord/${tUseScore.isNaN ? '-' : tUseScore.toStringAsFixed(1)} '
         'floor=$_floor win=[$reachLo,$reachHi] accepted=$accepted '
         'anchor=$_anchor reached=$_reached head=$_head ay=$_curAyah '

@@ -297,7 +297,7 @@ class DuaReadingState extends ChangeNotifier {
     }
     _lastRms = pcm.isEmpty ? 0 : math.sqrt(sumsq / pcm.length);
     if (tokens.length > _prevTokens) {
-      Log.t('phon', '[dua] +${tokens.length - _prevTokens} "${tokens.sublist(_prevTokens).join()}" '
+      Log.t('phon', () => '[dua] +${tokens.length - _prevTokens} "${tokens.sublist(_prevTokens).join()}" '
           '(total=${tokens.length} rms=${_lastRms.toStringAsFixed(0)})');
     }
     _prevTokens = tokens.length;
@@ -351,7 +351,7 @@ class DuaReadingState extends ChangeNotifier {
       if (_currentWord != null) _revealed.add(_currentWord!);
     }
     final m = _matcher;
-    Log.t('duaread', 'cursor=${out.cursor} cur=$_currentWord read=${_readWords.length} '
+    Log.t('duaread', () => 'cursor=${out.cursor} cur=$_currentWord read=${_readWords.length} '
         'skip=${_skippedWords.length} anchored=$anchored'
         '${m == null ? '' : ' head=${m.head} reach=${m.reached} '
             'loc=${m.lastLocWord}/${m.lastLocScore.toStringAsFixed(0)}'} '

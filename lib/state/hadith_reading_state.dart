@@ -189,7 +189,7 @@ class HadithReadingState extends ChangeNotifier {
     }
     _lastRms = pcm.isEmpty ? 0 : math.sqrt(sumsq / pcm.length);
     if (tokens.length > _prevTokens) {
-      Log.t('phon', '[hadith] +${tokens.length - _prevTokens} "${tokens.sublist(_prevTokens).join()}" '
+      Log.t('phon', () => '[hadith] +${tokens.length - _prevTokens} "${tokens.sublist(_prevTokens).join()}" '
           '(total=${tokens.length} rms=${_lastRms.toStringAsFixed(0)})');
     }
     _prevTokens = tokens.length;
@@ -202,7 +202,7 @@ class HadithReadingState extends ChangeNotifier {
     // Readable, already-collapsed form of the recent tail: the phoneme units are
     // Arabic-scripted, and _collapse already folds the madd repeats, so this reads
     // cleanly without manual repeat-collapsing.
-    Log.t('phon', '[hadith] collapsed tail: "${_heardTail.join()}"');
+    Log.t('phon', () => '[hadith] collapsed tail: "${_heardTail.join()}"');
     _applyOut(matcher.apply(tokens));
   }
 
@@ -230,7 +230,7 @@ class HadithReadingState extends ChangeNotifier {
       _currentWord = _markerCursor.clamp(0, clip.words.length - 1);
     }
     final m = _matcher;
-    Log.t('hadithread', 'cursor=${out.cursor} cur=$_currentWord read=${_readWords.length} '
+    Log.t('hadithread', () => 'cursor=${out.cursor} cur=$_currentWord read=${_readWords.length} '
         'skip=${_skippedWords.length} anchored=$anchored'
         '${m == null ? '' : ' head=${m.head} reach=${m.reached} '
             'loc=${m.lastLocWord}/${m.lastLocScore.toStringAsFixed(0)}'} '

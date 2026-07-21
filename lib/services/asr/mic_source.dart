@@ -78,7 +78,7 @@ class MicSource {
         ..addAll(all.sublist(sampleCount * 2));
       _pcmChunks++;
       _pcmSamples += sampleCount;
-      Log.t('mic', 'chunk#$_pcmChunks bytes=${bytes.length} samples=$sampleCount '
+      Log.t('mic', () => 'chunk#$_pcmChunks bytes=${bytes.length} samples=$sampleCount '
           'tail=${_byteTail.length} totalSamples=$_pcmSamples (${(_pcmSamples / 16000).toStringAsFixed(2)}s)');
       if (pcm.isNotEmpty) onPcm(pcm);
     }, onError: (e, st) => Log.e('mic', e, st));
