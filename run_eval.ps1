@@ -24,7 +24,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$pkg = 'com.sanad.sanad'
+$pkg = 'com.ylen.sanad'
 $proj = $PSScriptRoot
 $stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
 $outDir = Join-Path $proj "pulls\run_$stamp"
